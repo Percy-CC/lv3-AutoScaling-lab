@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cloud Lab 10 · Auto Scaling Simulator 運算規模縮放模擬實驗</title>
+<style>
+:root{--b:#0070c0;--g:#00a05a;--r:#d33;--o:#e8890c;--bg:#f4f6f9;--card:#fff;--tx:#1d2733;--mut:#667}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;background:var(--bg);color:var(--tx);line-height:1.55}
+header{background:#12324f;color:#fff;padding:10px 16px}
+header h1{font-size:18px;margin:0 0 6px}
+.prof{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px}
+.prof input{padding:4px 6px;border:1px solid #9ab;border-radius:4px;width:110px}
+#timer{margin-left:auto;font-weight:bold}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;background:#dfe7ef;position:sticky;top:0;z-index:5}
+nav button{border:1px solid #9ab;background:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:13px}
+nav button.on{background:var(--b);color:#fff;border-color:var(--b)}
+nav button.done{border-color:var(--g)}
+main{max-width:1000px;margin:12px auto;padding:0 12px 60px}
+.tab{display:none}.tab.on{display:block}
+.card{background:var(--card);border-radius:8px;padding:12px 14px;margin:10px 0;box-shadow:0 1px 3px #0002}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+h2{margin:6px 0}h3{margin:4px 0}h4{margin:6px 0}
+label{display:block;margin:6px 0;font-size:14px}
+select,input[type=number],input[type=text],textarea{padding:4px 6px;border:1px solid #9ab;border-radius:4px;font-size:14px}
+textarea{width:100%;font-family:Consolas,monospace}
+button.act{background:var(--b);color:#fff;border:0;border-radius:6px;padding:8px 14px;cursor:pointer;font-size:14px;margin:4px 4px 4px 0}
+button.act:disabled{background:#9ab;cursor:not-allowed}
+button.sec{background:#fff;color:var(--b);border:1px solid var(--b)}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
+th,td{border:1px solid #cdd6df;padding:4px 6px;text-align:left;vertical-align:top}
+th{background:#eef3f8}
+canvas{width:100%;height:auto;background:#fff;border:1px solid #cdd6df;border-radius:6px}
+.metrics{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.metrics div{background:#eef3f8;border-radius:6px;padding:4px 10px;font-size:13px}
+.metrics b{font-size:16px}
+.goals{background:#fffbe6;border:1px solid #ecd97a;border-radius:8px;padding:8px 12px;font-size:14px}
+.ok{color:var(--g)}.bad{color:var(--r)}.mut{color:var(--mut);font-size:13px}
+.warn{background:#fff0f0;border:1px solid #e99;padding:6px 10px;border-radius:6px;font-size:13px;margin:6px 0}
+.q{margin:10px 0}.q p{margin:4px 0;font-weight:bold}
+.q label{font-weight:normal;margin:2px 0}
+.fb{font-size:13px;margin-left:6px}
+pre{background:#101820;color:#d6e2ee;padding:8px;border-radius:6px;overflow:auto;font-size:12px;max-height:220px}
+.step{border-left:5px solid var(--b)}
+.step.fin{border-left-color:var(--g)}
+.shot{border:2px dashed #9ab;border-radius:8px;padding:10px;text-align:center;color:var(--mut);font-size:13px}
+.shot img{max-width:100%;border:1px solid #ccd}
+.code{width:100%;height:90px}
+.tag{display:inline-block;background:#e6f0fa;border-radius:4px;padding:0 6px;font-size:12px;margin-right:4px}
+</style>
+</head>
+<body>
+<header>
+<h1>☁ 第十課 運算規模縮放 Auto Scaling Simulator · Cloud Computing Lab 10</h1>
+<div class="prof">
+班別 Class <input id="pcls" data-persist placeholder="3A">
+學號 No. <input id="pid" data-persist placeholder="12">
+姓名 Name <input id="pname" data-persist placeholder="Chan TM">
+<span id="timer">⏱ 00:00 / 60:00</span>
+</div>
+</header>
+<nav id="nav"></nav>
+<main>
+
+<section class="tab" id="tab-intro">
+<div class="card">
+<h2>實驗簡介 Overview</h2>
+<p>本實驗以模擬器重現講義內容:垂直 / 水平縮放、Load Balancing、Auto Scaling 四個設定步驟及四種伸縮模式,再加入 AI (Machine Learning) 流量預測。所有數據均為模擬值,不會連接任何雲端帳戶,亦不會產生費用。<br>
+This lab simulates the lecture content: vertical/horizontal scaling, load balancing, the four Auto Scaling setup steps and scaling modes, plus AI/ML traffic prediction. All numbers are simulated; no cloud account or charges involved.</p>
+<p class="mut">先填寫上方班別、學號、姓名(流量曲線會因學號略有不同)。Fill in your class, number and name first (traffic differs slightly per student).</p>
+</div>
+<div class="card">
+<h3>60 分鐘建議時間表 Suggested 60-minute schedule</h3>
+<table>
+<tr><th>Mission</th><th>內容 Content</th><th>講義對應 Slides</th><th>時間 Time</th><th>分數 Points</th></tr>
+<tr><td>0</td><td>單一伺服器的極限 Limits of one server</td><td>Slide 3, 7</td><td>5 min</td><td>10</td></tr>
+<tr><td>1</td><td>垂直 vs 水平縮放 Scaling up vs out</td><td>Slide 5–7</td><td>10 min</td><td>20</td></tr>
+<tr><td>2</td><td>負載均衡 Load Balancing</td><td>Slide 10–11</td><td>10 min</td><td>20</td></tr>
+<tr><td>3</td><td>設定 Auto Scaling(四步驟)Four setup steps</td><td>Slide 9, 12–17</td><td>20 min</td><td>30</td></tr>
+<tr><td>4</td><td>AI 預測性伸縮 Predictive scaling</td><td>延伸 Extension</td><td>12 min</td><td>20</td></tr>
+<tr><td>提交</td><td>反思 + 結果代碼 Reflection + result code</td><td></td><td>3 min</td><td></td></tr>
+</table>
+</div>
+<div class="card">
+<h3>模擬模型假設 Model assumptions</h3>
+<ul>
+<li>1 tick = 1 分鐘 minute;每次模擬 240 分鐘(15:00–19:00)。Each run covers 240 minutes.</li>
+<li>規格 Specs:S = 100 rps ($1/min),M = 200 rps ($1.9/min),L = 400 rps ($3.6/min)。價格為虛構,並非阿里雲實際價格 Prices are fictional, not real Alibaba Cloud prices.</li>
+<li>新實例需 3 分鐘啟動(啟動期間已計費)。New instances take 3 min to boot and are billed meanwhile.</li>
+<li>Load Balancer 約 2 分鐘後才發現故障實例。LB needs about 2 min to detect a failed instance.</li>
+<li>Round Robin 平均分配流量;Least Connections 在此模型中近似按實例容量比例分配。Round Robin splits equally; Least Connections is approximated as capacity-proportional.</li>
+<li>可用度 Availability = 成功處理的請求 ÷ 總請求。</li>
+</ul>
+</div>
+</section>
+
+<section class="tab" id="tab-m0">
+<h2>Mission 0 · 單一伺服器的極限 One server's limit</h2>
+<div class="goals" id="goals-m0"></div>
+<div class="card">
+<p>情境 Scenario:學校網站只有 1 台 S 規格伺服器(100 rps),放學後流量突然上升。<br>A school website runs on one S instance (100 rps). Traffic jumps after school.</p>
+<button class="act" id="m0run">▶ 執行模擬 Run</button>
+<div id="out-m0"></div>
+</div>
+<div class="card" id="quiz-m0"></div>
+</section>
+
+<section class="tab" id="tab-m1">
+<h2>Mission 1 · 垂直縮放 vs 水平縮放 Scaling Up vs Scaling Out</h2>
+<div class="goals" id="goals-m1"></div>
+<div class="card">
+<p>情境:流量高峰約 420 rps。於第 100 分鐘(16:40)第一台伺服器發生故障。分別用兩種方法應付,比較可用度與成本。<br>Peak is about 420 rps. At minute 100 (16:40) the first server fails. Try both approaches and compare.</p>
+<label><input type="checkbox" id="m1fail" data-persist checked> 模擬第 100 分鐘故障 Simulate failure at minute 100</label>
+</div>
+<div class="grid2">
+<div class="card">
+<h3>A. 垂直縮放 Vertical (Scaling Up)</h3>
+<p class="mut">只有 1 台實例,改變規格。One instance, change its spec.</p>
+<label>規格 Spec <select id="m1vs" data-persist><option value="S">S</option><option value="M">M</option><option value="L" selected>L</option></select></label>
+<button class="act" id="m1v">▶ 執行 Run A</button>
+</div>
+<div class="card">
+<h3>B. 水平縮放 Horizontal (Scaling Out)</h3>
+<p class="mut">多台實例 + Load Balancer。Several instances behind a load balancer.</p>
+<label>規格 Spec <select id="m1hs" data-persist><option value="S" selected>S</option><option value="M">M</option><option value="L">L</option></select></label>
+<label>實例數目 Instances <input type="number" id="m1hn" data-persist min="2" max="8" value="4"></label>
+<button class="act" id="m1h">▶ 執行 Run B</button>
+</div>
+</div>
+<div class="card"><div id="cmp-m1"></div><div id="out-m1v"></div><div id="out-m1h"></div></div>
+<div class="card" id="quiz-m1"></div>
+</section>
+
+<section class="tab" id="tab-m2">
+<h2>Mission 2 · 負載均衡 Load Balancing</h2>
+<div class="goals" id="goals-m2"></div>
+<div class="card">
+<p>情境:網站有 3 台伺服器(S、S、L),流量 250–350 rps。比較沒有 Load Balancer、Round Robin 及 Least Connections。<br>Three servers (S, S, L), 250–350 rps. Compare no LB, Round Robin and Least Connections.</p>
+<label>模式 Mode
+<select id="m2lb" data-persist>
+<option value="none">沒有 LB · No load balancer(只用第一台 first server only)</option>
+<option value="rr">Round Robin(平均分配 equal split)</option>
+<option value="lc">Least Connections(按容量 capacity-aware)</option>
+</select></label>
+<label><input type="checkbox" id="m2fail" data-persist checked> 模擬第 100 分鐘第一台故障 Simulate failure of server #0 at minute 100</label>
+<button class="act" id="m2run">▶ 執行 Run</button>
+<p class="mut">三種模式都要在「有故障」下各執行一次。Run all three modes with failure enabled.</p>
+</div>
+<div class="card"><div id="cmp-m2"></div><div id="out-m2"></div></div>
+<div class="card" id="quiz-m2"></div>
+</section>
+
+<section class="tab" id="tab-m3">
+<h2>Mission 3 · 設定 Auto Scaling · Four setup steps</h2>
+<div class="goals" id="goals-m3"></div>
+<div class="card">
+<p>按講義 Slide 13 的順序完成四個步驟,每步按「確認」。同一組設定會同時測試三個情境:<br>Complete the four steps in order and confirm each. One configuration is tested on three scenarios:</p>
+<ul>
+<li><span class="tag">spike</span> 放學後突然高峰(動態模式 dynamic)</li>
+<li><span class="tag">daily</span> 每日 17:00–18:00 固定高峰(定時模式 scheduled)</li>
+<li><span class="tag">night</span> 夜間低流量 15 rps(Min Size 與成本 cost)</li>
+</ul>
+<p class="mut">提示:一個設定要兼顧三種情境時,可選「自訂模式 Custom」(動態 + 定時)。參考真實介面見「Console 參考」分頁。</p>
+</div>
+
+<div class="card step" id="st1"><h3>步驟一 Step 1 · 創建伸縮組 Scaling Group</h3>
+<label>名稱 Name <input type="text" id="m3name" data-persist value="school-web-asg"></label>
+<label>最小實例數 Min Size <input type="number" id="m3min" data-persist min="0" max="5" value="1"></label>
+<label>最大實例數 Max Size <input type="number" id="m3max" data-persist min="1" max="10" value="5"></label>
+<label>冷卻時間 Cooldown(分鐘 min)<input type="number" id="m3cool" data-persist min="0" max="10" value="3"></label>
+<label><input type="checkbox" id="m3lb" data-persist> 將 Load Balancer 附加到伸縮組 Attach load balancer to the group</label>
+<button class="act sec" data-step="1">確認步驟一 Confirm</button> <span class="fb" id="sf1"></span></div>
+
+<div class="card step" id="st2"><h3>步驟二 Step 2 · 創建伸縮配置 Scaling Configuration</h3>
+<label>新實例規格 Instance spec <select id="m3spec" data-persist><option value="S" selected>S · 100 rps · $1/min</option><option value="M">M · 200 rps · $1.9/min</option><option value="L">L · 400 rps · $3.6/min</option></select></label>
+<button class="act sec" data-step="2">確認步驟二 Confirm</button> <span class="fb" id="sf2"></span></div>
+
+<div class="card step" id="st3"><h3>步驟三 Step 3 · 創建伸縮規則 Scaling Rules</h3>
+<label>伸縮模式 Mode
+<select id="m3mode" data-persist>
+<option value="dynamic">動態模式 Dynamic(按 CPU)</option>
+<option value="scheduled">定時模式 Scheduled</option>
+<option value="fixed">固定數量模式 Fixed(= Min Size)</option>
+<option value="custom" selected>自訂模式 Custom(動態 + 定時)</option>
+</select></label>
+<label>擴容時增加實例數 Scale-out step <input type="number" id="m3so" data-persist min="1" max="5" value="2"></label>
+<label>縮容時減少實例數 Scale-in step <input type="number" id="m3si" data-persist min="1" max="5" value="1"></label>
+<table><tr><th>定時任務 Scheduled task</th><th>時間 Time (HH:MM)</th><th>調整至實例數 Set count to</th></tr>
+<tr><td>#1</td><td><input type="text" id="m3t1" data-persist value="16:50" size="6"></td><td><input type="number" id="m3n1" data-persist min="0" max="10" value="4"></td></tr>
+<tr><td>#2</td><td><input type="text" id="m3t2" data-persist value="18:00" size="6"></td><td><input type="number" id="m3n2" data-persist min="0" max="10" value="1"></td></tr></table>
+<button class="act sec" data-step="3">確認步驟三 Confirm</button> <span class="fb" id="sf3"></span></div>
+
+<div class="card step" id="st4"><h3>步驟四 Step 4 · 創建警報任務 Alert (CloudMonitor)</h3>
+<label>CPU ≥ 此值時觸發擴容 Scale-out when CPU ≥ <input type="number" id="m3out" data-persist min="30" max="100" value="70"> %</label>
+<label>CPU ≤ 此值時觸發縮容 Scale-in when CPU ≤ <input type="number" id="m3in" data-persist min="0" max="60" value="30"> %</label>
+<label>連續分鐘數 Consecutive minutes <input type="number" id="m3sus" data-persist min="1" max="5" value="1"></label>
+<button class="act sec" data-step="4">確認步驟四 Confirm</button> <span class="fb" id="sf4"></span></div>
+
+<div class="card">
+<button class="act" id="m3run" disabled>▶ 測試三個情境 Run all 3 scenarios</button>
+<div id="m3warn"></div>
+<div id="cmp-m3"></div>
+<div id="out-m3a"></div><div id="out-m3b"></div><div id="out-m3c"></div>
+</div>
+<div class="card" id="quiz-m3"></div>
+</section>
+
+<section class="tab" id="tab-m4">
+<h2>Mission 4 · AI 預測性伸縮 Predictive Scaling</h2>
+<div class="goals" id="goals-m4"></div>
+<div class="card">
+<p>Reactive(被動)伸縮要等 CPU 超標才加機,而新實例要 3 分鐘才可服務,所以流量急升時會有一段時間不足。Predictive(預測)伸縮用過去流量預測 5 分鐘後的流量,提前加機。<br>
+Reactive scaling waits for high CPU and new instances need 3 min to boot. Predictive scaling forecasts the load 5 min ahead and scales earlier.</p>
+<p>預設的預測方法是移動平均(Moving Average),它只反映過去,所以會滯後。請修改 <code>predict()</code>,令它在 <b>trend</b> 情境表現更好;再於 <b>viral</b>(突發爆紅)情境觀察預測何時失準。<br>
+The default is a moving average, which lags behind. Edit <code>predict()</code> to do better on <i>trend</i>, then see where predictions fail on <i>viral</i>.</p>
+<label>情境 Scenario <select id="m4sc" data-persist><option value="trend">trend · 流量穩定上升 steady ramp-up</option><option value="viral">viral · 突發爆紅 sudden surge</option></select></label>
+<label><input type="checkbox" id="m4hy" data-persist> 預測 + Reactive 後備(safety net)Predictive + reactive fallback</label>
+<textarea id="m4code" data-persist class="code" style="height:190px" spellcheck="false"></textarea>
+<button class="act" id="m4run">▶ 比較 Reactive vs Predictive</button>
+<button class="act sec" id="m4reset">重設程式碼 Reset code</button>
+<button class="act sec" id="m4ai">複製 AI Prompt Copy prompt</button>
+<span class="fb" id="m4msg"></span>
+<p class="mut">注意:無限迴圈會令瀏覽器分頁停頓,執行前請避免 while(true)。Avoid infinite loops; they will freeze the tab.</p>
+<details><summary>提示 Hint 1</summary><p>用最近 6 筆數據的變化量計算每分鐘增長率 slope,再用「最新值 + slope × 5」預測 5 分鐘後。Use the change over the last 6 samples as slope; predict latest + slope × 5.</p></details>
+<details><summary>提示 Hint 2</summary><p>數據有隨機波動。可先用最近 3 筆平均值作起點,再計算斜率。Data is noisy; smooth with a 3-sample average before computing the slope.</p></details>
+</div>
+<div class="card"><div id="cmp-m4"></div><div id="out-m4a"></div><div id="out-m4b"></div></div>
+<div class="card" id="quiz-m4"></div>
+</section>
+
+<section class="tab" id="tab-console">
+<h2>Console 參考 Real Cloud Console Reference</h2>
+<div class="card">
+<p>以下欄位對應阿里雲 Auto Scaling 主控台。請將教師自行截取的畫面放入 <code>img/</code> 資料夾(檔名如下),頁面會自動顯示。官方文件 Official docs:
+<a href="https://www.alibabacloud.com/help/zh/auto-scaling/latest/scale-ecs-instances" target="_blank" rel="noopener">scale-ecs-instances</a>。
+主控台介面可能更新,名稱以實際畫面為準。The console UI changes over time; use what you see on screen.</p>
+</div>
+<div id="shots"></div>
+<div class="card">
+<h3>模擬器欄位與真實介面對照 Field mapping</h3>
+<table>
+<tr><th>模擬器 Simulator</th><th>真實雲端概念 Real console concept</th></tr>
+<tr><td>Min / Max Size, Cooldown</td><td>伸縮組 Scaling group 的最小/最大實例數、冷卻時間</td></tr>
+<tr><td>附加 Load Balancer</td><td>伸縮組關聯 SLB / ALB / CLB,新實例才會加入後端伺服器組</td></tr>
+<tr><td>實例規格</td><td>伸縮配置 Scaling configuration(實例類型 + 鏡像 Image)</td></tr>
+<tr><td>擴容 / 縮容實例數</td><td>伸縮規則 Scaling rule(例如增加 N 台 / 減少 N 台)</td></tr>
+<tr><td>CPU 閾值 + 連續分鐘</td><td>警報任務 Alarm / event-triggered task(雲監控 CloudMonitor 指標)</td></tr>
+<tr><td>定時任務</td><td>定時任務 Scheduled task</td></tr>
+<tr><td>Predictive</td><td>預測性伸縮規則 Predictive scaling rule(官方建議先只預測不執行,驗證後才啟用)</td></tr>
+</table>
+</div>
+</section>
+
+<section class="tab" id="tab-submit">
+<h2>提交 Submit</h2>
+<div class="card" id="scorebox"></div>
+<div class="card">
+<h3>反思題 Reflection</h3>
+<p>學校 Open Day 報名網站會在公佈後 5 分鐘內有大量訪問。你會用動態、定時、固定數量還是預測模式?請說明原因(最多 300 字)。<br>
+A school Open Day registration site gets a surge within 5 minutes of the announcement. Which scaling mode would you use and why? (max 300 characters)</p>
+<textarea id="reflect" data-persist style="height:110px" maxlength="300"></textarea>
+</div>
+<div class="card">
+<button class="act" id="gen">產生結果代碼 Generate result code</button>
+<textarea id="codeout" readonly style="height:90px"></textarea>
+<button class="act sec" id="copy">複製 Copy</button> <span class="fb" id="submsg"></span>
+<p class="mut">將代碼貼到老師指定的表單 / 聊天室 / Padlet。代碼附有簡單校驗碼,只可防止無意修改,不能防止刻意作弊。Paste the code where your teacher asks. The checksum only catches accidental edits.</p>
+</div>
+</section>
+
+<section class="tab" id="tab-teacher">
+<h2>教師總覽 Teacher Dashboard</h2>
+<div class="card">
+<p>每行貼上一個學生的結果代碼。Paste one result code per line.</p>
+<textarea id="tcodes" style="height:140px" placeholder="CC10.xxxxx.yyyyyyyy"></textarea>
+<button class="act" id="tparse">解析 Parse</button>
+<button class="act sec" id="tcsv">匯出 CSV Export</button>
+<button class="act sec" id="tload">從 Endpoint 載入 Load from endpoint</button>
+<span class="fb" id="tmsg"></span>
+</div>
+<div class="card" id="tstats"></div>
+<div class="card" style="overflow:auto" id="ttable"></div>
+</section>
+
+</main>
+
+<script>
+'use strict';
+//SIM-START
+const SALT = 'cc10-lab-v1';
+const SUBMIT_ENDPOINT = '';
+const T = 240, START_MIN = 900, BOOT = 3, DETECT = 2;
+const SPECS = { S:{cap:100, price:1}, M:{cap:200, price:1.9}, L:{cap:400, price:3.6} };
+
+function fnv(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function rng(seed){let s=(seed>>>0)||1;return function(){s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296;};}
+function lerp(t,t0,t1,v0,v1){return v0+(v1-v0)*(t-t0)/(t1-t0);}
+function fmtTime(t){const m=START_MIN+t;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');}
+
+function baseLoad(name,t){
+  switch(name){
+    case 'spike':
+      if(t<60)return 80; if(t<72)return lerp(t,60,72,80,420); if(t<150)return 420;
+      if(t<180)return lerp(t,150,180,420,90); return 90;
+    case 'daily': return (t>=120&&t<180)?300:60;
+    case 'night': return 15;
+    case 'steady':
+      if(t<60)return 250; if(t<90)return lerp(t,60,90,250,350); if(t<150)return 350;
+      if(t<180)return lerp(t,150,180,350,250); return 250;
+    case 'trend':
+      if(t<60)return 100; if(t<120)return lerp(t,60,120,100,600); if(t<170)return 600;
+      if(t<200)return lerp(t,170,200,600,100); return 100;
+    case 'viral':
+      if(t<140)return 150; if(t<190)return 700; if(t<220)return lerp(t,190,220,700,150); return 150;
+  }
+  return 100;
+}
+function makeTraffic(name,seed){
+  const r=rng(seed),a=[];
+  for(let t=0;t<T;t++){a.push(Math.max(1,baseLoad(name,t)*(1+(r()-0.5)*0.08)));}
+  return a;
+}
+
+function simulate(cfg,traffic){
+  const inst=[];let nid=0;
+  const add=(spec,readyAt)=>{inst.push({id:nid++,spec:spec,readyAt:readyAt,failed:false,failedAt:-1,removed:false});};
+  cfg.fleet.forEach(s=>add(s,0));
+  const asg=cfg.asg||null;
+  const series={load:[],served:[],cap:[],run:[],total:[]};
+  const events=[];
+  let cost=0,lastAct=-999,over=0,under=0,sumLoad=0,sumServed=0,overMin=0,peak=0,predErr=false;
+  const ev=(t,m)=>events.push(fmtTime(t)+'  '+m);
+  const healthy=(i,t)=>i.readyAt<=t&&!i.failed;
+  for(let t=0;t<T;t++){
+    if(cfg.fail&&t===cfg.fail.at){
+      const x=inst[cfg.fail.idx];
+      if(x&&!x.removed){x.failed=true;x.failedAt=t;ev(t,'故障 Instance #'+x.id+' failed');}
+    }
+    const load=traffic[t];
+    const act=inst.filter(i=>!i.removed);
+    let recv=[];
+    if(cfg.lb==='none'){ if(act[0])recv=[act[0]]; }
+    else recv=act.filter(i=>healthy(i,t)||(i.failed&&t-i.failedAt<DETECT));
+    const w=i=>cfg.lb==='rr'?1:SPECS[i.spec].cap;
+    const sw=recv.reduce((a,i)=>a+w(i),0);
+    let served=0,uSum=0,hn=0,capH=0;
+    recv.forEach(i=>{
+      const share=sw>0?load*w(i)/sw:0,cap=SPECS[i.spec].cap;
+      if(healthy(i,t)){served+=Math.min(share,cap);uSum+=Math.min(1,share/cap);hn++;capH+=cap;}
+    });
+    const util=hn?uSum/hn:1;
+    cost+=act.reduce((a,i)=>a+SPECS[i.spec].price,0);
+    const runN=act.filter(i=>healthy(i,t)).length;
+    series.load.push(load);series.served.push(served);series.cap.push(capH);
+    series.run.push(runN);series.total.push(act.length);
+    sumLoad+=load;sumServed+=served;
+    if((load-served)/load>0.05)overMin++;
+    if(act.length>peak)peak=act.length;
+
+    if(asg){
+      inst.forEach(i=>{if(i.failed&&!i.removed&&t-i.failedAt>=DETECT){i.removed=true;ev(t,'移除故障實例 Removed unhealthy #'+i.id);}});
+      const cnt=()=>inst.filter(i=>!i.removed&&!i.failed).length;
+      const booting=()=>inst.some(i=>!i.removed&&!i.failed&&i.readyAt>t);
+      const addN=(n,why)=>{n=Math.min(n,asg.max-cnt());if(n<=0)return 0;
+        for(let k=0;k<n;k++)add(asg.spec,t+BOOT);
+        ev(t,'擴容 Scale out +'+n+' ('+why+') → '+cnt());return n;};
+      const rmN=(n,why)=>{let r=0;
+        while(r<n&&cnt()>asg.min){
+          const c=inst.filter(i=>!i.removed&&!i.failed).sort((a,b)=>b.id-a.id)[0];
+          c.removed=true;r++;
+        }
+        if(r)ev(t,'縮容 Scale in −'+r+' ('+why+') → '+cnt());return r;};
+      if(cnt()<asg.min)addN(asg.min-cnt(),'min size');
+      const mode=asg.mode;
+      if(mode==='dynamic'||mode==='custom'||asg.hybrid){
+        over=util>=asg.outTh/100?over+1:0;
+        under=util<=asg.inTh/100?under+1:0;
+        if(t-lastAct>=asg.cooldown){
+          if(over>=asg.sustain&&cnt()<asg.max){if(addN(asg.stepOut,'CPU '+Math.round(util*100)+'%')){lastAct=t;over=0;}}
+          else if(under>=asg.sustain&&!booting()){if(rmN(asg.stepIn,'CPU '+Math.round(util*100)+'%')){lastAct=t;under=0;}}
+        }
+      }
+      if(mode==='scheduled'||mode==='custom'){
+        (asg.sched||[]).forEach(r=>{
+          if(r.t===t){const c=cnt();if(r.n>c)addN(r.n-c,'scheduled');else if(r.n<c)rmN(c-r.n,'scheduled');}
+        });
+      }
+      if(mode==='predictive'){
+        let p;
+        try{p=asg.predictFn(traffic.slice(0,t+1));}catch(e){p=NaN;if(!predErr){predErr=true;ev(t,'predict() 錯誤 error: '+e.message);}}
+        if(typeof p!=='number'||!isFinite(p)){p=load;}
+        const cap=SPECS[asg.spec].cap;
+        const want=Math.max(asg.min,Math.min(asg.max,Math.ceil(Math.max(0,p)/(cap*0.7))));
+        const c=cnt();
+        if(want>c)addN(want-c,'forecast '+Math.round(p)+' rps');
+        else if(want<c&&t-lastAct>=asg.cooldown&&!booting()){if(rmN(1,'forecast '+Math.round(p)+' rps'))lastAct=t;}
+      }
+    }
+  }
+  return {series:series,events:events,cost:cost,avail:sumServed/sumLoad,over:overMin,peak:peak,
+          dropped:Math.round((sumLoad-sumServed)*60),traffic:traffic};
+}
+const DEFAULT_PREDICT =
+`// history: 過去每分鐘的 rps 陣列(最新數據在最後)
+// history: array of past rps per minute (latest last)
+// 回傳 5 分鐘後的預測 rps / return the predicted rps 5 minutes ahead
+function predict(history) {
+  const recent = history.slice(-5);
+  const sum = recent.reduce((a, b) => a + b, 0);
+  return sum / recent.length;   // Moving average 移動平均
+}`;
+//SIM-END
+
+const $=id=>document.getElementById(id);
+const KEY='cc10-autoscaling-lab-v1';
+function defState(){return {start:null,m:{},quiz:{},f:{}};}
+function loadState(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.m)return Object.assign(defState(),s);}catch(e){}return defState();}
+let S=loadState();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const TABS=[['intro','簡介 Intro'],['m0','M0'],['m1','M1'],['m2','M2'],['m3','M3'],['m4','M4 AI'],['console','Console 參考'],['submit','提交 Submit']];
+const PTS=[10,20,20,30,20];
+
+function seedFor(n){return fnv(($('pcls').value||'')+'|'+($('pid').value||'')+'|'+n)||1;}
+function ensureStart(){if(!S.start){S.start=Date.now();save();}}
+function pct(x){return (x*100).toFixed(1)+'%';}
+function sum(r,fail){return {a:+r.avail.toFixed(4),c:Math.round(r.cost),o:r.over,p:r.peak,f:!!fail};}
+function runSim(cfg,scen){const tr=makeTraffic(scen,seedFor(scen));return simulate(cfg,tr);}
+function num(id,def,lo,hi){let v=parseFloat($(id).value);if(!isFinite(v))v=def;return Math.max(lo,Math.min(hi,Math.round(v)));}
+
+function drawChart(cv,r,upto){
+  if(!cv)return;
+  const c=cv.getContext('2d'),W=cv.width,H=cv.height,L=52,R=14,pw=W-L-R;
+  c.clearRect(0,0,W,H);
+  const s=r.series,top=18,b1=210,t2=236,b2=H-22;
+  const ymax=Math.max.apply(null,s.load.concat(s.cap))*1.1;
+  const X=t=>L+t*pw/T,Y=v=>b1-(v/ymax)*(b1-top);
+  c.font='11px sans-serif';c.fillStyle='#667';c.strokeStyle='#e3e8ee';c.lineWidth=1;
+  for(let k=0;k<=4;k++){const v=ymax*k/4,y=Y(v);c.beginPath();c.moveTo(L,y);c.lineTo(W-R,y);c.stroke();c.fillText(Math.round(v)+'',6,y+4);}
+  for(let t=0;t<=T;t+=30){c.fillText(fmtTime(Math.min(t,T-1)),X(t)-14,H-6);}
+  c.fillStyle='rgba(220,50,50,0.45)';
+  for(let t=0;t<upto;t++){if(s.load[t]>s.served[t]){const y1=Y(s.load[t]),y2=Y(s.served[t]);c.fillRect(X(t),y1,pw/T+0.5,y2-y1);}}
+  const line=(arr,col,w,step)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();
+    for(let t=0;t<upto;t++){const y=Y(arr[t]);if(t===0)c.moveTo(X(t),y);else{if(step)c.lineTo(X(t),Y(arr[t-1]));c.lineTo(X(t),y);}}c.stroke();};
+  line(s.cap,'#00a05a',2,true);line(s.load,'#0070c0',1.6,false);
+  const imax=Math.max.apply(null,s.total)+1,Y2=v=>b2-(v/imax)*(b2-t2);
+  c.strokeStyle='#cdd6df';c.strokeRect(L,t2,pw,b2-t2);
+  const iline=(arr,col)=>{c.strokeStyle=col;c.lineWidth=2;c.beginPath();
+    for(let t=0;t<upto;t++){const y=Y2(arr[t]);if(t===0)c.moveTo(X(t),y);else{c.lineTo(X(t),Y2(arr[t-1]));c.lineTo(X(t),y);}}c.stroke();};
+  iline(s.total,'#e8890c');iline(s.run,'#00a05a');
+  c.fillStyle='#0070c0';c.fillText('● 流量 Load (rps)',L+6,12);
+  c.fillStyle='#00a05a';c.fillText('● 容量 Capacity',L+130,12);
+  c.fillStyle='#d33';c.fillText('■ 未處理 Dropped',L+230,12);
+  c.fillStyle='#e8890c';c.fillText('● 實例總數 Instances',L+340,12);
+  c.fillStyle='#00a05a';c.fillText('● 運行中 Running',L+460,12);
+}
+function runHtml(r,title,id){
+  const ok=r.avail>=0.99;
+  return '<div class="runbox"><h4>'+title+'</h4><canvas id="'+id+'" width="900" height="330"></canvas>'+
+  '<div class="metrics"><div>可用度 Availability <b class="'+(ok?'ok':'bad')+'">'+pct(r.avail)+'</b></div>'+
+  '<div>成本 Cost <b>$'+Math.round(r.cost)+'</b></div>'+
+  '<div>超載分鐘 Overload min <b>'+r.over+'</b></div>'+
+  '<div>最多實例 Peak instances <b>'+r.peak+'</b></div>'+
+  '<div>失敗請求 Dropped <b>'+r.dropped.toLocaleString()+'</b></div></div>'+
+  '<details><summary>事件記錄 Event log ('+r.events.length+')</summary><pre>'+(r.events.join('\n')||'(無 none)')+'</pre></details></div>';
+}
+function renderRun(box,r,title,animate){
+  const id='cv'+Math.random().toString(36).slice(2,9);
+  box.innerHTML=runHtml(r,title,id);
+  if(!animate){drawChart($(id),r,T);return;}
+  let u=0;drawChart($(id),r,0);
+  const h=setInterval(()=>{u+=10;drawChart($(id),r,Math.min(u,T));if(u>=T)clearInterval(h);},18);
+}
+
+const QUIZ={
+m0:[{q:'單一伺服器收到的流量超過其容量時,超出部分會怎樣? What happens to traffic above one server\'s capacity?',
+ o:['自動變快 It speeds up','部分請求失敗或逾時 Some requests fail or time out','成本自動下降 Cost drops'],a:1,
+ e:'容量是硬上限,多出的請求會失敗或逾時。Capacity is a hard limit.'}],
+m1:[{q:'垂直縮放的主要限制是什麼? Main limits of vertical scaling?',
+ o:['單一實例有規格上限,且是單點故障 There is a max spec and a single point of failure','不能改變 CPU / RAM Cannot change CPU/RAM','必須使用 Load Balancer Requires a load balancer'],a:0,
+ e:'實驗中 L 規格仍低於 420 rps 高峰,且故障後整個網站停止。'},
+ {q:'水平縮放為什麼需要 Load Balancer? Why does horizontal scaling need a load balancer?',
+ o:['加密流量 Encrypt traffic','把流量分配給多台實例 Distribute traffic across instances','備份資料 Back up data'],a:1,
+ e:'沒有 LB,用戶只會連到其中一台實例。'}],
+m2:[{q:'實例規格不同時,Round Robin 的問題是什麼? Problem of Round Robin with mixed specs?',
+ o:['平均分配,小實例先超載 Equal split overloads small instances first','速度太快 Too fast','不能用於 HTTP Cannot be used with HTTP'],a:0,
+ e:'S 與 L 收到同樣流量,L 的容量被浪費。'},
+ {q:'Load Balancer 的健康檢查 (health check) 有什麼作用? Purpose of health check?',
+ o:['增加 CPU Increase CPU','把流量移離故障實例 Stop sending traffic to failed instances','降低價格 Lower price'],a:1,
+ e:'本模擬有約 2 分鐘偵測延遲,期間部分請求仍會失敗。'}],
+m3:[{q:'依講義,Auto Scaling 本身是否收費? Per the slides, is Auto Scaling itself charged?',
+ o:['收費 Charged','免費,但自動建立的 ECS 實例按量付費 Free, but ECS instances it creates are pay-as-you-go','永久免費,包括實例 Everything is free'],a:1,
+ e:'參考講義 Slide 3。'},
+ {q:'Min Size 的作用是什麼? What does Min Size do?',
+ o:['保證至少有這個數量的運行實例 Keeps at least this many instances running','限制 CPU 最高值 Caps CPU','限制每日費用 Caps daily cost'],a:0,
+ e:'Min Size 太大會在夜間浪費成本;太小則高峰來臨時容量不足。'},
+ {q:'沒有把 Load Balancer 附加到伸縮組,新實例會怎樣? If no load balancer is attached, new instances will…',
+ o:['照樣收到流量 Still receive traffic','啟動並計費,但收不到流量 Start and bill but receive no traffic','自動刪除 Be deleted'],a:1,
+ e:'這是常見的設定錯誤。'}],
+m4:[{q:'預測性伸縮最適合哪種流量? Predictive scaling suits which traffic?',
+ o:['有規律或穩定趨勢的流量 Regular or steady-trend traffic','完全無法預料的突發流量 Totally unpredictable surges','零流量 Zero traffic'],a:0,
+ e:'預測依賴歷史數據,突發事件(viral)不在歷史之中。'},
+ {q:'為什麼官方建議先用「只預測不執行」模式驗證? Why validate a forecast before letting it scale?',
+ o:['因為預測可能不準,先檢查可避免浪費或容量不足 Forecasts can be wrong; checking avoids waste or shortage','因為預測會令實例收費 Forecasting is billed','因為 Load Balancer 要求 LB requires it'],a:0,
+ e:'預測規則亦需要至少 24 小時監控數據才能產生預測。'}]
+};
+function renderQuiz(mid){
+  const box=$('quiz-'+mid);let h='<h3>檢查理解 Quick check</h3>';
+  QUIZ[mid].forEach((q,i)=>{
+    const k=mid+'q'+i,sel=S.quiz[k];
+    h+='<div class="q"><p>'+(i+1)+'. '+q.q+'</p>';
+    q.o.forEach((o,j)=>{h+='<label><input type="radio" name="'+k+'" value="'+j+'"'+(sel===j?' checked':'')+'> '+o+'</label>';});
+    h+='<span class="fb" id="fb-'+k+'">'+(sel===undefined?'':(sel===q.a?'<span class="ok">✔ '+q.e+'</span>':'<span class="bad">✖ 再想想 Try again</span>'))+'</span></div>';
+  });
+  box.innerHTML=h;
+  box.querySelectorAll('input[type=radio]').forEach(inp=>inp.addEventListener('change',()=>{
+    const k=inp.name,i=+k.slice(k.indexOf('q')+1),mid2=k.slice(0,k.indexOf('q'));
+    S.quiz[k]=+inp.value;save();
+    const q=QUIZ[mid2][i];
+    $('fb-'+k).innerHTML=(+inp.value===q.a)?'<span class="ok">✔ '+q.e+'</span>':'<span class="bad">✖ 再想想 Try again</span>';
+    refresh();
+  }));
+}
+function quizCount(mid){let c=0;QUIZ[mid].forEach((q,i)=>{if(S.quiz[mid+'q'+i]===q.a)c++;});return [c,QUIZ[mid].length];}
+
+function goalList(i){
+  const m=S.m['m'+i]||{};
+  switch(i){
+  case 0:return [['完成一次模擬 Run the simulation',!!m.done]];
+  case 1:return [['執行垂直縮放 Ran vertical scaling',!!m.v],['執行水平縮放 Ran horizontal scaling',!!m.h],
+    ['水平縮放在有故障下可用度 ≥ 95% Horizontal availability ≥ 95% with failure',!!(m.h&&m.h.f&&m.h.a>=0.95)]];
+  case 2:return [['執行「沒有 LB」(有故障)Ran no-LB with failure',!!(m.none&&m.none.f)],
+    ['執行 Round Robin(有故障)Ran Round Robin with failure',!!(m.rr&&m.rr.f)],
+    ['執行 Least Connections(有故障)Ran Least Connections with failure',!!(m.lc&&m.lc.f)],
+    ['LC 可用度 ≥ 98% 且高於 RR LC ≥ 98% and better than RR',!!(m.lc&&m.rr&&m.lc.a>=0.98&&m.lc.a>m.rr.a)]];
+  case 3:return [['四個步驟均已確認 All four steps confirmed',!!(S.steps&&S.steps.every(Boolean))],
+    ['spike 可用度 ≥ 97% Spike availability ≥ 97%',!!(m.spike&&m.spike.a>=0.97)],
+    ['daily 可用度 ≥ 97% Daily availability ≥ 97%',!!(m.daily&&m.daily.a>=0.97)],
+    ['night 成本 ≤ $300 Night cost ≤ $300',!!(m.night&&m.night.c<=300)],
+    ['spike 成本 ≤ $1000 Spike cost ≤ $1000',!!(m.spike&&m.spike.c<=1000)]];
+  case 4:{const t=m.trend;return [['trend:Predictive 可用度 ≥ 99% 且不低於 Reactive Predictive ≥ 99% and ≥ reactive',!!(t&&t.pr.a>=0.99&&t.pr.a>=t.re.a)],
+    ['已執行 viral 情境 Ran the viral scenario',!!m.viral],['已修改 predict() Edited predict()',!!m.edited]];}
+  }
+  return [];
+}
+function missionScore(i){
+  const g=goalList(i),sim=g.filter(x=>x[1]).length/g.length;
+  const q=quizCount('m'+i),qf=q[0]/q[1];
+  return Math.round(PTS[i]*(0.6*sim+0.4*qf)*10)/10;
+}
+function totalScore(){let s=0;for(let i=0;i<5;i++)s+=missionScore(i);return Math.round(s*10)/10;}
+function refresh(){
+  for(let i=0;i<5;i++){
+    const g=goalList(i),q=quizCount('m'+i);
+    let h='<b>目標 Goals(模擬 60% + 測驗 40%,滿分 '+PTS[i]+')</b><br>';
+    g.forEach(x=>{h+=(x[1]?'<span class="ok">✔ ':'<span class="bad">✖ ')+x[0]+'</span><br>';});
+    h+='測驗 Quiz: '+q[0]+'/'+q[1]+' · 本關得分 Score: <b>'+missionScore(i)+'</b>';
+    $('goals-m'+i).innerHTML=h;
+    const done=g.every(x=>x[1])&&q[0]===q[1];
+    const b=document.querySelector('#nav button[data-t="m'+i+'"]');if(b)b.classList.toggle('done',done);
+  }
+  const sb=$('scorebox');
+  if(sb){let h='<h3>成績摘要 Score summary</h3><table><tr><th>Mission</th><th>分數 Score</th><th>滿分 Max</th></tr>';
+    for(let i=0;i<5;i++)h+='<tr><td>M'+i+'</td><td>'+missionScore(i)+'</td><td>'+PTS[i]+'</td></tr>';
+    h+='<tr><th>總分 Total</th><th>'+totalScore()+'</th><th>100</th></tr></table>';sb.innerHTML=h;}
+}
+
+// Mission handlers
+function initM0(){
+  $('m0run').onclick=()=>{ensureStart();
+    const r=runSim({fleet:['S'],lb:'none',fail:null},'spike');
+    S.m.m0=Object.assign({done:true},sum(r,false));save();
+    renderRun($('out-m0'),r,'Mission 0 · 1 × S 實例 instance',true);refresh();};
+}
+function cmpTable(rows){
+  let h='<table><tr><th>方案 Plan</th><th>可用度 Availability</th><th>成本 Cost</th><th>超載分鐘 Overload min</th><th>最多實例 Peak</th></tr>';
+  rows.forEach(r=>{if(r[1])h+='<tr><td>'+r[0]+'</td><td>'+pct(r[1].a)+'</td><td>$'+r[1].c+'</td><td>'+r[1].o+'</td><td>'+r[1].p+'</td></tr>';});
+  return h+'</table>';
+}
+function initM1(){
+  const upd=()=>{const m=S.m.m1||{};$('cmp-m1').innerHTML=cmpTable([['A 垂直 Vertical',m.v],['B 水平 Horizontal',m.h]]);};
+  const fail=()=>$('m1fail').checked?{at:100,idx:0}:null;
+  $('m1v').onclick=()=>{ensureStart();const sp=$('m1vs').value;
+    const r=runSim({fleet:[sp],lb:'none',fail:fail()},'spike');
+    S.m.m1=S.m.m1||{};S.m.m1.v=sum(r,fail());save();
+    renderRun($('out-m1v'),r,'A · 垂直 1 × '+sp,true);upd();refresh();};
+  $('m1h').onclick=()=>{ensureStart();const sp=$('m1hs').value,n=num('m1hn',4,2,8);
+    const r=runSim({fleet:Array(n).fill(sp),lb:'lc',fail:fail()},'spike');
+    S.m.m1=S.m.m1||{};S.m.m1.h=sum(r,fail());save();
+    renderRun($('out-m1h'),r,'B · 水平 '+n+' × '+sp+' + LB',true);upd();refresh();};
+  upd();
+}
+function initM2(){
+  const names={none:'沒有 LB No LB',rr:'Round Robin',lc:'Least Connections'};
+  const upd=()=>{const m=S.m.m2||{};$('cmp-m2').innerHTML=cmpTable(['none','rr','lc'].map(k=>[names[k]+(m[k]&&m[k].f?' (故障 failure)':''),m[k]]));};
+  $('m2run').onclick=()=>{ensureStart();const lb=$('m2lb').value,f=$('m2fail').checked;
+    const r=runSim({fleet:['S','S','L'],lb:lb,fail:f?{at:100,idx:0}:null},'steady');
+    S.m.m2=S.m.m2||{};S.m.m2[lb]=sum(r,f);save();
+    renderRun($('out-m2'),r,'Mission 2 · '+names[lb],true);upd();refresh();};
+  upd();
+}
+function parseHM(s){const m=/^(\d{1,2}):(\d{2})$/.exec((s||'').trim());if(!m)return null;return (+m[1])*60+(+m[2])-START_MIN;}
+function m3cfg(){
+  const min=num('m3min',1,0,5),max=num('m3max',5,1,10),spec=$('m3spec').value,att=$('m3lb').checked;
+  const sched=[];
+  [['m3t1','m3n1'],['m3t2','m3n2']].forEach(p=>{const t=parseHM($(p[0]).value);if(t!==null&&t>=0&&t<T)sched.push({t:t,n:num(p[1],1,0,10)});});
+  const asg={min:min,max:Math.max(max,min),cooldown:num('m3cool',3,0,10),spec:spec,attachLb:att,mode:$('m3mode').value,
+    stepOut:num('m3so',2,1,5),stepIn:num('m3si',1,1,5),outTh:num('m3out',70,30,100),inTh:num('m3in',30,0,60),sustain:num('m3sus',1,1,5),sched:sched,hybrid:false};
+  return {fleet:Array(Math.max(min,1)).fill(spec),lb:att?'lc':'none',fail:null,asg:asg};
+}
+function initM3(){
+  S.steps=S.steps||[false,false,false,false];
+  const setSteps=()=>{
+    for(let i=1;i<=4;i++){$('st'+i).classList.toggle('fin',!!S.steps[i-1]);$('sf'+i).textContent=S.steps[i-1]?'✔ 已確認 confirmed':'';}
+    $('m3run').disabled=!S.steps.every(Boolean);
+  };
+  document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{ensureStart();S.steps[+b.dataset.step-1]=true;save();setSteps();refresh();});
+  document.querySelectorAll('#tab-m3 input,#tab-m3 select').forEach(e=>e.addEventListener('change',()=>{
+    const st=e.closest('.step');if(st&&S.steps){const i=+st.id.slice(2)-1;if(S.steps[i]){S.steps[i]=false;save();setSteps();refresh();}}
+  }));
+  $('m3run').onclick=()=>{
+    const cfg=m3cfg(),a=cfg.asg;
+    let w='';
+    if(!a.attachLb)w+='<div class="warn">⚠ 未附加 Load Balancer:新增的實例不會收到流量。Load balancer not attached: new instances receive no traffic.</div>';
+    if(a.max<num('m3min',1,0,5))w+='<div class="warn">⚠ Max Size 小於 Min Size,已自動調整。Max was below Min and was adjusted.</div>';
+    if((a.mode==='scheduled'||a.mode==='custom')&&a.sched.length===0)w+='<div class="warn">⚠ 定時任務時間格式不正確 (HH:MM, 15:00–18:59)。Invalid scheduled time.</div>';
+    $('m3warn').innerHTML=w;
+    const res={};
+    [['spike','a','放學後高峰 spike'],['daily','b','每日固定高峰 daily'],['night','c','夜間 night']].forEach(x=>{
+      const c2=JSON.parse(JSON.stringify(cfg));
+      const r=runSim(Object.assign(c2,{asg:cfg.asg}),x[0]);
+      res[x[0]]=sum(r,false);renderRun($('out-m3'+x[1]),r,'Mission 3 · '+x[2],true);
+    });
+    S.m.m3=res;save();
+    let h='<table><tr><th>情境 Scenario</th><th>可用度 Availability</th><th>目標 Target</th><th>成本 Cost</th><th>目標 Target</th></tr>';
+    h+='<tr><td>spike</td><td>'+pct(res.spike.a)+'</td><td>≥ 97%</td><td>$'+res.spike.c+'</td><td>≤ $1000</td></tr>';
+    h+='<tr><td>daily</td><td>'+pct(res.daily.a)+'</td><td>≥ 97%</td><td>$'+res.daily.c+'</td><td>—</td></tr>';
+    h+='<tr><td>night</td><td>'+pct(res.night.a)+'</td><td>—</td><td>$'+res.night.c+'</td><td>≤ $300</td></tr></table>';
+    $('cmp-m3').innerHTML=h;refresh();
+  };
+  setSteps();
+  if(S.m.m3)$('cmp-m3').innerHTML='<p class="mut">已有上次結果,可重新測試。Previous results saved; run again to see charts.</p>';
+}
+function compileFn(src){
+  const f=new Function(src+'\nreturn predict;')();
+  if(typeof f!=='function')throw new Error('找不到 predict() function not found');
+  return f;
+}
+function initM4(){
+  if(!S.f.m4code){$('m4code').value=DEFAULT_PREDICT;S.f.m4code=DEFAULT_PREDICT;save();}
+  $('m4reset').onclick=()=>{$('m4code').value=DEFAULT_PREDICT;S.f.m4code=DEFAULT_PREDICT;save();};
+  $('m4ai').onclick=()=>{
+    const p='我在做一個雲端運算實驗。請改寫以下 JavaScript 函數 predict(history),history 是過去每分鐘的請求數 (rps) 陣列(最新在最後),函數需回傳 5 分鐘後的預測 rps。流量有約 ±4% 隨機波動,請用簡單線性趨勢或線性迴歸,並加上平滑。只用純 JavaScript、不用外部函式庫,並用中文逐行解釋。\n\nI am doing a cloud computing lab. Rewrite this JavaScript function predict(history) where history is an array of past requests-per-second, one per minute (latest last). Return the predicted rps 5 minutes ahead. Traffic has about ±4% noise; use a simple linear trend or linear regression with smoothing. Plain JavaScript only, and explain each line.\n\n'+$('m4code').value;
+    (navigator.clipboard?navigator.clipboard.writeText(p):Promise.reject()).then(()=>{$('m4msg').textContent='已複製,請貼到 AI 工具。Copied; paste into an AI tool, then CHECK its answer before use.';},()=>{$('m4msg').textContent='無法自動複製 Copy failed';});
+  };
+  const upd=()=>{
+    const m=S.m.m4||{};let rows=[];
+    ['trend','viral'].forEach(k=>{if(m[k]){rows.push(['['+k+'] Reactive',m[k].re]);rows.push(['['+k+'] Predictive',m[k].pr]);}});
+    $('cmp-m4').innerHTML=cmpTable(rows);
+  };
+  $('m4run').onclick=()=>{ensureStart();
+    const sc=$('m4sc').value,src=$('m4code').value;let fn;
+    try{fn=compileFn(src);const t=fn([1,2,3,4,5,6,7]);if(typeof t!=='number'||!isFinite(t))throw new Error('predict() 必須回傳數字 must return a number');}
+    catch(e){$('m4msg').textContent='❌ '+e.message;return;}
+    $('m4msg').textContent='';
+    const base={min:1,max:8,cooldown:3,spec:'S',attachLb:true,outTh:70,inTh:30,sustain:1,stepOut:2,stepIn:1,sched:[]};
+    const re=runSim({fleet:['S'],lb:'lc',fail:null,asg:Object.assign({},base,{mode:'dynamic'})},sc);
+    const pr=runSim({fleet:['S'],lb:'lc',fail:null,asg:Object.assign({},base,{mode:'predictive',predictFn:fn,hybrid:$('m4hy').checked})},sc);
+    S.m.m4=S.m.m4||{};S.m.m4[sc]={re:sum(re,false),pr:sum(pr,false)};
+    if(src.trim()!==DEFAULT_PREDICT.trim())S.m.m4.edited=true;
+    save();
+    renderRun($('out-m4a'),re,sc+' · Reactive(CPU 閾值 threshold)',true);
+    renderRun($('out-m4b'),pr,sc+' · Predictive('+(src.trim()===DEFAULT_PREDICT.trim()?'預設 default':'你的版本 your version')+')',true);
+    upd();refresh();
+  };
+  upd();
+}
+
+// Console tab
+function initConsole(){
+  const shots=[['img/asg-1-scaling-group.png','1. 創建伸縮組 Scaling Group','Min / Max Size、Cooldown、關聯 Load Balancer'],
+  ['img/asg-2-scaling-config.png','2. 創建伸縮配置 Scaling Configuration','實例類型、鏡像 Image'],
+  ['img/asg-3-scaling-rule.png','3. 創建伸縮規則 Scaling Rule','簡單 / 步進 / 目標追蹤 / 預測 規則'],
+  ['img/asg-4-alarm-task.png','4. 創建警報任務 Alarm Task','CPU 閾值、連續次數、觸發的規則']];
+  $('shots').innerHTML=shots.map((s,i)=>'<div class="card"><h3>'+s[1]+'</h3><div class="shot" id="shot'+i+'"><img src="'+s[0]+'" alt="'+s[1]+'"><div>'+s[2]+'</div></div></div>').join('');
+  shots.forEach((s,i)=>{const im=document.querySelector('#shot'+i+' img');im.onerror=()=>{im.replaceWith(Object.assign(document.createElement('div'),{innerHTML:'尚未放入截圖 No screenshot yet.<br>請放置 Place file: <code>'+s[0]+'</code>'}));};});
+}
+
+// Submit
+function b64u(s){const b=new TextEncoder().encode(s);let bin='';b.forEach(x=>bin+=String.fromCharCode(x));return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function unb64u(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const bin=atob(s);return new TextDecoder().decode(Uint8Array.from(bin,c=>c.charCodeAt(0)));}
+function chk(js){return fnv(js+SALT).toString(16).padStart(8,'0');}
+function buildCode(){
+  const m3=S.m.m3||{},m4=(S.m.m4||{}).trend,m1=S.m.m1||{},m2=S.m.m2||{};
+  const p={v:1,i:$('pid').value.trim(),c:$('pcls').value.trim(),n:$('pname').value.trim(),t:Date.now(),
+    d:S.start?Math.round((Date.now()-S.start)/60000):0,
+    p:[0,1,2,3,4].map(missionScore),tot:totalScore(),
+    k:[m1.h?m1.h.a:null,m2.lc?m2.lc.a:null,m3.spike?m3.spike.a:null,m3.daily?m3.daily.a:null,m3.night?m3.night.c:null,m4?m4.pr.a:null],
+    r:($('reflect').value||'').slice(0,300)};
+  const js=JSON.stringify(p);
+  return 'CC10.'+b64u(js)+'.'+chk(js);
+}
+function initSubmit(){
+  $('gen').onclick=()=>{
+    if(!$('pid').value.trim()||!$('pcls').value.trim()||!$('pname').value.trim()){$('submsg').textContent='請先填寫班別、學號、姓名 Fill in class, number and name first.';return;}
+    const code=buildCode();$('codeout').value=code;$('submsg').textContent='';
+    if(SUBMIT_ENDPOINT){fetch(SUBMIT_ENDPOINT,{method:'POST',mode:'no-cors',body:code}).then(()=>{$('submsg').textContent='已自動提交 Submitted to endpoint.';}).catch(()=>{});}
+  };
+  $('copy').onclick=()=>{const v=$('codeout').value;if(!v)return;
+    (navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>{$('submsg').textContent='已複製 Copied';},()=>{$('codeout').select();document.execCommand('copy');$('submsg').textContent='已複製 Copied';});};
+}
+
+// Teacher
+let TROWS=[];
+function parseCode(line){
+  line=line.trim();const a=line.split('.');
+  if(a.length!==3||a[0]!=='CC10')return null;
+  try{const js=unb64u(a[1]);const p=JSON.parse(js);p.valid=(chk(js)===a[2]);return p;}catch(e){return null;}
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function renderTeacher(lines){
+  const map={};let bad=0;
+  lines.forEach(l=>{if(!l.trim())return;const p=parseCode(l);if(!p){bad++;return;}
+    const key=p.c+'|'+p.i;if(!map[key]||map[key].t<p.t)map[key]=p;});
+  TROWS=Object.values(map).sort((x,y)=>(x.c+'').localeCompare(y.c+'')||(+x.i-+y.i));
+  const n=TROWS.length;
+  let st='<b>人數 Students: '+n+'</b>'+(bad?' · <span class="bad">無法解析 unparsable: '+bad+'</span>':'');
+  if(n){const avg=k=>(TROWS.reduce((a,r)=>a+(r.p[k]||0),0)/n).toFixed(1);
+    st+='<br>平均分 Average — M0 '+avg(0)+' · M1 '+avg(1)+' · M2 '+avg(2)+' · M3 '+avg(3)+' · M4 '+avg(4)+' · 總分 Total '+(TROWS.reduce((a,r)=>a+r.tot,0)/n).toFixed(1);}
+  $('tstats').innerHTML=st;
+  let h='<table><tr><th>班</th><th>學號</th><th>姓名</th><th>M0</th><th>M1</th><th>M2</th><th>M3</th><th>M4</th><th>總分</th><th>用時 min</th><th>M1 水平</th><th>M2 LC</th><th>M3 spike</th><th>M3 daily</th><th>M3 night $</th><th>M4 預測</th><th>校驗</th><th>反思 Reflection</th></tr>';
+  const pc=v=>v==null?'—':(v*100).toFixed(1)+'%';
+  TROWS.forEach(r=>{h+='<tr><td>'+esc(r.c)+'</td><td>'+esc(r.i)+'</td><td>'+esc(r.n)+'</td>'+r.p.map(x=>'<td>'+x+'</td>').join('')+
+    '<td><b>'+r.tot+'</b></td><td>'+r.d+'</td><td>'+pc(r.k[0])+'</td><td>'+pc(r.k[1])+'</td><td>'+pc(r.k[2])+'</td><td>'+pc(r.k[3])+'</td><td>'+(r.k[4]==null?'—':'$'+r.k[4])+'</td><td>'+pc(r.k[5])+'</td><td>'+(r.valid?'✔':'<span class="bad">✖</span>')+'</td><td>'+esc(r.r)+'</td></tr>';});
+  $('ttable').innerHTML=h+'</table>';
+}
+function initTeacher(){
+  $('tparse').onclick=()=>renderTeacher($('tcodes').value.split(/\r?\n/));
+  $('tcsv').onclick=()=>{
+    const head=['class','no','name','M0','M1','M2','M3','M4','total','minutes','m1_h_avail','m2_lc_avail','m3_spike_avail','m3_daily_avail','m3_night_cost','m4_pred_avail','valid','reflection'];
+    const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+    const rows=TROWS.map(r=>[r.c,r.i,r.n].concat(r.p,[r.tot,r.d],r.k,[r.valid,r.r]).map(q).join(','));
+    const blob=new Blob(['\ufeff'+head.join(',')+'\n'+rows.join('\n')],{type:'text/csv'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='lab10-results.csv';a.click();
+  };
+  $('tload').onclick=()=>{
+    if(!SUBMIT_ENDPOINT){$('tmsg').textContent='尚未設定 SUBMIT_ENDPOINT Endpoint not configured.';return;}
+    fetch(SUBMIT_ENDPOINT+'?action=list').then(r=>r.json()).then(a=>{$('tcodes').value=a.join('\n');renderTeacher(a);$('tmsg').textContent='已載入 Loaded '+a.length;}).catch(e=>{$('tmsg').textContent='載入失敗 Failed: '+e.message;});
+  };
+}
+
+// Navigation, persistence, timer
+function show(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id==='tab-'+id));
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===id));
+  window.scrollTo(0,0);if(id==='submit')refresh();
+}
+function buildNav(){
+  const tabs=TABS.slice();if(location.hash==='#teacher')tabs.push(['teacher','教師 Teacher']);
+  $('nav').innerHTML=tabs.map(t=>'<button data-t="'+t[0]+'">'+t[1]+'</button>').join('');
+  $('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>show(b.dataset.t));
+}
+function initPersist(){
+  document.querySelectorAll('[data-persist]').forEach(e=>{
+    const k=e.id;
+    if(k in S.f){if(e.type==='checkbox')e.checked=!!S.f[k];else e.value=S.f[k];}
+    const h=()=>{S.f[k]=e.type==='checkbox'?e.checked:e.value;save();};
+    e.addEventListener('input',h);e.addEventListener('change',h);
+  });
+}
+function tick(){
+  if(!S.start){$('timer').textContent='⏱ 00:00 / 60:00';return;}
+  const s=Math.floor((Date.now()-S.start)/1000),mm=String(Math.floor(s/60)).padStart(2,'0'),ss=String(s%60).padStart(2,'0');
+  $('timer').textContent='⏱ '+mm+':'+ss+' / 60:00';
+  $('timer').style.color=s>3600?'#ff8a8a':'#fff';
+}
+window.addEventListener('hashchange',()=>{buildNav();});
+buildNav();
+initPersist();
+['m0','m1','m2','m3','m4'].forEach(renderQuiz);
+initM0();initM1();initM2();initM3();initM4();initConsole();initSubmit();initTeacher();
+refresh();show('intro');
+['pcls','pid','pname'].forEach(id=>$(id).addEventListener('input',ensureStart));
+setInterval(tick,1000);tick();
+</script>
+</body>
+</html>
