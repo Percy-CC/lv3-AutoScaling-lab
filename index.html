@@ -78,14 +78,14 @@ This lab simulates the lecture content: vertical/horizontal scaling, load balanc
 </table>
 </div>
 <div class="card">
-<h3>模擬模型假設 Model assumptions</h3>
+<h3 data-language-copy data-zh="模擬模型假設" data-en="Model assumptions">模擬模型假設</h3>
 <ul>
-<li>1 tick = 1 分鐘 minute;每次模擬 240 分鐘(15:00–19:00)。Each run covers 240 minutes.</li>
-<li>規格 Specs:S = 100 rps ($1/min),M = 200 rps ($1.9/min),L = 400 rps ($3.6/min)。價格為虛構,並非阿里雲實際價格 Prices are fictional, not real Alibaba Cloud prices.</li>
-<li>新實例需 3 分鐘啟動(啟動期間已計費)。New instances take 3 min to boot and are billed meanwhile.</li>
-<li>Load Balancer 約 2 分鐘後才發現故障實例。LB needs about 2 min to detect a failed instance.</li>
-<li>Round Robin 平均分配流量;Least Connections 在此模型中近似按實例容量比例分配。Round Robin splits equally; Least Connections is approximated as capacity-proportional.</li>
-<li>可用度 Availability = 成功處理的請求 ÷ 總請求。</li>
+<li data-language-copy data-zh="1 tick = 1 分鐘；每次模擬涵蓋 240 分鐘（15:00–19:00）。" data-en="1 tick = 1 minute. Each simulation run covers 240 minutes (15:00–19:00).">1 tick = 1 分鐘；每次模擬涵蓋 240 分鐘（15:00–19:00）。</li>
+<li data-language-copy data-zh="實例規格：S = 100 rps（$1/分鐘）、M = 200 rps（$1.9/分鐘）、L = 400 rps（$3.6/分鐘）。價格為虛構，並非阿里雲實際價格。" data-en="Instance specs: S = 100 rps ($1/min), M = 200 rps ($1.90/min), L = 400 rps ($3.60/min). Prices are fictional, not actual Alibaba Cloud prices.">實例規格：S = 100 rps（$1/分鐘）、M = 200 rps（$1.9/分鐘）、L = 400 rps（$3.6/分鐘）。價格為虛構，並非阿里雲實際價格。</li>
+<li data-language-copy data-zh="新實例需要 3 分鐘啟動；啟動期間亦會計費。" data-en="New instances take 3 minutes to start; billing begins during startup.">新實例需要 3 分鐘啟動；啟動期間亦會計費。</li>
+<li data-language-copy data-zh="負載平衡器約需 2 分鐘才會偵測到故障實例。" data-en="The Load Balancer takes about 2 minutes to detect a failed instance.">負載平衡器約需 2 分鐘才會偵測到故障實例。</li>
+<li data-language-copy data-zh="Round Robin 平均分配流量；Least Connections 在此模型中近似按實例容量比例分配。" data-en="Round Robin distributes traffic equally. Least Connections approximates capacity-weighted distribution in this model.">Round Robin 平均分配流量；Least Connections 在此模型中近似按實例容量比例分配。</li>
+<li data-language-copy data-zh="可用度 = 成功處理的請求 ÷ 總請求。" data-en="Availability = successfully served requests ÷ total requests.">可用度 = 成功處理的請求 ÷ 總請求。</li>
 </ul>
 </div>
 </section>
@@ -99,7 +99,7 @@ This lab simulates the lecture content: vertical/horizontal scaling, load balanc
 <h2>Mission 0 · 單一伺服器的極限 One server's limit</h2>
 <div class="goals" id="goals-m0"></div>
 <div class="card">
-<p>情境 Scenario:學校網站只有 1 台 S 規格伺服器(100 rps),放學後流量突然上升。<br>A school website runs on one S instance (100 rps). Traffic jumps after school.</p>
+<p data-language-copy data-zh="情境（Scenario）：學校網站只有 1 台 S 規格伺服器（100 rps），放學後流量突然上升。" data-en="Scenario: A school website runs on one S instance (100 rps). Traffic jumps after school.">情境（Scenario）：學校網站只有 1 台 S 規格伺服器（100 rps），放學後流量突然上升。</p>
 <button class="act" id="m0run">▶ 執行模擬 Run</button>
 <div id="out-m0"></div>
 </div>
@@ -110,7 +110,7 @@ This lab simulates the lecture content: vertical/horizontal scaling, load balanc
 <h2>Mission 1 · 垂直縮放 vs 水平縮放 Scaling Up vs Scaling Out</h2>
 <div class="goals" id="goals-m1"></div>
 <div class="card">
-<p>情境:流量高峰約 420 rps。於第 100 分鐘(16:40)第一台伺服器發生故障。分別用兩種方法應付,比較可用度與成本。<br>Peak is about 420 rps. At minute 100 (16:40) the first server fails. Try both approaches and compare.</p>
+<p data-language-copy data-zh="情境：流量高峰約 420 rps。第 100 分鐘（16:40）第一台伺服器發生故障。請分別用兩種方法應對，並比較可用度與成本。" data-en="Scenario: Peak traffic is about 420 rps. The first server fails at minute 100 (16:40). Try both approaches and compare their availability and cost.">情境：流量高峰約 420 rps。第 100 分鐘（16:40）第一台伺服器發生故障。請分別用兩種方法應對，並比較可用度與成本。</p>
 <label><input type="checkbox" id="m1fail" data-persist checked> 模擬第 100 分鐘故障 Simulate failure at minute 100</label>
 </div>
 <div class="grid2">
@@ -136,7 +136,7 @@ This lab simulates the lecture content: vertical/horizontal scaling, load balanc
 <h2>Mission 2 · 負載均衡 Load Balancing</h2>
 <div class="goals" id="goals-m2"></div>
 <div class="card">
-<p>情境:網站有 3 台伺服器(S、S、L),流量 250–350 rps。比較沒有 Load Balancer、Round Robin 及 Least Connections。<br>Three servers (S, S, L), 250–350 rps. Compare no LB, Round Robin and Least Connections.</p>
+<p data-language-copy data-zh="情境：網站有 3 台伺服器（S、S、L），流量為 250–350 rps。比較沒有 Load Balancer、Round Robin 及 Least Connections 的效果。" data-en="Scenario: A website has three servers (S, S, L) and traffic of 250–350 rps. Compare no load balancer, Round Robin, and Least Connections.">情境：網站有 3 台伺服器（S、S、L），流量為 250–350 rps。比較沒有 Load Balancer、Round Robin 及 Least Connections 的效果。</p>
 <label>模式 Mode
 <select id="m2lb" data-persist>
 <option value="none">沒有 LB · No load balancer(只用第一台 first server only)</option>
@@ -155,7 +155,7 @@ This lab simulates the lecture content: vertical/horizontal scaling, load balanc
 <h2>Mission 3 · 設定 Auto Scaling · Four setup steps</h2>
 <div class="goals" id="goals-m3"></div>
 <div class="card">
-<p>按講義 Slide 13 的順序完成四個步驟,每步按「確認」。同一組設定會同時測試三個情境:<br>Complete the four steps in order and confirm each. One configuration is tested on three scenarios:</p>
+<p data-language-copy data-zh="按講義 Slide 13 的順序完成四個步驟，每步按「確認」。同一組設定會同時測試三個情境：" data-en="Follow the four steps in the order shown on Slide 13 and confirm each one. The same configuration will be tested in three scenarios:">按講義 Slide 13 的順序完成四個步驟，每步按「確認」。同一組設定會同時測試三個情境：</p>
 <ul>
 <li><span class="tag">spike</span> 放學後突然高峰(動態模式 dynamic)</li>
 <li><span class="tag">daily</span> 每日 17:00–18:00 固定高峰(定時模式 scheduled)</li>
@@ -210,10 +210,8 @@ This lab simulates the lecture content: vertical/horizontal scaling, load balanc
 <h2>Mission 4 · AI 預測性伸縮 Predictive Scaling</h2>
 <div class="goals" id="goals-m4"></div>
 <div class="card">
-<p>Reactive(被動)伸縮要等 CPU 超標才加機,而新實例要 3 分鐘才可服務,所以流量急升時會有一段時間不足。Predictive(預測)伸縮用過去流量預測 5 分鐘後的流量,提前加機。<br>
-Reactive scaling waits for high CPU and new instances need 3 min to boot. Predictive scaling forecasts the load 5 min ahead and scales earlier.</p>
-<p>預設的預測方法是移動平均(Moving Average),它只反映過去,所以會滯後。請修改 <code>predict()</code>,令它在 <b>trend</b> 情境表現更好;再於 <b>viral</b>(突發爆紅)情境觀察預測何時失準。<br>
-The default is a moving average, which lags behind. Edit <code>predict()</code> to do better on <i>trend</i>, then see where predictions fail on <i>viral</i>.</p>
+<p data-language-copy data-zh="Reactive（被動）伸縮要等 CPU 超標才擴容；新實例需要 3 分鐘啟動，因此流量急升時會短暫出現容量不足。Predictive（預測性）伸縮根據過去流量預測 5 分鐘後的需求，提前擴容。" data-en="Reactive scaling waits for CPU to exceed the threshold, and new instances take 3 minutes to start. A sudden traffic increase can therefore cause a temporary capacity shortage. Predictive scaling forecasts demand 5 minutes ahead from past traffic and scales out in advance.">Reactive（被動）伸縮要等 CPU 超標才擴容；新實例需要 3 分鐘啟動，因此流量急升時會短暫出現容量不足。Predictive（預測性）伸縮根據過去流量預測 5 分鐘後的需求，提前擴容。</p>
+<p><span data-language-copy data-zh="預設的預測方法是移動平均（Moving Average），它只反映過去，所以會滯後。請修改 " data-en="The default prediction method is a moving average, which lags behind. Edit ">預設的預測方法是移動平均（Moving Average），它只反映過去，所以會滯後。請修改 </span><code>predict()</code><span data-language-copy data-zh="，令它在 " data-en=" to perform better on ">，令它在 </span><b>trend</b><span data-language-copy data-zh=" 情境表現更好；再於 " data-en=", then use "> 情境表現更好；再於 </span><b>viral</b><span data-language-copy data-zh="（突發爆紅）情境觀察預測何時失準。" data-en=" to observe when the forecast fails during a sudden surge.">（突發爆紅）情境觀察預測何時失準。</span></p>
 <label>情境 Scenario <select id="m4sc" data-persist><option value="trend">trend · 流量穩定上升 steady ramp-up</option><option value="viral">viral · 突發爆紅 sudden surge</option></select></label>
 <label><input type="checkbox" id="m4hy" data-persist> 預測 + Reactive 後備(safety net)Predictive + reactive fallback</label>
 <textarea id="m4code" data-persist class="code" style="height:190px" spellcheck="false"></textarea>
@@ -505,21 +503,24 @@ function quizCount(mid){let c=0;QUIZ[mid].forEach((q,i)=>{if(S.quiz[mid+'q'+i]==
 
 function goalList(i){
   const m=S.m['m'+i]||{};
+  const goal=(zh,en,done)=>[language==='zh'?zh:en,done];
   switch(i){
-  case 0:return [['完成一次模擬 Run the simulation',!!m.done]];
-  case 1:return [['執行垂直縮放 Ran vertical scaling',!!m.v],['執行水平縮放 Ran horizontal scaling',!!m.h],
-    ['水平縮放在有故障下可用度 ≥ 95% Horizontal availability ≥ 95% with failure',!!(m.h&&m.h.f&&m.h.a>=0.95)]];
-  case 2:return [['執行「沒有 LB」(有故障)Ran no-LB with failure',!!(m.none&&m.none.f)],
-    ['執行 Round Robin(有故障)Ran Round Robin with failure',!!(m.rr&&m.rr.f)],
-    ['執行 Least Connections(有故障)Ran Least Connections with failure',!!(m.lc&&m.lc.f)],
-    ['LC 可用度 ≥ 98% 且高於 RR LC ≥ 98% and better than RR',!!(m.lc&&m.rr&&m.lc.a>=0.98&&m.lc.a>m.rr.a)]];
-  case 3:return [['四個步驟均已確認 All four steps confirmed',!!(S.steps&&S.steps.every(Boolean))],
-    ['spike 可用度 ≥ 97% Spike availability ≥ 97%',!!(m.spike&&m.spike.a>=0.97)],
-    ['daily 可用度 ≥ 97% Daily availability ≥ 97%',!!(m.daily&&m.daily.a>=0.97)],
-    ['night 成本 ≤ $300 Night cost ≤ $300',!!(m.night&&m.night.c<=300)],
-    ['spike 成本 ≤ $1000 Spike cost ≤ $1000',!!(m.spike&&m.spike.c<=1000)]];
-  case 4:{const t=m.trend;return [['trend:Predictive 可用度 ≥ 99% 且不低於 Reactive Predictive ≥ 99% and ≥ reactive',!!(t&&t.pr.a>=0.99&&t.pr.a>=t.re.a)],
-    ['已執行 viral 情境 Ran the viral scenario',!!m.viral],['已修改 predict() Edited predict()',!!m.edited]];}
+  case 0:return [goal('完成一次模擬','Run the simulation',!!m.done)];
+  case 1:return [goal('執行垂直縮放','Run vertical scaling',!!m.v),
+    goal('執行水平縮放','Run horizontal scaling',!!m.h),
+    goal('水平縮放在有故障下可用度 ≥ 95%','Reach at least 95% horizontal availability with a failure',!!(m.h&&m.h.f&&m.h.a>=0.95))];
+  case 2:return [goal('執行「沒有負載平衡器」(有故障)','Run no load balancer with a failure',!!(m.none&&m.none.f)),
+    goal('執行 Round Robin (有故障)','Run Round Robin with a failure',!!(m.rr&&m.rr.f)),
+    goal('執行 Least Connections (有故障)','Run Least Connections with a failure',!!(m.lc&&m.lc.f)),
+    goal('Least Connections 可用度 ≥ 98% 且高於 Round Robin','Reach at least 98% availability with Least Connections and outperform Round Robin',!!(m.lc&&m.rr&&m.lc.a>=0.98&&m.lc.a>m.rr.a))];
+  case 3:return [goal('四個步驟均已確認','Confirm all four steps',!!(S.steps&&S.steps.every(Boolean))),
+    goal('高峰情境可用度 ≥ 97%','Reach at least 97% availability in the spike scenario',!!(m.spike&&m.spike.a>=0.97)),
+    goal('每日情境可用度 ≥ 97%','Reach at least 97% availability in the daily scenario',!!(m.daily&&m.daily.a>=0.97)),
+    goal('夜間情境成本 ≤ $300','Keep night scenario cost at or below $300',!!(m.night&&m.night.c<=300)),
+    goal('高峰情境成本 ≤ $1000','Keep spike scenario cost at or below $1,000',!!(m.spike&&m.spike.c<=1000))];
+  case 4:{const t=m.trend;return [goal('趨勢情境：Predictive 可用度 ≥ 99% 且不低於 Reactive','Reach at least 99% availability with Predictive scaling, matching or exceeding Reactive scaling',!!(t&&t.pr.a>=0.99&&t.pr.a>=t.re.a)),
+    goal('已執行突發情境','Run the viral scenario',!!m.viral),
+    goal('已修改 predict()','Edit predict()',!!m.edited)];}
   }
   return [];
 }
@@ -532,7 +533,7 @@ function totalScore(){let s=0;for(let i=0;i<5;i++)s+=missionScore(i);return Math
 function refresh(){
   for(let i=0;i<5;i++){
     const g=goalList(i),q=quizCount('m'+i);
-    let h='<b>目標 Goals(模擬 60% + 測驗 40%,滿分 '+PTS[i]+')</b><br>';
+    let h='<b>'+(language==='zh'?'目標（模擬 60% + 測驗 40%，滿分 ':'Goals (Simulation 60% + Quiz 40%, max ')+PTS[i]+(language==='zh'?'）':')')+'</b><br>';
     g.forEach(x=>{h+=(x[1]?'<span class="ok">✔ ':'<span class="bad">✖ ')+x[0]+'</span><br>';});
     h+='測驗 Quiz: '+q[0]+'/'+q[1]+' · 本關得分 Score: <b>'+missionScore(i)+'</b>';
     $('goals-m'+i).innerHTML=h;
@@ -674,38 +675,110 @@ const UI={
 let language=localStorage.getItem('cc10-language')==='en'?'en':'zh';
 const originalText=new WeakMap();
 const glossary=[
-  [/\bAuto Scaling\b/g,'自動擴展'],[/\bLoad Balancer\b/g,'負載平衡器'],[/\bLoad Balancing\b/g,'負載平衡'],
-  [/\bLeast Connections\b/g,'最少連線'],[/\bRound Robin\b/g,'輪詢'],[/\bPredictive scaling\b/gi,'預測性擴展'],
-  [/\bReactive scaling\b/gi,'被動擴展'],[/\bScaling Group\b/g,'伸縮組'],[/\bScaling Configuration\b/g,'伸縮配置'],
-  [/\bScaling Rules?\b/g,'伸縮規則'],[/\bCloudMonitor\b/g,'雲端監控'],[/\bAvailability\b/g,'可用度'],
-  [/\bScenario\b/g,'情境'],[/\bCost\b/g,'成本'],[/\bGoals?\b/g,'目標'],[/\bScore\b/g,'分數'],
-  [/\bTarget\b/g,'目標'],[/\bRun\b/g,'執行'],[/\bConfirm\b/g,'確認'],[/\bReset code\b/g,'重設程式碼'],
-  [/\bCopy prompt\b/g,'複製提示'],[/\bQuick check\b/g,'檢查理解'],[/\bHint\b/g,'提示']
+  [/\bAI\s*\(Machine Learning\)/gi,'人工智能',true],[/\bMachine Learning\b/gi,'機器學習',true],
+  [/\bVertical Scaling\b/gi,'垂直縮放',true],[/\bHorizontal Scaling\b/gi,'水平縮放',true],
+  [/\bScaling Up\b/gi,'垂直擴展',true],[/\bScaling Out\b/gi,'水平擴展',true],
+  [/\bScale[- ]out\b/gi,'擴容',true],[/\bScale[- ]in\b/gi,'縮容',true],
+  [/\bMin Size\b/gi,'最小實例數',true],[/\bMax Size\b/gi,'最大實例數',true],
+  [/\bMoving Average\b/gi,'移動平均',true],[/\bHealth check\b/gi,'健康檢查',true],
+  [/\bTarget tracking\b/gi,'目標追蹤',true],[/\bScheduled task\b/gi,'定時任務',true],
+  [/\bField mapping\b/gi,'欄位對照',true],[/\bEvent-triggered task\b/gi,'事件觸發任務',true],
+  [/\bSet count to\b/gi,'調整至實例數',true],[/\bReal console concept\b/gi,'真實雲端概念',true],
+  [/\bAuto Scaling\b/gi,'自動擴展',true],[/\bLoad Balancer\b/gi,'負載平衡器',true],[/\bLoad Balancing\b/gi,'負載平衡',true],
+  [/\bLeast Connections\b/gi,'最少連線',true],[/\bRound Robin\b/gi,'輪詢',true],
+  [/\bPredictive scaling\b/gi,'預測性擴展',true],[/\bReactive scaling\b/gi,'被動擴展',true],
+  [/\bScaling Group\b/gi,'伸縮組',true],[/\bScaling Configuration\b/gi,'伸縮配置',true],
+  [/\bScaling Rules?\b/gi,'伸縮規則',true],[/\bCloudMonitor\b/gi,'雲端監控',true],
+  [/\bNo[- ]LB\b/gi,'沒有負載平衡器',true],[/\bLB\b/g,'負載平衡器',true],
+  [/\bECS\b/g,'ECS',true],[/\bSLB\b|\bALB\b|\bCLB\b/g,'負載平衡器',true],
+  [/\bCPU\b/g,'CPU',true],[/\bRAM\b/g,'RAM',true],[/\brps\b/gi,'每秒請求',true],
+  [/\bDynamic\b/gi,'動態模式',true],[/\bScheduled\b/gi,'定時模式',true],
+  [/\bFixed\b/gi,'固定數量模式',true],[/\bCustom\b/gi,'自訂模式',true],
+  [/\bPredictive\b/gi,'預測性',true],[/\bReactive\b/gi,'被動',true],
+  [/\bVertical\b/gi,'垂直',true],[/\bHorizontal\b/gi,'水平',true],
+  [/\bspike\b/gi,'高峰情境',true],[/\bdaily\b/gi,'每日情境',true],
+  [/\bnight\b/gi,'夜間情境',true],[/\btrend\b/gi,'趨勢情境',true],
+  [/\bviral\b/gi,'突發情境',true],[/\bforecast\b/gi,'預測',true],
+  [/\bInstance(s)?\b/gi,'實例',true],[/\bScenario\b/gi,'情境',true],
+  [/\bAvailability\b/gi,'可用度',true],[/\bCapacity\b/gi,'容量',true],
+  [/\bCooldown\b/gi,'冷卻時間',true],[/\bSpec\b/gi,'規格',true],
+  [/\bStep\b/gi,'步驟',true],[/\bAlert\b/gi,'警報',true],[/\bAlarm\b/gi,'警報',true],
+  [/\bImage\b/gi,'鏡像',true],[/\bConsole\b/gi,'主控台',true],
+  [/\bmin\b/gi,'分鐘',true],[/\bCost\b/gi,'成本',true],
+  [/\bGoals?\b/gi,'目標',true],[/\bScore\b/gi,'分數',true],
+  [/\bMission\b/gi,'任務',true],[/\bM\d+\b/g,'任務',true],
+  [/\bTarget\b/gi,'目標',true],[/\bPlan\b/gi,'方案',true],[/\bRun\b/gi,'執行',true],
+  [/\bConfirm\b/gi,'確認',true],[/\bReset code\b/gi,'重設程式碼',true],
+  [/\bCopy prompt\b/gi,'複製提示',true],[/\bQuick check\b/gi,'檢查理解',true],
+  [/\bHint\b/gi,'提示',true],[/\bS\b/g,'小型規格',true],
+  [/\bM\b/g,'中型規格',true],[/\bL\b/g,'大型規格',true]
 ];
 function englishText(text){
-  return text.replace(/[\u3400-\u9fff\uf900-\ufaff]/g,'').replace(/[，。；：、（）「」]/g,' ')
+  return text.replace(/[\u3400-\u9fff\uf900-\ufaff]+/g,' ').replace(/[，。；：、（）「」]/g,' ')
+    .replace(/(\d+)\.\s*[,;:!?]+\s*(?=[A-Za-z])/g,'$1. ')
+    .replace(/([.!?])(?:\s*[,;:!?]\s*)+(?=[A-Za-z])/g,'$1 ')
+    .replace(/\s+[?？]\s+(?=[A-Za-z])/g,' ')
     .replace(/(\d)[,?]+(?=\s*[A-Za-z])/g,'$1').replace(/\s+([,.;:!?])/g,'$1')
-    .replace(/^[\s,.;:!?]+/,'').replace(/\s{2,}/g,' ').trim();
+    .replace(/\s+[,;:]+\s+/g,' ').replace(/[,;:]{2,}/g,',')
+    .replace(/(\d)\.\?\s*(?=[A-Za-z])/g,'$1. ').replace(/([A-Za-z])\(/g,'$1 (')
+    .replace(/\(\s*\)/g,'').replace(/\(\s*(?=[,.;:!?]|$)/g,'')
+    .replace(/^\s*vs\.?\s+/i,'').replace(/^[\s.;:!?/]+/,'').replace(/[,;:]+\s*$/,'')
+    .replace(/[,.;:/]+$/g,'').replace(/\s{2,}/g,' ').trim();
 }
 function chineseText(text){
+  const hasChinese=/[\u3400-\u9fff\uf900-\ufaff]/.test(text);
   let localized=text;
-  glossary.forEach(pair=>{localized=localized.replace(pair[0],pair[1]);});
-  return localized.replace(/([。！？])\s*[A-Za-z][^。！？]*/g,'$1')
+  const keywords=[];
+  if(!hasChinese){
+    const term=text.trim();
+    for(const [pattern,translation,preserveEnglish] of glossary){
+      if(new RegExp('^(?:'+pattern.source+')$',pattern.flags.replace(/g/g,'')).test(term)){
+        return preserveEnglish&&translation!==term?translation+' ('+term+')':translation;
+      }
+    }
+  }
+  if(hasChinese){
+    glossary.forEach(([pattern,translation,preserveEnglish])=>{
+      localized=localized.replace(pattern,(match,...args)=>{
+        if(!preserveEnglish)return translation;
+        const offset=Number(args[args.length-2])||0,source=String(args[args.length-1]);
+        const english=match.replace(/\s*\(([^)]*)\)/,' / $1');
+        const prefix=source.slice(0,offset);
+        const alreadyTranslated=new RegExp(translation+'\\s*$').test(prefix);
+        const inTranslationParens=new RegExp(translation+'\\s*\\(\\s*$').test(prefix);
+        const term=alreadyTranslated
+          ?'('+english+')'
+          :inTranslationParens?english:translation===english?translation:translation+' ('+english+')';
+        const index=keywords.push(term)-1;
+        return '\uE000'+index+'\uE001';
+      });
+    });
+  }
+  localized=localized.replace(/([。！？])\s*[A-Za-z][^。！？]*/g,'$1')
     .replace(/[A-Za-z][A-Za-z0-9'().:\/=+*_-]*/g,'').replace(/([\u3400-\u9fff]+)\s+\1/g,'$1')
     .replace(/\(\s*\)/g,'').replace(/(^|[。！？])\s*[,;:/]+/g,'$1')
-    .replace(/\s{2,}/g,' ').trim();
+    .replace(/([。！？])\s*[,;:]+\s*/g,'$1').replace(/\s+[,;:]+\s*(?=[\u3400-\u9fff])/g,'')
+    .replace(/\s+[,;:]+\s+/g,' ')
+    .replace(/[,;:]+\s*$/,'').replace(/\(\s*(?=[，。；：、。！？]|$)/g,'')
+    .replace(/\s+\)/g,')').replace(/\s{2,}/g,' ').trim()
+    .replace(/\uE000(\d+)\uE001/g,(_,index)=>keywords[Number(index)])
+    .replace(/([\u3400-\u9fff]+)\s*\(([^)]+)\)\s*\(\s*\1\s*\)/g,'$1 ($2)');
+  return !hasChinese&&!/\d/.test(localized)?'':localized;
 }
 function localizeTextNodes(root=document.querySelector('main')){
   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(node){
     const parent=node.parentElement;
-    return parent&&!parent.closest('script,style,pre,code,textarea,[data-title-zh]')&&!parent.matches('#tab-m0 > h2,#tab-m1 > h2,#tab-m2 > h2,#tab-m3 > h2,#tab-m4 > h2')
-      &&node.nodeValue.trim()?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;
+    return parent&&!parent.closest('script,style,pre,code,textarea,a,[data-title-zh],[data-language-copy]')&&!parent.matches('#tab-m0 > h2,#tab-m1 > h2,#tab-m2 > h2,#tab-m3 > h2,#tab-m4 > h2')
+      &&(originalText.has(node)||node.nodeValue.trim())?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;
   }});
   const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
   nodes.forEach(node=>{
     if(!originalText.has(node))originalText.set(node,node.nodeValue);
     const source=originalText.get(node);
-    node.nodeValue=language==='en'?englishText(source):chineseText(source);
+    const localized=language==='en'?englishText(source):chineseText(source);
+    node.nodeValue=localized
+      ?(source[0].trim()?'':' ')+localized+(source[source.length-1].trim()?'':' ')
+      :'';
   });
 }
 function animateTab(tab){
@@ -731,6 +804,7 @@ function applyLanguage(){
   $('intro-kicker').textContent=copy.kicker;$('intro-title').textContent=copy.intro;
   $('progress-title').textContent=copy.progress;$('language-toggle').textContent=copy.toggle;
   copy.missions.forEach((title,i)=>document.querySelector('#tab-m'+i+' > h2').textContent=title);
+  document.querySelectorAll('[data-language-copy]').forEach(node=>{node.textContent=node.dataset[''+language];});
   buildNav();refresh();localizeTextNodes();
   document.querySelectorAll('[data-title-zh]').forEach(heading=>{heading.textContent=language==='zh'?heading.dataset.titleZh:heading.dataset.titleEn;});
   document.querySelectorAll('canvas').forEach(canvas=>{if(canvas._simResult)drawChart(canvas,canvas._simResult,canvas._simUpto||T);});
