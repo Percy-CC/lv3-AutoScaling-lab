@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-HK">
+<html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cloud Lab 10 · Auto Scaling Simulator 運算規模縮放模擬實驗</title>
+<title>Cloud Lab 10 · 彈性伸縮模擬實驗</title>
 <style>
 :root{--b:#1769d1;--g:#16856c;--r:#c33c4b;--o:#ffbf4a;--bg:#edf4fb;--card:#fff;--tx:#112239;--mut:#60728a;--line:#dbe4f0;--cyan:#51d5e8}
 *{box-sizing:border-box}
@@ -54,78 +54,77 @@ pre{background:#101820;color:#d6e2ee;padding:8px;border-radius:6px;overflow:auto
 </head>
 <body>
 <header>
-<div class="brand"><div class="brand-mark"><div class="cloud">☁</div><div><h1 id="page-title">運算規模縮放實驗室</h1><p class="subtitle" id="page-subtitle">Cloud Computing Lab · Auto Scaling Simulator</p></div></div><button class="language" id="language-toggle" type="button" aria-label="Switch language">English</button></div>
+<div class="brand"><div class="brand-mark"><div class="cloud">☁</div><div><h1 id="page-title" data-i18n data-zh="彈性伸縮實驗室" data-en="Auto Scaling Lab">彈性伸縮實驗室</h1><p class="subtitle" id="page-subtitle" data-i18n data-zh="雲端運算實驗 · 彈性伸縮模擬器" data-en="Cloud Computing Lab · Auto Scaling Simulator">雲端運算實驗 · 彈性伸縮模擬器</p></div></div><button class="language" id="language-toggle" type="button" data-i18n data-zh="English" data-en="繁體中文" data-zh-aria-label="切換至英文" data-en-aria-label="Switch to Traditional Chinese">English</button></div>
 </header>
 <nav id="nav"></nav>
 <main>
 
 <section class="tab" id="tab-intro">
 <div class="card intro-hero">
-<p class="eyebrow" id="intro-kicker">互動雲端運算實驗</p>
-<h2 id="intro-title">親手調整系統，找出最合適的擴展策略。</h2>
-<p>本實驗以模擬器重現講義內容:垂直 / 水平縮放、Load Balancing、Auto Scaling 四個設定步驟及四種伸縮模式,再加入 AI (Machine Learning) 流量預測。所有數據均為模擬值,不會連接任何雲端帳戶,亦不會產生費用。<br>
-This lab simulates the lecture content: vertical/horizontal scaling, load balancing, the four Auto Scaling setup steps and scaling modes, plus AI/ML traffic prediction. All numbers are simulated; no cloud account or charges involved.</p>
+<p class="eyebrow" id="intro-kicker" data-i18n data-zh="互動雲端運算實驗" data-en="Interactive cloud computing lab">互動雲端運算實驗</p>
+<h2 id="intro-title" data-i18n data-zh="親手調整系統，找出最合適的伸縮策略。" data-en="Tune the system and discover the right scaling strategy.">親手調整系統，找出最合適的伸縮策略。</h2>
+<p data-i18n data-zh="本實驗以模擬器重現講義內容：垂直伸縮、水平伸縮、負載均衡（Load Balancing）、彈性伸縮（Auto Scaling）的四個設定步驟及四種伸縮模式，再加入人工智能（AI）流量預測。所有數據均為模擬值，不會連接任何雲端帳戶，亦不會產生費用。" data-en="This lab simulates the lecture content: vertical scaling, horizontal scaling, load balancing, the four Auto Scaling setup steps, four scaling modes, and AI traffic prediction. All figures are simulated; no cloud account is connected and no charges are incurred.">本實驗以模擬器重現講義內容：垂直伸縮、水平伸縮、負載均衡（Load Balancing）、彈性伸縮（Auto Scaling）的四個設定步驟及四種伸縮模式，再加入人工智能（AI）流量預測。所有數據均為模擬值，不會連接任何雲端帳戶，亦不會產生費用。</p>
 </div>
 <div class="card">
-<h3>建議學習流程 Suggested learning path</h3>
+<h3 data-i18n data-zh="建議學習流程" data-en="Suggested learning path">建議學習流程</h3>
 <table>
-<tr><th>Mission</th><th>內容 Content</th><th>講義對應 Slides</th><th>時間 Time</th><th>分數 Points</th></tr>
-<tr><td>0</td><td>單一伺服器的極限 Limits of one server</td><td>Slide 3, 7</td><td>5 min</td><td>10</td></tr>
-<tr><td>1</td><td>垂直 vs 水平縮放 Scaling up vs out</td><td>Slide 5–7</td><td>10 min</td><td>20</td></tr>
-<tr><td>2</td><td>負載均衡 Load Balancing</td><td>Slide 10–11</td><td>10 min</td><td>20</td></tr>
-<tr><td>3</td><td>設定 Auto Scaling(四步驟)Four setup steps</td><td>Slide 9, 12–17</td><td>20 min</td><td>30</td></tr>
-<tr><td>4</td><td>AI 預測性伸縮 Predictive scaling</td><td>延伸 Extension</td><td>12 min</td><td>20</td></tr>
+<tr><th data-i18n data-zh="任務" data-en="Mission">任務</th><th data-i18n data-zh="內容" data-en="Content">內容</th><th data-i18n data-zh="講義對應" data-en="Slides">講義對應</th><th data-i18n data-zh="時間" data-en="Time">時間</th><th data-i18n data-zh="分數" data-en="Points">分數</th></tr>
+<tr><td>0</td><td data-i18n data-zh="單一伺服器的極限" data-en="One server's limit">單一伺服器的極限</td><td data-i18n data-zh="投影片 3、7" data-en="Slides 3, 7">投影片 3、7</td><td data-i18n data-zh="5 分鐘" data-en="5 min">5 分鐘</td><td>10</td></tr>
+<tr><td>1</td><td data-i18n data-zh="垂直伸縮與水平伸縮" data-en="Vertical vs. horizontal scaling">垂直伸縮與水平伸縮</td><td data-i18n data-zh="投影片 5–7" data-en="Slides 5–7">投影片 5–7</td><td data-i18n data-zh="10 分鐘" data-en="10 min">10 分鐘</td><td>20</td></tr>
+<tr><td>2</td><td data-i18n data-zh="負載均衡（Load Balancing）" data-en="Load balancing">負載均衡（Load Balancing）</td><td data-i18n data-zh="投影片 10–11" data-en="Slides 10–11">投影片 10–11</td><td data-i18n data-zh="10 分鐘" data-en="10 min">10 分鐘</td><td>20</td></tr>
+<tr><td>3</td><td data-i18n data-zh="設定彈性伸縮（Auto Scaling）的四個步驟" data-en="Four Auto Scaling setup steps">設定彈性伸縮（Auto Scaling）的四個步驟</td><td data-i18n data-zh="投影片 9、12–17" data-en="Slides 9, 12–17">投影片 9、12–17</td><td data-i18n data-zh="20 分鐘" data-en="20 min">20 分鐘</td><td>30</td></tr>
+<tr><td>4</td><td data-i18n data-zh="人工智能預測性伸縮" data-en="AI predictive scaling">人工智能預測性伸縮</td><td data-i18n data-zh="延伸" data-en="Extension">延伸</td><td data-i18n data-zh="12 分鐘" data-en="12 min">12 分鐘</td><td>20</td></tr>
 </table>
 </div>
 <div class="card">
-<h3 data-language-copy data-zh="模擬模型假設" data-en="Model assumptions">模擬模型假設</h3>
+<h3 data-i18n data-zh="模擬模型假設" data-en="Model assumptions">模擬模型假設</h3>
 <ul>
-<li data-language-copy data-zh="1 tick = 1 分鐘；每次模擬涵蓋 240 分鐘（15:00–19:00）。" data-en="1 tick = 1 minute. Each simulation run covers 240 minutes (15:00–19:00).">1 tick = 1 分鐘；每次模擬涵蓋 240 分鐘（15:00–19:00）。</li>
-<li data-language-copy data-zh="實例規格：S = 100 rps（$1/分鐘）、M = 200 rps（$1.9/分鐘）、L = 400 rps（$3.6/分鐘）。價格為虛構，並非阿里雲實際價格。" data-en="Instance specs: S = 100 rps ($1/min), M = 200 rps ($1.90/min), L = 400 rps ($3.60/min). Prices are fictional, not actual Alibaba Cloud prices.">實例規格：S = 100 rps（$1/分鐘）、M = 200 rps（$1.9/分鐘）、L = 400 rps（$3.6/分鐘）。價格為虛構，並非阿里雲實際價格。</li>
-<li data-language-copy data-zh="新實例需要 3 分鐘啟動；啟動期間亦會計費。" data-en="New instances take 3 minutes to start; billing begins during startup.">新實例需要 3 分鐘啟動；啟動期間亦會計費。</li>
-<li data-language-copy data-zh="負載平衡器約需 2 分鐘才會偵測到故障實例。" data-en="The Load Balancer takes about 2 minutes to detect a failed instance.">負載平衡器約需 2 分鐘才會偵測到故障實例。</li>
-<li data-language-copy data-zh="Round Robin 平均分配流量；Least Connections 在此模型中近似按實例容量比例分配。" data-en="Round Robin distributes traffic equally. Least Connections approximates capacity-weighted distribution in this model.">Round Robin 平均分配流量；Least Connections 在此模型中近似按實例容量比例分配。</li>
-<li data-language-copy data-zh="可用度 = 成功處理的請求 ÷ 總請求。" data-en="Availability = successfully served requests ÷ total requests.">可用度 = 成功處理的請求 ÷ 總請求。</li>
+<li data-i18n data-zh="1 tick = 1 分鐘；每次模擬涵蓋 240 分鐘（15:00–19:00）。" data-en="1 tick = 1 minute. Each simulation run covers 240 minutes (15:00–19:00).">1 tick = 1 分鐘；每次模擬涵蓋 240 分鐘（15:00–19:00）。</li>
+<li data-i18n data-zh="執行個體規格：S = 100 rps（$1/分鐘）、M = 200 rps（$1.9/分鐘）、L = 400 rps（$3.6/分鐘）。價格為虛構，並非阿里雲實際價格。" data-en="Instance specs: S = 100 rps ($1/min), M = 200 rps ($1.90/min), L = 400 rps ($3.60/min). Prices are fictional, not actual Alibaba Cloud prices.">執行個體規格：S = 100 rps（$1/分鐘）、M = 200 rps（$1.9/分鐘）、L = 400 rps（$3.6/分鐘）。價格為虛構，並非阿里雲實際價格。</li>
+<li data-i18n data-zh="新執行個體需要 3 分鐘啟動；啟動期間亦會計費。" data-en="New instances take 3 minutes to start; billing begins during startup.">新執行個體需要 3 分鐘啟動；啟動期間亦會計費。</li>
+<li data-i18n data-zh="負載均衡器約需 2 分鐘才會偵測到故障執行個體。" data-en="The Load Balancer takes about 2 minutes to detect a failed instance.">負載均衡器約需 2 分鐘才會偵測到故障執行個體。</li>
+<li data-i18n data-zh="Round Robin 平均分配流量；Least Connections 在此模型中近似按執行個體容量比例分配。" data-en="Round Robin distributes traffic equally. Least Connections approximates capacity-weighted distribution in this model.">Round Robin 平均分配流量；Least Connections 在此模型中近似按執行個體容量比例分配。</li>
+<li data-i18n data-zh="可用度 = 成功處理的請求 ÷ 總請求。" data-en="Availability = successfully served requests ÷ total requests.">可用度 = 成功處理的請求 ÷ 總請求。</li>
 </ul>
 </div>
 </section>
 
 <section class="tab" id="tab-progress">
-<h2 id="progress-title">學習進度</h2>
+<h2 id="progress-title" data-i18n data-zh="學習進度" data-en="Learning progress">學習進度</h2>
 <div class="card" id="scorebox"></div>
 </section>
 
 <section class="tab" id="tab-m0">
-<h2>Mission 0 · 單一伺服器的極限 One server's limit</h2>
+<h2 data-i18n data-zh="任務 0 · 單一伺服器的極限" data-en="Mission 0 · One server's limit">任務 0 · 單一伺服器的極限</h2>
 <div class="goals" id="goals-m0"></div>
 <div class="card">
-<p data-language-copy data-zh="情境（Scenario）：學校網站只有 1 台 S 規格伺服器（100 rps），放學後流量突然上升。" data-en="Scenario: A school website runs on one S instance (100 rps). Traffic jumps after school.">情境（Scenario）：學校網站只有 1 台 S 規格伺服器（100 rps），放學後流量突然上升。</p>
-<button class="act" id="m0run">▶ 執行模擬 Run</button>
+<p data-i18n data-zh="情境（Scenario）：學校網站只有 1 台 S 規格伺服器（100 rps），放學後流量突然上升。" data-en="Scenario: A school website runs on one S instance (100 rps). Traffic jumps after school.">情境（Scenario）：學校網站只有 1 台 S 規格伺服器（100 rps），放學後流量突然上升。</p>
+<button class="act" id="m0run" data-i18n data-zh="▶ 執行模擬" data-en="▶ Run simulation">▶ 執行模擬</button>
 <div id="out-m0"></div>
 </div>
 <div class="card" id="quiz-m0"></div>
 </section>
 
 <section class="tab" id="tab-m1">
-<h2>Mission 1 · 垂直縮放 vs 水平縮放 Scaling Up vs Scaling Out</h2>
+<h2 data-i18n data-zh="任務 1 · 垂直伸縮與水平伸縮" data-en="Mission 1 · Vertical vs. horizontal scaling">任務 1 · 垂直伸縮與水平伸縮</h2>
 <div class="goals" id="goals-m1"></div>
 <div class="card">
-<p data-language-copy data-zh="情境：流量高峰約 420 rps。第 100 分鐘（16:40）第一台伺服器發生故障。請分別用兩種方法應對，並比較可用度與成本。" data-en="Scenario: Peak traffic is about 420 rps. The first server fails at minute 100 (16:40). Try both approaches and compare their availability and cost.">情境：流量高峰約 420 rps。第 100 分鐘（16:40）第一台伺服器發生故障。請分別用兩種方法應對，並比較可用度與成本。</p>
-<label><input type="checkbox" id="m1fail" data-persist checked> 模擬第 100 分鐘故障 Simulate failure at minute 100</label>
+<p data-i18n data-zh="情境：流量高峰約 420 rps。第 100 分鐘（16:40）第一台伺服器發生故障。請分別用兩種方法應對，並比較可用度與成本。" data-en="Scenario: Peak traffic is about 420 rps. The first server fails at minute 100 (16:40). Try both approaches and compare their availability and cost.">情境：流量高峰約 420 rps。第 100 分鐘（16:40）第一台伺服器發生故障。請分別用兩種方法應對，並比較可用度與成本。</p>
+<label><input type="checkbox" id="m1fail" data-persist checked><span data-i18n data-zh=" 模擬第 100 分鐘故障" data-en=" Simulate a failure at minute 100"> 模擬第 100 分鐘故障</span></label>
 </div>
 <div class="grid2">
 <div class="card">
-<h3>A. 垂直縮放 Vertical (Scaling Up)</h3>
-<p class="mut">只有 1 台實例,改變規格。One instance, change its spec.</p>
-<label>規格 Spec <select id="m1vs" data-persist><option value="S">S</option><option value="M">M</option><option value="L" selected>L</option></select></label>
-<button class="act" id="m1v">▶ 執行 Run A</button>
+<h3 data-i18n data-zh="A · 垂直伸縮" data-en="A · Vertical scaling">A · 垂直伸縮</h3>
+<p class="mut" data-i18n data-zh="只有 1 個執行個體（instance），改變其規格。" data-en="Use one instance and change its specification.">只有 1 個執行個體（instance），改變其規格。</p>
+<label><span data-i18n data-zh="規格 " data-en="Specification ">規格 </span><select id="m1vs" data-persist><option value="S">S</option><option value="M">M</option><option value="L" selected>L</option></select></label>
+<button class="act" id="m1v" data-i18n data-zh="▶ 執行 A" data-en="▶ Run A">▶ 執行 A</button>
 </div>
 <div class="card">
-<h3>B. 水平縮放 Horizontal (Scaling Out)</h3>
-<p class="mut">多台實例 + Load Balancer。Several instances behind a load balancer.</p>
-<label>規格 Spec <select id="m1hs" data-persist><option value="S" selected>S</option><option value="M">M</option><option value="L">L</option></select></label>
-<label>實例數目 Instances <input type="number" id="m1hn" data-persist min="2" max="8" value="4"></label>
-<button class="act" id="m1h">▶ 執行 Run B</button>
+<h3 data-i18n data-zh="B · 水平伸縮" data-en="B · Horizontal scaling">B · 水平伸縮</h3>
+<p class="mut" data-i18n data-zh="多個執行個體（instance）置於負載均衡器（Load Balancer）後方。" data-en="Use several instances behind a load balancer.">多個執行個體（instance）置於負載均衡器（Load Balancer）後方。</p>
+<label><span data-i18n data-zh="規格 " data-en="Specification ">規格 </span><select id="m1hs" data-persist><option value="S" selected>S</option><option value="M">M</option><option value="L">L</option></select></label>
+<label><span data-i18n data-zh="執行個體數目 " data-en="Instance count ">執行個體數目 </span><input type="number" id="m1hn" data-persist min="2" max="8" value="4"></label>
+<button class="act" id="m1h" data-i18n data-zh="▶ 執行 B" data-en="▶ Run B">▶ 執行 B</button>
 </div>
 </div>
 <div class="card"><div id="cmp-m1"></div><div id="out-m1v"></div><div id="out-m1h"></div></div>
@@ -133,48 +132,48 @@ This lab simulates the lecture content: vertical/horizontal scaling, load balanc
 </section>
 
 <section class="tab" id="tab-m2">
-<h2>Mission 2 · 負載均衡 Load Balancing</h2>
+<h2 data-i18n data-zh="任務 2 · 負載均衡（Load Balancing）" data-en="Mission 2 · Load balancing">任務 2 · 負載均衡（Load Balancing）</h2>
 <div class="goals" id="goals-m2"></div>
 <div class="card">
-<p data-language-copy data-zh="情境：網站有 3 台伺服器（S、S、L），流量為 250–350 rps。比較沒有 Load Balancer、Round Robin 及 Least Connections 的效果。" data-en="Scenario: A website has three servers (S, S, L) and traffic of 250–350 rps. Compare no load balancer, Round Robin, and Least Connections.">情境：網站有 3 台伺服器（S、S、L），流量為 250–350 rps。比較沒有 Load Balancer、Round Robin 及 Least Connections 的效果。</p>
-<label>模式 Mode
+<p data-i18n data-zh="情境：網站有 3 台伺服器（S、S、L），流量為 250–350 rps。比較沒有 Load Balancer、Round Robin 及 Least Connections 的效果。" data-en="Scenario: A website has three servers (S, S, L) and traffic of 250–350 rps. Compare no load balancer, Round Robin, and Least Connections.">情境：網站有 3 台伺服器（S、S、L），流量為 250–350 rps。比較沒有 Load Balancer、Round Robin 及 Least Connections 的效果。</p>
+<label><span data-i18n data-zh="模式" data-en="Mode">模式</span>
 <select id="m2lb" data-persist>
-<option value="none">沒有 LB · No load balancer(只用第一台 first server only)</option>
-<option value="rr">Round Robin(平均分配 equal split)</option>
-<option value="lc">Least Connections(按容量 capacity-aware)</option>
+<option value="none" data-i18n data-zh="沒有負載均衡器 · 只使用第一台伺服器" data-en="No load balancer · first server only">沒有負載均衡器 · 只使用第一台伺服器</option>
+<option value="rr" data-i18n data-zh="Round Robin · 平均分配" data-en="Round Robin · equal split">Round Robin · 平均分配</option>
+<option value="lc" data-i18n data-zh="Least Connections · 按容量分配" data-en="Least Connections · capacity-aware">Least Connections · 按容量分配</option>
 </select></label>
-<label><input type="checkbox" id="m2fail" data-persist checked> 模擬第 100 分鐘第一台故障 Simulate failure of server #0 at minute 100</label>
-<button class="act" id="m2run">▶ 執行 Run</button>
-<p class="mut">三種模式都要在「有故障」下各執行一次。Run all three modes with failure enabled.</p>
+<label><input type="checkbox" id="m2fail" data-persist checked><span data-i18n data-zh=" 模擬第 100 分鐘第一台伺服器故障" data-en=" Simulate failure of server #0 at minute 100"> 模擬第 100 分鐘第一台伺服器故障</span></label>
+<button class="act" id="m2run" data-i18n data-zh="▶ 執行" data-en="▶ Run">▶ 執行</button>
+<p class="mut" data-i18n data-zh="三種模式都要在「有故障」下各執行一次。" data-en="Run each of the three modes with failure enabled.">三種模式都要在「有故障」下各執行一次。</p>
 </div>
 <div class="card"><div id="cmp-m2"></div><div id="out-m2"></div></div>
 <div class="card" id="quiz-m2"></div>
 </section>
 
 <section class="tab" id="tab-m3">
-<h2>Mission 3 · 設定 Auto Scaling · Four setup steps</h2>
+<h2 data-i18n data-zh="任務 3 · 設定彈性伸縮（Auto Scaling）的四個步驟" data-en="Mission 3 · Four Auto Scaling setup steps">任務 3 · 設定彈性伸縮（Auto Scaling）的四個步驟</h2>
 <div class="goals" id="goals-m3"></div>
 <div class="card">
-<p data-language-copy data-zh="按講義 Slide 13 的順序完成四個步驟，每步按「確認」。同一組設定會同時測試三個情境：" data-en="Follow the four steps in the order shown on Slide 13 and confirm each one. The same configuration will be tested in three scenarios:">按講義 Slide 13 的順序完成四個步驟，每步按「確認」。同一組設定會同時測試三個情境：</p>
+<p data-i18n data-zh="按講義 Slide 13 的順序完成四個步驟，每步按「確認」。同一組設定會同時測試三個情境：" data-en="Follow the four steps in the order shown on Slide 13 and confirm each one. The same configuration will be tested in three scenarios:">按講義 Slide 13 的順序完成四個步驟，每步按「確認」。同一組設定會同時測試三個情境：</p>
 <ul>
-<li><span class="tag">spike</span> 放學後突然高峰(動態模式 dynamic)</li>
-<li><span class="tag">daily</span> 每日 17:00–18:00 固定高峰(定時模式 scheduled)</li>
-<li><span class="tag">night</span> 夜間低流量 15 rps(Min Size 與成本 cost)</li>
+<li><span class="tag">spike</span><span data-i18n data-zh=" 放學後突然高峰（動態模式）" data-en=" Sudden after-school spike (dynamic mode)"> 放學後突然高峰（動態模式）</span></li>
+<li><span class="tag">daily</span><span data-i18n data-zh=" 每日 17:00–18:00 固定高峰（定時模式）" data-en=" Daily fixed peak from 17:00–18:00 (scheduled mode)"> 每日 17:00–18:00 固定高峰（定時模式）</span></li>
+<li><span class="tag">night</span><span data-i18n data-zh=" 夜間低流量 15 rps（最小執行個體數與成本）" data-en=" Night-time low traffic at 15 rps (minimum size and cost)"> 夜間低流量 15 rps（最小執行個體數與成本）</span></li>
 </ul>
-<p class="mut">提示:一個設定要兼顧三種情境時,可選「自訂模式 Custom」(動態 + 定時)。參考真實介面見「Console 參考」分頁。</p>
+<p class="mut" data-i18n data-zh="提示：一個設定要兼顧三種情境時，可選「自訂模式」（動態＋定時）。參考真實介面見「Console 參考」分頁。" data-en="Tip: Choose Custom mode (dynamic plus scheduled) when one configuration must cover all three scenarios. See the Console reference tab for the real interface.">提示：一個設定要兼顧三種情境時，可選「自訂模式」（動態＋定時）。參考真實介面見「Console 參考」分頁。</p>
 </div>
 
-<div class="card step" id="st1"><h3>步驟一 Step 1 · 創建伸縮組 Scaling Group</h3>
-<label>名稱 Name <input type="text" id="m3name" data-persist value="school-web-asg"></label>
-<label>最小實例數 Min Size <input type="number" id="m3min" data-persist min="0" max="5" value="1"></label>
-<label>最大實例數 Max Size <input type="number" id="m3max" data-persist min="1" max="10" value="5"></label>
-<label>冷卻時間 Cooldown(分鐘 min)<input type="number" id="m3cool" data-persist min="0" max="10" value="3"></label>
-<label><input type="checkbox" id="m3lb" data-persist> 將 Load Balancer 附加到伸縮組 Attach load balancer to the group</label>
-<button class="act sec" data-step="1">確認步驟一 Confirm</button> <span class="fb" id="sf1"></span></div>
+<div class="card step" id="st1"><h3 data-i18n data-zh="步驟 1 · 建立伸縮組" data-en="Step 1 · Create a scaling group">步驟 1 · 建立伸縮組</h3>
+<label><span data-i18n data-zh="名稱 " data-en="Name ">名稱 </span><input type="text" id="m3name" data-persist value="school-web-asg"></label>
+<label><span data-i18n data-zh="最小執行個體數 " data-en="Minimum size ">最小執行個體數 </span><input type="number" id="m3min" data-persist min="0" max="5" value="1"></label>
+<label><span data-i18n data-zh="最大執行個體數 " data-en="Maximum size ">最大執行個體數 </span><input type="number" id="m3max" data-persist min="1" max="10" value="5"></label>
+<label><span data-i18n data-zh="冷卻時間（分鐘） " data-en="Cooldown (minutes) ">冷卻時間（分鐘） </span><input type="number" id="m3cool" data-persist min="0" max="10" value="3"></label>
+<label><input type="checkbox" id="m3lb" data-persist><span data-i18n data-zh=" 將負載均衡器（Load Balancer）附加到伸縮組" data-en=" Attach the load balancer to the scaling group"> 將負載均衡器（Load Balancer）附加到伸縮組</span></label>
+<button class="act sec" data-step="1" data-i18n data-zh="確認步驟 1" data-en="Confirm step 1">確認步驟 1</button> <span class="fb" id="sf1"></span></div>
 
-<div class="card step" id="st2"><h3>步驟二 Step 2 · 創建伸縮配置 Scaling Configuration</h3>
-<label>新實例規格 Instance spec <select id="m3spec" data-persist><option value="S" selected>S · 100 rps · $1/min</option><option value="M">M · 200 rps · $1.9/min</option><option value="L">L · 400 rps · $3.6/min</option></select></label>
-<button class="act sec" data-step="2">確認步驟二 Confirm</button> <span class="fb" id="sf2"></span></div>
+<div class="card step" id="st2"><h3 data-i18n data-zh="步驟 2 · 建立伸縮配置" data-en="Step 2 · Create a scaling configuration">步驟 2 · 建立伸縮配置</h3>
+<label><span data-i18n data-zh="新執行個體規格 " data-en="New instance specification ">新執行個體規格 </span><select id="m3spec" data-persist><option value="S" selected data-i18n data-zh="S · 100 每秒請求 · $1/分鐘" data-en="S · 100 rps · $1/min">S · 100 每秒請求 · $1/分鐘</option><option value="M" data-i18n data-zh="M · 200 每秒請求 · $1.9/分鐘" data-en="M · 200 rps · $1.9/min">M · 200 每秒請求 · $1.9/分鐘</option><option value="L" data-i18n data-zh="L · 400 每秒請求 · $3.6/分鐘" data-en="L · 400 rps · $3.6/min">L · 400 每秒請求 · $3.6/分鐘</option></select></label>
+<button class="act sec" data-step="2" data-i18n data-zh="確認步驟 2" data-en="Confirm step 2">確認步驟 2</button> <span class="fb" id="sf2"></span></div>
 
 <div class="card step" id="st3"><h3>步驟三 Step 3 · 創建伸縮規則 Scaling Rules</h3>
 <label>伸縮模式 Mode
@@ -184,9 +183,9 @@ This lab simulates the lecture content: vertical/horizontal scaling, load balanc
 <option value="fixed">固定數量模式 Fixed(= Min Size)</option>
 <option value="custom" selected>自訂模式 Custom(動態 + 定時)</option>
 </select></label>
-<label>擴容時增加實例數 Scale-out step <input type="number" id="m3so" data-persist min="1" max="5" value="2"></label>
-<label>縮容時減少實例數 Scale-in step <input type="number" id="m3si" data-persist min="1" max="5" value="1"></label>
-<table><tr><th>定時任務 Scheduled task</th><th>時間 Time (HH:MM)</th><th>調整至實例數 Set count to</th></tr>
+<label>擴容時增加執行個體數 Scale-out step <input type="number" id="m3so" data-persist min="1" max="5" value="2"></label>
+<label>縮容時減少執行個體數 Scale-in step <input type="number" id="m3si" data-persist min="1" max="5" value="1"></label>
+<table><tr><th>定時任務 Scheduled task</th><th>時間 Time (HH:MM)</th><th>調整至執行個體數 Set count to</th></tr>
 <tr><td>#1</td><td><input type="text" id="m3t1" data-persist value="16:50" size="6"></td><td><input type="number" id="m3n1" data-persist min="0" max="10" value="4"></td></tr>
 <tr><td>#2</td><td><input type="text" id="m3t2" data-persist value="18:00" size="6"></td><td><input type="number" id="m3n2" data-persist min="0" max="10" value="1"></td></tr></table>
 <button class="act sec" data-step="3">確認步驟三 Confirm</button> <span class="fb" id="sf3"></span></div>
@@ -207,17 +206,17 @@ This lab simulates the lecture content: vertical/horizontal scaling, load balanc
 </section>
 
 <section class="tab" id="tab-m4">
-<h2>Mission 4 · AI 預測性伸縮 Predictive Scaling</h2>
+<h2 data-i18n data-zh="任務 4 · 人工智能預測性伸縮" data-en="Mission 4 · AI predictive scaling">任務 4 · 人工智能預測性伸縮</h2>
 <div class="goals" id="goals-m4"></div>
 <div class="card">
-<p data-language-copy data-zh="Reactive（被動）伸縮要等 CPU 超標才擴容；新實例需要 3 分鐘啟動，因此流量急升時會短暫出現容量不足。Predictive（預測性）伸縮根據過去流量預測 5 分鐘後的需求，提前擴容。" data-en="Reactive scaling waits for CPU to exceed the threshold, and new instances take 3 minutes to start. A sudden traffic increase can therefore cause a temporary capacity shortage. Predictive scaling forecasts demand 5 minutes ahead from past traffic and scales out in advance.">Reactive（被動）伸縮要等 CPU 超標才擴容；新實例需要 3 分鐘啟動，因此流量急升時會短暫出現容量不足。Predictive（預測性）伸縮根據過去流量預測 5 分鐘後的需求，提前擴容。</p>
-<p><span data-language-copy data-zh="預設的預測方法是移動平均（Moving Average），它只反映過去，所以會滯後。請修改 " data-en="The default prediction method is a moving average, which lags behind. Edit ">預設的預測方法是移動平均（Moving Average），它只反映過去，所以會滯後。請修改 </span><code>predict()</code><span data-language-copy data-zh="，令它在 " data-en=" to perform better on ">，令它在 </span><b>trend</b><span data-language-copy data-zh=" 情境表現更好；再於 " data-en=", then use "> 情境表現更好；再於 </span><b>viral</b><span data-language-copy data-zh="（突發爆紅）情境觀察預測何時失準。" data-en=" to observe when the forecast fails during a sudden surge.">（突發爆紅）情境觀察預測何時失準。</span></p>
-<label>情境 Scenario <select id="m4sc" data-persist><option value="trend">trend · 流量穩定上升 steady ramp-up</option><option value="viral">viral · 突發爆紅 sudden surge</option></select></label>
-<label><input type="checkbox" id="m4hy" data-persist> 預測 + Reactive 後備(safety net)Predictive + reactive fallback</label>
+<p data-i18n data-zh="Reactive（被動）伸縮要等 CPU 超標才擴容；新執行個體需要 3 分鐘啟動，因此流量急升時會短暫出現容量不足。Predictive（預測性）伸縮根據過去流量預測 5 分鐘後的需求，提前擴容。" data-en="Reactive scaling waits for CPU to exceed the threshold, and new instances take 3 minutes to start. A sudden traffic increase can therefore cause a temporary capacity shortage. Predictive scaling forecasts demand 5 minutes ahead from past traffic and scales out in advance.">Reactive（被動）伸縮要等 CPU 超標才擴容；新執行個體需要 3 分鐘啟動，因此流量急升時會短暫出現容量不足。Predictive（預測性）伸縮根據過去流量預測 5 分鐘後的需求，提前擴容。</p>
+<p><span data-i18n data-zh="預設的預測方法是移動平均（Moving Average），它只反映過去，所以會滯後。請修改 " data-en="The default prediction method is a moving average, which lags behind. Edit ">預設的預測方法是移動平均（Moving Average），它只反映過去，所以會滯後。請修改 </span><code>predict()</code><span data-i18n data-zh="，令它在 " data-en=" to perform better on ">，令它在 </span><b>trend</b><span data-i18n data-zh=" 情境表現更好；再於 " data-en=", then use ">情境表現更好；再於 </span><b>viral</b><span data-i18n data-zh="（突發爆紅）情境觀察預測何時失準。" data-en=" to observe when the forecast fails during a sudden surge.">（突發爆紅）情境觀察預測何時失準。</span></p>
+<label><span data-i18n data-zh="情境 " data-en="Scenario ">情境 </span><select id="m4sc" data-persist><option value="trend" data-i18n data-zh="trend · 流量穩定上升" data-en="trend · steady ramp-up">trend · 流量穩定上升</option><option value="viral" data-i18n data-zh="viral · 突發爆紅" data-en="viral · sudden surge">viral · 突發爆紅</option></select></label>
+<label><input type="checkbox" id="m4hy" data-persist><span data-i18n data-zh=" 預測性伸縮＋被動伸縮後備" data-en=" Predictive scaling with reactive fallback"> 預測性伸縮＋被動伸縮後備</span></label>
 <textarea id="m4code" data-persist class="code" style="height:190px" spellcheck="false"></textarea>
-<button class="act" id="m4run">▶ 比較 Reactive vs Predictive</button>
-<button class="act sec" id="m4reset">重設程式碼 Reset code</button>
-<button class="act sec" id="m4ai">複製 AI Prompt Copy prompt</button>
+<button class="act" id="m4run" data-i18n data-zh="▶ 比較被動與預測性伸縮" data-en="▶ Compare reactive and predictive scaling">▶ 比較被動與預測性伸縮</button>
+<button class="act sec" id="m4reset" data-i18n data-zh="重設程式碼" data-en="Reset code">重設程式碼</button>
+<button class="act sec" id="m4ai" data-i18n data-zh="複製 AI 提示" data-en="Copy AI prompt">複製 AI 提示</button>
 <span class="fb" id="m4msg"></span>
 <p class="mut">注意:無限迴圈會令瀏覽器分頁停頓,執行前請避免 while(true)。Avoid infinite loops; they will freeze the tab.</p>
 <details><summary>提示 Hint 1</summary><p>用最近 6 筆數據的變化量計算每分鐘增長率 slope,再用「最新值 + slope × 5」預測 5 分鐘後。Use the change over the last 6 samples as slope; predict latest + slope × 5.</p></details>
@@ -228,7 +227,7 @@ This lab simulates the lecture content: vertical/horizontal scaling, load balanc
 </section>
 
 <section class="tab" id="tab-console">
-<h2>Console 參考 Real Cloud Console Reference</h2>
+<h2 data-i18n data-zh="Console 參考" data-en="Cloud console reference">Console 參考</h2>
 <div class="card">
 <p>以下欄位對應阿里雲 Auto Scaling 主控台。將截圖放入 <code>img/</code> 資料夾(檔名如下),頁面會自動顯示。官方文件 Official docs:
 <a href="https://www.alibabacloud.com/help/zh/auto-scaling/latest/scale-ecs-instances" target="_blank" rel="noopener">scale-ecs-instances</a>。
@@ -236,14 +235,14 @@ This lab simulates the lecture content: vertical/horizontal scaling, load balanc
 </div>
 <div id="shots"></div>
 <div class="card">
-<h3>模擬器欄位與真實介面對照 Field mapping</h3>
+<h3 data-i18n data-zh="模擬器欄位與真實介面對照" data-en="Simulator-to-console field mapping">模擬器欄位與真實介面對照</h3>
 <table>
 <tr><th>模擬器 Simulator</th><th>真實雲端概念 Real console concept</th></tr>
-<tr><td>Min / Max Size, Cooldown</td><td>伸縮組 Scaling group 的最小/最大實例數、冷卻時間</td></tr>
-<tr><td>附加 Load Balancer</td><td>伸縮組關聯 SLB / ALB / CLB,新實例才會加入後端伺服器組</td></tr>
-<tr><td>實例規格</td><td>伸縮配置 Scaling configuration(實例類型 + 鏡像 Image)</td></tr>
-<tr><td>擴容 / 縮容實例數</td><td>伸縮規則 Scaling rule(例如增加 N 台 / 減少 N 台)</td></tr>
-<tr><td>CPU 閾值 + 連續分鐘</td><td>警報任務 Alarm / event-triggered task(雲監控 CloudMonitor 指標)</td></tr>
+<tr><td>Min / Max Size, Cooldown</td><td>伸縮組 Scaling group 的最小/最大執行個體數、冷卻時間</td></tr>
+<tr><td>附加 Load Balancer</td><td>伸縮組關聯 SLB / ALB / CLB,新執行個體才會加入後端伺服器組</td></tr>
+<tr><td>執行個體規格</td><td>伸縮配置 Scaling configuration(執行個體類型 + 鏡像 Image)</td></tr>
+<tr><td>擴容 / 縮容執行個體數</td><td>伸縮規則 Scaling rule(例如增加 N 台 / 減少 N 台)</td></tr>
+<tr><td>CPU 閾值 + 連續分鐘</td><td>警報任務 Alarm / event-triggered task（雲監控（CloudMonitor）指標）</td></tr>
 <tr><td>定時任務</td><td>定時任務 Scheduled task</td></tr>
 <tr><td>Predictive</td><td>預測性伸縮規則 Predictive scaling rule(官方建議先只預測不執行,驗證後才啟用)</td></tr>
 </table>
@@ -259,7 +258,7 @@ This lab simulates the lecture content: vertical/horizontal scaling, load balanc
 //SIM-START
 const SALT = 'cc10-lab-v1';
 const SUBMIT_ENDPOINT = '';
-const T = 240, START_MIN = 900, BOOT = 3, DETECT = 2;
+const SIM_T = 240, START_MIN = 900, BOOT = 3, DETECT = 2;
 const SPECS = { S:{cap:100, price:1}, M:{cap:200, price:1.9}, L:{cap:400, price:3.6} };
 
 function fnv(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
@@ -287,7 +286,7 @@ function baseLoad(name,t){
 }
 function makeTraffic(name,seed){
   const r=rng(seed),a=[];
-  for(let t=0;t<T;t++){a.push(Math.max(1,baseLoad(name,t)*(1+(r()-0.5)*0.08)));}
+  for(let t=0;t<SIM_T;t++){a.push(Math.max(1,baseLoad(name,t)*(1+(r()-0.5)*0.08)));}
   return a;
 }
 
@@ -299,12 +298,12 @@ function simulate(cfg,traffic){
   const series={load:[],served:[],cap:[],run:[],total:[]};
   const events=[];
   let cost=0,lastAct=-999,over=0,under=0,sumLoad=0,sumServed=0,overMin=0,peak=0,predErr=false;
-  const ev=(t,m)=>events.push(fmtTime(t)+'  '+m);
+  const ev=(t,zh,en)=>events.push({time:fmtTime(t),zh:zh,en:en});
   const healthy=(i,t)=>i.readyAt<=t&&!i.failed;
-  for(let t=0;t<T;t++){
+  for(let t=0;t<SIM_T;t++){
     if(cfg.fail&&t===cfg.fail.at){
       const x=inst[cfg.fail.idx];
-      if(x&&!x.removed){x.failed=true;x.failedAt=t;ev(t,'故障 Instance #'+x.id+' failed');}
+      if(x&&!x.removed){x.failed=true;x.failedAt=t;ev(t,'執行個體 #'+x.id+' 故障','Instance #'+x.id+' failed');}
     }
     const load=traffic[t];
     const act=inst.filter(i=>!i.removed);
@@ -328,18 +327,18 @@ function simulate(cfg,traffic){
     if(act.length>peak)peak=act.length;
 
     if(asg){
-      inst.forEach(i=>{if(i.failed&&!i.removed&&t-i.failedAt>=DETECT){i.removed=true;ev(t,'移除故障實例 Removed unhealthy #'+i.id);}});
+      inst.forEach(i=>{if(i.failed&&!i.removed&&t-i.failedAt>=DETECT){i.removed=true;ev(t,'移除故障執行個體 #'+i.id,'Removed unhealthy instance #'+i.id);}});
       const cnt=()=>inst.filter(i=>!i.removed&&!i.failed).length;
       const booting=()=>inst.some(i=>!i.removed&&!i.failed&&i.readyAt>t);
       const addN=(n,why)=>{n=Math.min(n,asg.max-cnt());if(n<=0)return 0;
         for(let k=0;k<n;k++)add(asg.spec,t+BOOT);
-        ev(t,'擴容 Scale out +'+n+' ('+why+') → '+cnt());return n;};
+        ev(t,'擴容 +'+n+'（'+why+'）→ '+cnt(),'Scale out +'+n+' ('+why+') → '+cnt());return n;};
       const rmN=(n,why)=>{let r=0;
         while(r<n&&cnt()>asg.min){
           const c=inst.filter(i=>!i.removed&&!i.failed).sort((a,b)=>b.id-a.id)[0];
           c.removed=true;r++;
         }
-        if(r)ev(t,'縮容 Scale in −'+r+' ('+why+') → '+cnt());return r;};
+        if(r)ev(t,'縮容 −'+r+'（'+why+'）→ '+cnt(),'Scale in −'+r+' ('+why+') → '+cnt());return r;};
       if(cnt()<asg.min)addN(asg.min-cnt(),'min size');
       const mode=asg.mode;
       if(mode==='dynamic'||mode==='custom'||asg.hybrid){
@@ -357,7 +356,7 @@ function simulate(cfg,traffic){
       }
       if(mode==='predictive'){
         let p;
-        try{p=asg.predictFn(traffic.slice(0,t+1));}catch(e){p=NaN;if(!predErr){predErr=true;ev(t,'predict() 錯誤 error: '+e.message);}}
+        try{p=asg.predictFn(traffic.slice(0,t+1));}catch(e){p=NaN;if(!predErr){predErr=true;ev(t,'predict() 錯誤：'+e.message,'predict() error: '+e.message);}}
         if(typeof p!=='number'||!isFinite(p)){p=load;}
         const cap=SPECS[asg.spec].cap;
         const want=Math.max(asg.min,Math.min(asg.max,Math.ceil(Math.max(0,p)/(cap*0.7))));
@@ -399,103 +398,72 @@ function num(id,def,lo,hi){let v=parseFloat($(id).value);if(!isFinite(v))v=def;r
 
 function drawChart(cv,r,upto){
   if(!cv)return;
-  const c=cv.getContext('2d'),W=cv.width,H=cv.height,L=52,R=14,pw=W-L-R;
+  const c=cv.getContext('2d'),W=cv.width,H=cv.height,LEFT=52,R=14,pw=W-LEFT-R;
   c.clearRect(0,0,W,H);
   const s=r.series,top=18,b1=210,t2=236,b2=H-22;
   const ymax=Math.max.apply(null,s.load.concat(s.cap))*1.1;
-  const X=t=>L+t*pw/T,Y=v=>b1-(v/ymax)*(b1-top);
+  const X=t=>LEFT+t*pw/SIM_T,Y=v=>b1-(v/ymax)*(b1-top);
   c.font='11px sans-serif';c.fillStyle='#667';c.strokeStyle='#e3e8ee';c.lineWidth=1;
-  for(let k=0;k<=4;k++){const v=ymax*k/4,y=Y(v);c.beginPath();c.moveTo(L,y);c.lineTo(W-R,y);c.stroke();c.fillText(Math.round(v)+'',6,y+4);}
-  for(let t=0;t<=T;t+=30){c.fillText(fmtTime(Math.min(t,T-1)),X(t)-14,H-6);}
+  for(let k=0;k<=4;k++){const v=ymax*k/4,y=Y(v);c.beginPath();c.moveTo(LEFT,y);c.lineTo(W-R,y);c.stroke();c.fillText(Math.round(v)+'',6,y+4);}
+  for(let t=0;t<=SIM_T;t+=30){c.fillText(fmtTime(Math.min(t,SIM_T-1)),X(t)-14,H-6);}
   c.fillStyle='rgba(220,50,50,0.45)';
-  for(let t=0;t<upto;t++){if(s.load[t]>s.served[t]){const y1=Y(s.load[t]),y2=Y(s.served[t]);c.fillRect(X(t),y1,pw/T+0.5,y2-y1);}}
+  for(let t=0;t<upto;t++){if(s.load[t]>s.served[t]){const y1=Y(s.load[t]),y2=Y(s.served[t]);c.fillRect(X(t),y1,pw/SIM_T+0.5,y2-y1);}}
   const line=(arr,col,w,step)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();
     for(let t=0;t<upto;t++){const y=Y(arr[t]);if(t===0)c.moveTo(X(t),y);else{if(step)c.lineTo(X(t),Y(arr[t-1]));c.lineTo(X(t),y);}}c.stroke();};
   line(s.cap,'#00a05a',2,true);line(s.load,'#0070c0',1.6,false);
   const imax=Math.max.apply(null,s.total)+1,Y2=v=>b2-(v/imax)*(b2-t2);
-  c.strokeStyle='#cdd6df';c.strokeRect(L,t2,pw,b2-t2);
+  c.strokeStyle='#cdd6df';c.strokeRect(LEFT,t2,pw,b2-t2);
   const iline=(arr,col)=>{c.strokeStyle=col;c.lineWidth=2;c.beginPath();
     for(let t=0;t<upto;t++){const y=Y2(arr[t]);if(t===0)c.moveTo(X(t),y);else{c.lineTo(X(t),Y2(arr[t-1]));c.lineTo(X(t),y);}}c.stroke();};
   iline(s.total,'#e8890c');iline(s.run,'#00a05a');
-  const labels=language==='zh'
-    ?['● 流量（每秒請求）','● 容量','■ 未處理','● 實例總數','● 運行中']
-    :['● Load (rps)','● Capacity','■ Dropped','● Instances','● Running'];
-  c.fillStyle='#0070c0';c.fillText(labels[0],L+6,12);
-  c.fillStyle='#00a05a';c.fillText(labels[1],L+150,12);
-  c.fillStyle='#d33';c.fillText(labels[2],L+250,12);
-  c.fillStyle='#e8890c';c.fillText(labels[3],L+355,12);
-  c.fillStyle='#00a05a';c.fillText(labels[4],L+485,12);
+  const labels=[L('● 流量（每秒請求）','● Load (rps)'),L('● 容量','● Capacity'),L('■ 未處理','■ Dropped'),L('● 執行個體總數','● Instances'),L('● 運行中','● Running')];
+  c.fillStyle='#0070c0';c.fillText(labels[0],LEFT+6,12);
+  c.fillStyle='#00a05a';c.fillText(labels[1],LEFT+150,12);
+  c.fillStyle='#d33';c.fillText(labels[2],LEFT+250,12);
+  c.fillStyle='#e8890c';c.fillText(labels[3],LEFT+355,12);
+  c.fillStyle='#00a05a';c.fillText(labels[4],LEFT+485,12);
 }
 function runHtml(r,title,id){
   const ok=r.avail>=0.99;
   return '<div class="runbox"><h4>'+title+'</h4><canvas id="'+id+'" width="900" height="330"></canvas>'+
-  '<div class="metrics"><div>可用度 Availability <b class="'+(ok?'ok':'bad')+'">'+pct(r.avail)+'</b></div>'+
-  '<div>成本 Cost <b>$'+Math.round(r.cost)+'</b></div>'+
-  '<div>超載分鐘 Overload min <b>'+r.over+'</b></div>'+
-  '<div>最多實例 Peak instances <b>'+r.peak+'</b></div>'+
-  '<div>失敗請求 Dropped <b>'+r.dropped.toLocaleString()+'</b></div></div>'+
-  '<details><summary>事件記錄 Event log ('+r.events.length+')</summary><pre>'+(r.events.join('\n')||'(無 none)')+'</pre></details></div>';
+  '<div class="metrics"><div>'+T('可用度','Availability')+' <b class="'+(ok?'ok':'bad')+'">'+pct(r.avail)+'</b></div>'+
+  '<div>'+T('成本','Cost')+' <b>$'+Math.round(r.cost)+'</b></div>'+
+  '<div>'+T('超載分鐘','Overload minutes')+' <b>'+r.over+'</b></div>'+
+  '<div>'+T('最多執行個體','Peak instances')+' <b>'+r.peak+'</b></div>'+
+  '<div>'+T('失敗請求','Dropped requests')+' <b>'+r.dropped.toLocaleString()+'</b></div></div>'+
+  '<details><summary>'+T('事件記錄','Event log')+' ('+r.events.length+')</summary><pre>'+(r.events.map(event=>typeof event==='string'?T(event,event):T(event.time+'  '+event.zh,event.time+'  '+event.en)).join('\n')||T('(無)','(none)'))+'</pre></details></div>';
 }
-function renderRun(box,r,title,animate){
+function renderRun(box,r,titleObj,animate){
   const id='cv'+Math.random().toString(36).slice(2,9);
-  const englishTitle=englishText(title.replace(/^Mission (\d+)/,(match,index)=>UI.en.missions[+index]));
-  const chineseTitle=chineseText(title.replace(/^Mission (\d+)/,(match,index)=>UI.zh.missions[+index]));
-  box.innerHTML=runHtml(r,language==='zh'?chineseTitle:englishTitle,id);
-  const heading=box.querySelector('h4');
-  heading.dataset.titleZh=chineseTitle;
-  heading.dataset.titleEn=englishTitle;
+  box.innerHTML=runHtml(r,T(titleObj.zh,titleObj.en),id);
   const canvas=$(id);canvas._simResult=r;
-  if(!animate){canvas._simUpto=T;drawChart(canvas,r,T);return;}
+  if(!animate){canvas._simUpto=SIM_T;drawChart(canvas,r,SIM_T);return;}
   let u=0;canvas._simUpto=0;drawChart(canvas,r,0);
-  const h=setInterval(()=>{u+=10;canvas._simUpto=Math.min(u,T);drawChart(canvas,r,canvas._simUpto);if(u>=T)clearInterval(h);},18);
+  const h=setInterval(()=>{u+=10;canvas._simUpto=Math.min(u,SIM_T);drawChart(canvas,r,canvas._simUpto);if(u>=SIM_T)clearInterval(h);},18);
 }
 
 const QUIZ={
-m0:[{q:'單一伺服器收到的流量超過其容量時,超出部分會怎樣? What happens to traffic above one server\'s capacity?',
- o:['自動變快 It speeds up','部分請求失敗或逾時 Some requests fail or time out','成本自動下降 Cost drops'],a:1,
- e:'容量是硬上限,多出的請求會失敗或逾時。Capacity is a hard limit.'}],
-m1:[{q:'垂直縮放的主要限制是什麼? Main limits of vertical scaling?',
- o:['單一實例有規格上限,且是單點故障 There is a max spec and a single point of failure','不能改變 CPU / RAM Cannot change CPU/RAM','必須使用 Load Balancer Requires a load balancer'],a:0,
- e:'實驗中 L 規格仍低於 420 rps 高峰,且故障後整個網站停止。'},
- {q:'水平縮放為什麼需要 Load Balancer? Why does horizontal scaling need a load balancer?',
- o:['加密流量 Encrypt traffic','把流量分配給多台實例 Distribute traffic across instances','備份資料 Back up data'],a:1,
- e:'沒有 LB,用戶只會連到其中一台實例。'}],
-m2:[{q:'實例規格不同時,Round Robin 的問題是什麼? Problem of Round Robin with mixed specs?',
- o:['平均分配,小實例先超載 Equal split overloads small instances first','速度太快 Too fast','不能用於 HTTP Cannot be used with HTTP'],a:0,
- e:'S 與 L 收到同樣流量,L 的容量被浪費。'},
- {q:'Load Balancer 的健康檢查 (health check) 有什麼作用? Purpose of health check?',
- o:['增加 CPU Increase CPU','把流量移離故障實例 Stop sending traffic to failed instances','降低價格 Lower price'],a:1,
- e:'本模擬有約 2 分鐘偵測延遲,期間部分請求仍會失敗。'}],
-m3:[{q:'依講義,Auto Scaling 本身是否收費? Per the slides, is Auto Scaling itself charged?',
- o:['收費 Charged','免費,但自動建立的 ECS 實例按量付費 Free, but ECS instances it creates are pay-as-you-go','永久免費,包括實例 Everything is free'],a:1,
- e:'參考講義 Slide 3。'},
- {q:'Min Size 的作用是什麼? What does Min Size do?',
- o:['保證至少有這個數量的運行實例 Keeps at least this many instances running','限制 CPU 最高值 Caps CPU','限制每日費用 Caps daily cost'],a:0,
- e:'Min Size 太大會在夜間浪費成本;太小則高峰來臨時容量不足。'},
- {q:'沒有把 Load Balancer 附加到伸縮組,新實例會怎樣? If no load balancer is attached, new instances will…',
- o:['照樣收到流量 Still receive traffic','啟動並計費,但收不到流量 Start and bill but receive no traffic','自動刪除 Be deleted'],a:1,
- e:'這是常見的設定錯誤。'}],
-m4:[{q:'預測性伸縮最適合哪種流量? Predictive scaling suits which traffic?',
- o:['有規律或穩定趨勢的流量 Regular or steady-trend traffic','完全無法預料的突發流量 Totally unpredictable surges','零流量 Zero traffic'],a:0,
- e:'預測依賴歷史數據,突發事件(viral)不在歷史之中。'},
- {q:'為什麼官方建議先用「只預測不執行」模式驗證? Why validate a forecast before letting it scale?',
- o:['因為預測可能不準,先檢查可避免浪費或容量不足 Forecasts can be wrong; checking avoids waste or shortage','因為預測會令實例收費 Forecasting is billed','因為 Load Balancer 要求 LB requires it'],a:0,
- e:'預測規則亦需要至少 24 小時監控數據才能產生預測。'}]
+m0:[{q:{zh:'單一伺服器收到的流量超過其容量時，超出部分會怎樣？',en:'What happens to traffic above one server\'s capacity?'},
+ o:[{zh:'自動變快',en:'It speeds up'},{zh:'部分請求失敗或逾時',en:'Some requests fail or time out'},{zh:'成本自動下降',en:'Cost drops'}],a:1,e:{zh:'容量是硬上限，多出的請求會失敗或逾時。',en:'Capacity is a hard limit; excess requests fail or time out.'}}],
+m1:[{q:{zh:'垂直伸縮的主要限制是甚麼？',en:'What are the main limits of vertical scaling?'},o:[{zh:'單一執行個體有規格上限，且是單點故障',en:'One instance has a specification limit and is a single point of failure'},{zh:'不能改變 CPU／RAM',en:'CPU and RAM cannot be changed'},{zh:'必須使用負載均衡器',en:'It requires a load balancer'}],a:0,e:{zh:'L 規格仍低於 420 rps 高峰，故障後整個網站亦會停止。',en:'Even L is below the 420 rps peak, and one failure stops the whole site.'}},{q:{zh:'水平伸縮為何需要負載均衡器？',en:'Why does horizontal scaling need a load balancer?'},o:[{zh:'加密流量',en:'Encrypt traffic'},{zh:'把流量分配給多個執行個體',en:'Distribute traffic across instances'},{zh:'備份資料',en:'Back up data'}],a:1,e:{zh:'沒有負載均衡器，用戶只會連到其中一個執行個體。',en:'Without a load balancer, users connect to only one instance.'}}],
+m2:[{q:{zh:'執行個體規格不同時，Round Robin 有甚麼問題？',en:'What is the problem with Round Robin and mixed specifications?'},o:[{zh:'平均分配會令小執行個體先超載',en:'Equal splitting overloads smaller instances first'},{zh:'速度太快',en:'It is too fast'},{zh:'不能用於 HTTP',en:'It cannot be used with HTTP'}],a:0,e:{zh:'S 與 L 收到相同流量，L 的容量因而被浪費。',en:'S and L receive the same traffic, wasting L capacity.'}},{q:{zh:'負載均衡器的健康檢查有甚麼作用？',en:'What is the purpose of load balancer health checks?'},o:[{zh:'增加 CPU',en:'Increase CPU'},{zh:'停止把流量送到故障執行個體',en:'Stop sending traffic to failed instances'},{zh:'降低價格',en:'Lower price'}],a:1,e:{zh:'本模擬有約 2 分鐘偵測延遲，期間部分請求仍會失敗。',en:'This simulation has about a two-minute detection delay, during which requests can still fail.'}}],
+m3:[{q:{zh:'依講義，彈性伸縮本身是否收費？',en:'According to the slides, is Auto Scaling itself charged?'},o:[{zh:'收費',en:'Charged'},{zh:'免費，但自動建立的 ECS 執行個體按量付費',en:'Free, but the ECS instances it creates are pay-as-you-go'},{zh:'永久免費，包括執行個體',en:'Everything is permanently free, including instances'}],a:1,e:{zh:'參考投影片 3。',en:'See Slide 3.'}},{q:{zh:'最小執行個體數的作用是甚麼？',en:'What does the minimum size do?'},o:[{zh:'保證至少有這個數量的運行執行個體',en:'Keeps at least this many instances running'},{zh:'限制 CPU 最高值',en:'Caps CPU'},{zh:'限制每日費用',en:'Caps daily cost'}],a:0,e:{zh:'最小值太大會在夜間浪費成本；太小則高峰時容量不足。',en:'A large minimum wastes money at night; a small one lacks peak capacity.'}},{q:{zh:'未把負載均衡器附加到伸縮組時，新執行個體會怎樣？',en:'What happens when no load balancer is attached to the scaling group?'},o:[{zh:'照樣收到流量',en:'Still receive traffic'},{zh:'啟動並計費，但收不到流量',en:'Start and bill, but receive no traffic'},{zh:'自動刪除',en:'Be deleted automatically'}],a:1,e:{zh:'這是常見的設定錯誤。',en:'This is a common configuration error.'}}],
+m4:[{q:{zh:'預測性伸縮最適合哪種流量？',en:'Which traffic best suits predictive scaling?'},o:[{zh:'有規律或穩定趨勢的流量',en:'Regular or steady-trend traffic'},{zh:'完全無法預料的突發流量',en:'Totally unpredictable surges'},{zh:'零流量',en:'Zero traffic'}],a:0,e:{zh:'預測依賴歷史數據，突發事件不在歷史之中。',en:'Forecasts rely on history; sudden events are not in it.'}},{q:{zh:'為何應先以「只預測、不執行」模式驗證？',en:'Why validate a forecast before letting it scale?'},o:[{zh:'預測可能不準，先檢查可避免浪費或容量不足',en:'Forecasts can be wrong; checking avoids waste or shortages'},{zh:'預測會令執行個體收費',en:'Forecasting bills instances'},{zh:'負載均衡器要求這樣做',en:'The load balancer requires it'}],a:0,e:{zh:'預測規則亦需要至少 24 小時監控數據才能產生預測。',en:'Predictive rules also need at least 24 hours of monitoring data.'}}]
 };
 function renderQuiz(mid){
-  const box=$('quiz-'+mid);let h='<h3>檢查理解 Quick check</h3>';
+  const box=$('quiz-'+mid);let h='<h3>'+T('檢查理解','Quick check')+'</h3>';
   QUIZ[mid].forEach((q,i)=>{
     const k=mid+'q'+i,sel=S.quiz[k];
-    h+='<div class="q"><p>'+(i+1)+'. '+q.q+'</p>';
-    q.o.forEach((o,j)=>{h+='<label><input type="radio" name="'+k+'" value="'+j+'"'+(sel===j?' checked':'')+'> '+o+'</label>';});
-    h+='<span class="fb" id="fb-'+k+'">'+(sel===undefined?'':(sel===q.a?'<span class="ok">✔ '+q.e+'</span>':'<span class="bad">✖ 再想想 Try again</span>'))+'</span></div>';
+    h+='<div class="q"><p>'+(i+1)+'. '+T(q.q.zh,q.q.en)+'</p>';
+    q.o.forEach((o,j)=>{h+='<label><input type="radio" name="'+k+'" value="'+j+'"'+(sel===j?' checked':'')+'> '+T(o.zh,o.en)+'</label>';});
+    h+='<span class="fb" id="fb-'+k+'">'+(sel===undefined?'':(sel===q.a?'<span class="ok">✔ '+T(q.e.zh,q.e.en)+'</span>':'<span class="bad">✖ '+T('再想想','Try again')+'</span>'))+'</span></div>';
   });
   box.innerHTML=h;
   box.querySelectorAll('input[type=radio]').forEach(inp=>inp.addEventListener('change',()=>{
     const k=inp.name,i=+k.slice(k.indexOf('q')+1),mid2=k.slice(0,k.indexOf('q'));
     S.quiz[k]=+inp.value;save();
     const q=QUIZ[mid2][i];
-    $('fb-'+k).innerHTML=(+inp.value===q.a)?'<span class="ok">✔ '+q.e+'</span>':'<span class="bad">✖ 再想想 Try again</span>';
+    $('fb-'+k).innerHTML=(+inp.value===q.a)?'<span class="ok">✔ '+T(q.e.zh,q.e.en)+'</span>':'<span class="bad">✖ '+T('再想想','Try again')+'</span>';
     refresh();
   }));
 }
@@ -503,13 +471,13 @@ function quizCount(mid){let c=0;QUIZ[mid].forEach((q,i)=>{if(S.quiz[mid+'q'+i]==
 
 function goalList(i){
   const m=S.m['m'+i]||{};
-  const goal=(zh,en,done)=>[language==='zh'?zh:en,done];
+  const goal=(zh,en,done)=>[L(zh,en),done];
   switch(i){
   case 0:return [goal('完成一次模擬','Run the simulation',!!m.done)];
-  case 1:return [goal('執行垂直縮放','Run vertical scaling',!!m.v),
-    goal('執行水平縮放','Run horizontal scaling',!!m.h),
-    goal('水平縮放在有故障下可用度 ≥ 95%','Reach at least 95% horizontal availability with a failure',!!(m.h&&m.h.f&&m.h.a>=0.95))];
-  case 2:return [goal('執行「沒有負載平衡器」(有故障)','Run no load balancer with a failure',!!(m.none&&m.none.f)),
+  case 1:return [goal('執行垂直伸縮','Run vertical scaling',!!m.v),
+    goal('執行水平伸縮','Run horizontal scaling',!!m.h),
+    goal('水平伸縮在有故障下可用度 ≥ 95%','Reach at least 95% horizontal availability with a failure',!!(m.h&&m.h.f&&m.h.a>=0.95))];
+  case 2:return [goal('執行「沒有負載均衡器」(有故障)','Run no load balancer with a failure',!!(m.none&&m.none.f)),
     goal('執行 Round Robin (有故障)','Run Round Robin with a failure',!!(m.rr&&m.rr.f)),
     goal('執行 Least Connections (有故障)','Run Least Connections with a failure',!!(m.lc&&m.lc.f)),
     goal('Least Connections 可用度 ≥ 98% 且高於 Round Robin','Reach at least 98% availability with Least Connections and outperform Round Robin',!!(m.lc&&m.rr&&m.lc.a>=0.98&&m.lc.a>m.rr.a))];
@@ -533,17 +501,17 @@ function totalScore(){let s=0;for(let i=0;i<5;i++)s+=missionScore(i);return Math
 function refresh(){
   for(let i=0;i<5;i++){
     const g=goalList(i),q=quizCount('m'+i);
-    let h='<b>'+(language==='zh'?'目標（模擬 60% + 測驗 40%，滿分 ':'Goals (Simulation 60% + Quiz 40%, max ')+PTS[i]+(language==='zh'?'）':')')+'</b><br>';
+    let h='<b>'+T('目標（模擬 60% ＋ 測驗 40%，滿分 '+PTS[i]+'）','Goals (Simulation 60% + Quiz 40%, max '+PTS[i]+')')+'</b><br>';
     g.forEach(x=>{h+=(x[1]?'<span class="ok">✔ ':'<span class="bad">✖ ')+x[0]+'</span><br>';});
-    h+='測驗 Quiz: '+q[0]+'/'+q[1]+' · 本關得分 Score: <b>'+missionScore(i)+'</b>';
+    h+=T('測驗：','Quiz: ')+q[0]+'/'+q[1]+' · '+T('本關得分：','Mission score: ')+'<b>'+missionScore(i)+'</b>';
     $('goals-m'+i).innerHTML=h;
     const done=g.every(x=>x[1])&&q[0]===q[1];
     const b=document.querySelector('#nav button[data-t="m'+i+'"]');if(b)b.classList.toggle('done',done);
   }
   const sb=$('scorebox');
-  if(sb){const copy=UI[language]||UI.zh;let h='<h3>'+copy.score+'</h3><table><tr><th>Mission</th><th>'+copy.scoreLabel+'</th><th>'+copy.max+'</th></tr>';
-    for(let i=0;i<5;i++)h+='<tr><td>M'+i+'</td><td>'+missionScore(i)+'</td><td>'+PTS[i]+'</td></tr>';
-    h+='<tr><th>'+copy.total+'</th><th>'+totalScore()+'</th><th>100</th></tr></table>';sb.innerHTML=h;}
+  if(sb){let h='<h3>'+T('成績摘要','Score summary')+'</h3><table><tr><th>'+T('任務','Mission')+'</th><th>'+T('分數','Score')+'</th><th>'+T('滿分','Max')+'</th></tr>';
+    for(let i=0;i<5;i++)h+='<tr><td>'+T('任務 '+i,'Mission '+i)+'</td><td>'+missionScore(i)+'</td><td>'+PTS[i]+'</td></tr>';
+    h+='<tr><th>'+T('總分','Total')+'</th><th>'+totalScore()+'</th><th>100</th></tr></table>';sb.innerHTML=h;}
 }
 
 // Mission handlers
@@ -551,10 +519,10 @@ function initM0(){
   $('m0run').onclick=()=>{ensureStart();
     const r=runSim({fleet:['S'],lb:'none',fail:null},'spike');
     S.m.m0=Object.assign({done:true},sum(r,false));save();
-    renderRun($('out-m0'),r,'Mission 0 · 1 × S 實例 instance',true);refresh();};
+    renderRun($('out-m0'),r,{zh:'任務 0 · 1 × S 執行個體',en:'Mission 0 · 1 × S instance'},true);refresh();};
 }
 function cmpTable(rows){
-  let h='<table><tr><th>方案 Plan</th><th>可用度 Availability</th><th>成本 Cost</th><th>超載分鐘 Overload min</th><th>最多實例 Peak</th></tr>';
+  let h='<table><tr><th>'+T('方案','Plan')+'</th><th>'+T('可用度','Availability')+'</th><th>'+T('成本','Cost')+'</th><th>'+T('超載分鐘','Overload minutes')+'</th><th>'+T('最多執行個體','Peak instances')+'</th></tr>';
   rows.forEach(r=>{if(r[1])h+='<tr><td>'+r[0]+'</td><td>'+pct(r[1].a)+'</td><td>$'+r[1].c+'</td><td>'+r[1].o+'</td><td>'+r[1].p+'</td></tr>';});
   return h+'</table>';
 }
@@ -564,30 +532,30 @@ function initM1(){
   $('m1v').onclick=()=>{ensureStart();const sp=$('m1vs').value;
     const r=runSim({fleet:[sp],lb:'none',fail:fail()},'spike');
     S.m.m1=S.m.m1||{};S.m.m1.v=sum(r,fail());save();
-    renderRun($('out-m1v'),r,'A · 垂直 1 × '+sp,true);upd();refresh();};
+    renderRun($('out-m1v'),r,{zh:'A · 垂直伸縮 1 × '+sp,en:'A · Vertical scaling 1 × '+sp},true);upd();refresh();};
   $('m1h').onclick=()=>{ensureStart();const sp=$('m1hs').value,n=num('m1hn',4,2,8);
     const r=runSim({fleet:Array(n).fill(sp),lb:'lc',fail:fail()},'spike');
     S.m.m1=S.m.m1||{};S.m.m1.h=sum(r,fail());save();
-    renderRun($('out-m1h'),r,'B · 水平 '+n+' × '+sp+' + LB',true);upd();refresh();};
+    renderRun($('out-m1h'),r,{zh:'B · 水平伸縮 '+n+' × '+sp+' ＋ 負載均衡器',en:'B · Horizontal scaling '+n+' × '+sp+' + load balancer'},true);upd();refresh();};
   upd();
 }
 function initM2(){
-  const names={none:'沒有 LB No LB',rr:'Round Robin',lc:'Least Connections'};
-  const upd=()=>{const m=S.m.m2||{};$('cmp-m2').innerHTML=cmpTable(['none','rr','lc'].map(k=>[names[k]+(m[k]&&m[k].f?' (故障 failure)':''),m[k]]));};
+  const names={none:{zh:'沒有負載均衡器',en:'No load balancer'},rr:{zh:'Round Robin',en:'Round Robin'},lc:{zh:'Least Connections',en:'Least Connections'}};
+  const upd=()=>{const m=S.m.m2||{};$('cmp-m2').innerHTML=cmpTable(['none','rr','lc'].map(k=>[T(names[k].zh+(m[k]&&m[k].f?'（故障）':''),names[k].en+(m[k]&&m[k].f?' (failure)':'')),m[k]]));};
   $('m2run').onclick=()=>{ensureStart();const lb=$('m2lb').value,f=$('m2fail').checked;
     const r=runSim({fleet:['S','S','L'],lb:lb,fail:f?{at:100,idx:0}:null},'steady');
     S.m.m2=S.m.m2||{};S.m.m2[lb]=sum(r,f);save();
-    renderRun($('out-m2'),r,'Mission 2 · '+names[lb],true);upd();refresh();};
+    renderRun($('out-m2'),r,{zh:'任務 2 · '+names[lb].zh,en:'Mission 2 · '+names[lb].en},true);upd();refresh();};
   upd();
 }
 function parseHM(s){const m=/^(\d{1,2}):(\d{2})$/.exec((s||'').trim());if(!m)return null;return (+m[1])*60+(+m[2])-START_MIN;}
 function m3cfg(){
-  const min=num('m3min',1,0,5),max=num('m3max',5,1,10),spec=$('m3spec').value,att=$('m3lb').checked;
+  const min=num('m3min',1,0,5),rawMax=num('m3max',5,1,10),spec=$('m3spec').value,att=$('m3lb').checked;
   const sched=[];
-  [['m3t1','m3n1'],['m3t2','m3n2']].forEach(p=>{const t=parseHM($(p[0]).value);if(t!==null&&t>=0&&t<T)sched.push({t:t,n:num(p[1],1,0,10)});});
-  const asg={min:min,max:Math.max(max,min),cooldown:num('m3cool',3,0,10),spec:spec,attachLb:att,mode:$('m3mode').value,
+  [['m3t1','m3n1'],['m3t2','m3n2']].forEach(p=>{const t=parseHM($(p[0]).value);if(t!==null&&t>=0&&t<SIM_T)sched.push({t:t,n:num(p[1],1,0,10)});});
+  const asg={min:min,max:Math.max(rawMax,min),cooldown:num('m3cool',3,0,10),spec:spec,attachLb:att,mode:$('m3mode').value,
     stepOut:num('m3so',2,1,5),stepIn:num('m3si',1,1,5),outTh:num('m3out',70,30,100),inTh:num('m3in',30,0,60),sustain:num('m3sus',1,1,5),sched:sched,hybrid:false};
-  return {fleet:Array(Math.max(min,1)).fill(spec),lb:att?'lc':'none',fail:null,asg:asg};
+  return {fleet:Array(Math.max(min,1)).fill(spec),lb:att?'lc':'none',fail:null,rawMax:rawMax,asg:asg};
 }
 function initM3(){
   S.steps=S.steps||[false,false,false,false];
@@ -602,15 +570,16 @@ function initM3(){
   $('m3run').onclick=()=>{
     const cfg=m3cfg(),a=cfg.asg;
     let w='';
-    if(!a.attachLb)w+='<div class="warn">⚠ 未附加 Load Balancer:新增的實例不會收到流量。Load balancer not attached: new instances receive no traffic.</div>';
-    if(a.max<num('m3min',1,0,5))w+='<div class="warn">⚠ Max Size 小於 Min Size,已自動調整。Max was below Min and was adjusted.</div>';
+    if(!a.attachLb)w+='<div class="warn">⚠ 未附加 Load Balancer:新增的執行個體不會收到流量。Load balancer not attached: new instances receive no traffic.</div>';
+    if(cfg.rawMax<a.min)w+='<div class="warn">⚠ '+T('最大執行個體數小於最小執行個體數，已自動調整。','Maximum size is below minimum size and was adjusted.')+'</div>';
     if((a.mode==='scheduled'||a.mode==='custom')&&a.sched.length===0)w+='<div class="warn">⚠ 定時任務時間格式不正確 (HH:MM, 15:00–18:59)。Invalid scheduled time.</div>';
     $('m3warn').innerHTML=w;
     const res={};
     [['spike','a','放學後高峰 spike'],['daily','b','每日固定高峰 daily'],['night','c','夜間 night']].forEach(x=>{
       const c2=JSON.parse(JSON.stringify(cfg));
       const r=runSim(Object.assign(c2,{asg:cfg.asg}),x[0]);
-      res[x[0]]=sum(r,false);renderRun($('out-m3'+x[1]),r,'Mission 3 · '+x[2],true);
+      const titles={spike:{zh:'任務 3 · 放學後高峰',en:'Mission 3 · After-school spike'},daily:{zh:'任務 3 · 每日固定高峰',en:'Mission 3 · Daily fixed peak'},night:{zh:'任務 3 · 夜間',en:'Mission 3 · Night-time'}};
+      res[x[0]]=sum(r,false);renderRun($('out-m3'+x[1]),r,titles[x[0]],true);
     });
     S.m.m3=res;save();
     let h='<table><tr><th>情境 Scenario</th><th>可用度 Availability</th><th>目標 Target</th><th>成本 Cost</th><th>目標 Target</th></tr>';
@@ -636,7 +605,7 @@ function initM4(){
   };
   const upd=()=>{
     const m=S.m.m4||{};let rows=[];
-    ['trend','viral'].forEach(k=>{if(m[k]){rows.push(['['+k+'] Reactive',m[k].re]);rows.push(['['+k+'] Predictive',m[k].pr]);}});
+    ['trend','viral'].forEach(k=>{if(m[k]){rows.push([T('['+k+'] 被動伸縮','['+k+'] Reactive scaling'),m[k].re]);rows.push([T('['+k+'] 預測性伸縮','['+k+'] Predictive scaling'),m[k].pr]);}});
     $('cmp-m4').innerHTML=cmpTable(rows);
   };
   $('m4run').onclick=()=>{ensureStart();
@@ -650,8 +619,8 @@ function initM4(){
     S.m.m4=S.m.m4||{};S.m.m4[sc]={re:sum(re,false),pr:sum(pr,false)};
     if(src.trim()!==DEFAULT_PREDICT.trim())S.m.m4.edited=true;
     save();
-    renderRun($('out-m4a'),re,sc+' · Reactive(CPU 閾值 threshold)',true);
-    renderRun($('out-m4b'),pr,sc+' · Predictive('+(src.trim()===DEFAULT_PREDICT.trim()?'預設 default':'你的版本 your version')+')',true);
+    renderRun($('out-m4a'),re,{zh:sc+' · 被動伸縮（CPU 閾值）',en:sc+' · Reactive scaling (CPU threshold)'},true);
+    renderRun($('out-m4b'),pr,{zh:sc+' · 預測性伸縮（'+(src.trim()===DEFAULT_PREDICT.trim()?'預設':'你的版本')+'）',en:sc+' · Predictive scaling ('+(src.trim()===DEFAULT_PREDICT.trim()?'default':'your version')+')'},true);
     upd();refresh();
   };
   upd();
@@ -660,7 +629,7 @@ function initM4(){
 // Console tab
 function initConsole(){
   const shots=[['img/asg-1-scaling-group.png','1. 創建伸縮組 Scaling Group','Min / Max Size、Cooldown、關聯 Load Balancer'],
-  ['img/asg-2-scaling-config.png','2. 創建伸縮配置 Scaling Configuration','實例類型、鏡像 Image'],
+  ['img/asg-2-scaling-config.png','2. 創建伸縮配置 Scaling Configuration','執行個體類型、鏡像 Image'],
   ['img/asg-3-scaling-rule.png','3. 創建伸縮規則 Scaling Rule','簡單 / 步進 / 目標追蹤 / 預測 規則'],
   ['img/asg-4-alarm-task.png','4. 創建警報任務 Alarm Task','CPU 閾值、連續次數、觸發的規則']];
   $('shots').innerHTML=shots.map((s,i)=>'<div class="card"><h3>'+s[1]+'</h3><div class="shot" id="shot'+i+'"><img src="'+s[0]+'" alt="'+s[1]+'"><div>'+s[2]+'</div></div></div>').join('');
@@ -669,117 +638,19 @@ function initConsole(){
 
 // Navigation, persistence
 const UI={
-  zh:{title:'運算規模縮放實驗室',subtitle:'雲端運算實驗 · 自動擴展模擬器',kicker:'互動雲端運算實驗',intro:'親手調整系統，找出最合適的擴展策略。',progress:'學習進度',toggle:'English',nav:['簡介','學習進度','任務一','任務二','任務三','任務四','任務五：AI','雲端參考'],missions:['任務一 · 單一伺服器的極限','任務二 · 垂直縮放與水平縮放','任務三 · 負載平衡','任務四 · 設定自動擴展','任務五 · AI 預測性擴展'],score:'成績摘要',scoreLabel:'分數',max:'滿分',total:'總分'},
-  en:{title:'Auto Scaling Lab',subtitle:'Cloud Computing Lab · Auto Scaling Simulator',kicker:'Interactive cloud computing lab',intro:'Tune the system and discover the right scaling strategy.',progress:'Learning progress',toggle:'繁體中文',nav:['Overview','Progress','Mission 1','Mission 2','Mission 3','Mission 4','Mission 5: AI','Cloud reference'],missions:["Mission 1 · One server's limit",'Mission 2 · Scaling up vs. scaling out','Mission 3 · Load balancing','Mission 4 · Configure Auto Scaling','Mission 5 · AI predictive scaling'],score:'Score summary',scoreLabel:'Score',max:'Max',total:'Total'}
+  zh:{title:'彈性伸縮實驗室',subtitle:'雲端運算實驗 · 彈性伸縮模擬器',kicker:'互動雲端運算實驗',intro:'親手調整系統，找出最合適的伸縮策略。',progress:'學習進度',toggle:'English',nav:['簡介','學習進度','任務 0','任務 1','任務 2','任務 3','任務 4：AI','Console 參考'],missions:['任務 0 · 單一伺服器的極限','任務 1 · 垂直伸縮與水平伸縮','任務 2 · 負載均衡','任務 3 · 設定彈性伸縮','任務 4 · AI 預測性伸縮'],score:'成績摘要',scoreLabel:'分數',max:'滿分',total:'總分'},
+  en:{title:'Auto Scaling Lab',subtitle:'Cloud Computing Lab · Auto Scaling Simulator',kicker:'Interactive cloud computing lab',intro:'Tune the system and discover the right scaling strategy.',progress:'Learning progress',toggle:'繁體中文',nav:['Overview','Progress','Mission 0','Mission 1','Mission 2','Mission 3','Mission 4: AI','Cloud reference'],missions:["Mission 0 · One server's limit",'Mission 1 · Vertical vs. horizontal scaling','Mission 2 · Load balancing','Mission 3 · Configure Auto Scaling','Mission 4 · AI predictive scaling'],score:'Score summary',scoreLabel:'Score',max:'Max',total:'Total'}
 };
 let language=localStorage.getItem('cc10-language')==='en'?'en':'zh';
-const originalText=new WeakMap();
-const glossary=[
-  [/\bAI\s*\(Machine Learning\)/gi,'人工智能',true],[/\bMachine Learning\b/gi,'機器學習',true],
-  [/\bVertical Scaling\b/gi,'垂直縮放',true],[/\bHorizontal Scaling\b/gi,'水平縮放',true],
-  [/\bScaling Up\b/gi,'垂直擴展',true],[/\bScaling Out\b/gi,'水平擴展',true],
-  [/\bScale[- ]out\b/gi,'擴容',true],[/\bScale[- ]in\b/gi,'縮容',true],
-  [/\bMin Size\b/gi,'最小實例數',true],[/\bMax Size\b/gi,'最大實例數',true],
-  [/\bMoving Average\b/gi,'移動平均',true],[/\bHealth check\b/gi,'健康檢查',true],
-  [/\bTarget tracking\b/gi,'目標追蹤',true],[/\bScheduled task\b/gi,'定時任務',true],
-  [/\bField mapping\b/gi,'欄位對照',true],[/\bEvent-triggered task\b/gi,'事件觸發任務',true],
-  [/\bSet count to\b/gi,'調整至實例數',true],[/\bReal console concept\b/gi,'真實雲端概念',true],
-  [/\bAuto Scaling\b/gi,'自動擴展',true],[/\bLoad Balancer\b/gi,'負載平衡器',true],[/\bLoad Balancing\b/gi,'負載平衡',true],
-  [/\bLeast Connections\b/gi,'最少連線',true],[/\bRound Robin\b/gi,'輪詢',true],
-  [/\bPredictive scaling\b/gi,'預測性擴展',true],[/\bReactive scaling\b/gi,'被動擴展',true],
-  [/\bScaling Group\b/gi,'伸縮組',true],[/\bScaling Configuration\b/gi,'伸縮配置',true],
-  [/\bScaling Rules?\b/gi,'伸縮規則',true],[/\bCloudMonitor\b/gi,'雲端監控',true],
-  [/\bNo[- ]LB\b/gi,'沒有負載平衡器',true],[/\bLB\b/g,'負載平衡器',true],
-  [/\bECS\b/g,'ECS',true],[/\bSLB\b|\bALB\b|\bCLB\b/g,'負載平衡器',true],
-  [/\bCPU\b/g,'CPU',true],[/\bRAM\b/g,'RAM',true],[/\brps\b/gi,'每秒請求',true],
-  [/\bDynamic\b/gi,'動態模式',true],[/\bScheduled\b/gi,'定時模式',true],
-  [/\bFixed\b/gi,'固定數量模式',true],[/\bCustom\b/gi,'自訂模式',true],
-  [/\bPredictive\b/gi,'預測性',true],[/\bReactive\b/gi,'被動',true],
-  [/\bVertical\b/gi,'垂直',true],[/\bHorizontal\b/gi,'水平',true],
-  [/\bspike\b/gi,'高峰情境',true],[/\bdaily\b/gi,'每日情境',true],
-  [/\bnight\b/gi,'夜間情境',true],[/\btrend\b/gi,'趨勢情境',true],
-  [/\bviral\b/gi,'突發情境',true],[/\bforecast\b/gi,'預測',true],
-  [/\bInstance(s)?\b/gi,'實例',true],[/\bScenario\b/gi,'情境',true],
-  [/\bAvailability\b/gi,'可用度',true],[/\bCapacity\b/gi,'容量',true],
-  [/\bCooldown\b/gi,'冷卻時間',true],[/\bSpec\b/gi,'規格',true],
-  [/\bStep\b/gi,'步驟',true],[/\bAlert\b/gi,'警報',true],[/\bAlarm\b/gi,'警報',true],
-  [/\bImage\b/gi,'鏡像',true],[/\bConsole\b/gi,'主控台',true],
-  [/\bmin\b/gi,'分鐘',true],[/\bCost\b/gi,'成本',true],
-  [/\bGoals?\b/gi,'目標',true],[/\bScore\b/gi,'分數',true],
-  [/\bMission\b/gi,'任務',true],[/\bM\d+\b/g,'任務',true],
-  [/\bTarget\b/gi,'目標',true],[/\bPlan\b/gi,'方案',true],[/\bRun\b/gi,'執行',true],
-  [/\bConfirm\b/gi,'確認',true],[/\bReset code\b/gi,'重設程式碼',true],
-  [/\bCopy prompt\b/gi,'複製提示',true],[/\bQuick check\b/gi,'檢查理解',true],
-  [/\bHint\b/gi,'提示',true],[/\bS\b/g,'小型規格',true],
-  [/\bM\b/g,'中型規格',true],[/\bL\b/g,'大型規格',true]
-];
-function englishText(text){
-  return text.replace(/[\u3400-\u9fff\uf900-\ufaff]+/g,' ').replace(/[，。；：、（）「」]/g,' ')
-    .replace(/(\d+)\.\s*[,;:!?]+\s*(?=[A-Za-z])/g,'$1. ')
-    .replace(/([.!?])(?:\s*[,;:!?]\s*)+(?=[A-Za-z])/g,'$1 ')
-    .replace(/\s+[?？]\s+(?=[A-Za-z])/g,' ')
-    .replace(/(\d)[,?]+(?=\s*[A-Za-z])/g,'$1').replace(/\s+([,.;:!?])/g,'$1')
-    .replace(/\s+[,;:]+\s+/g,' ').replace(/[,;:]{2,}/g,',')
-    .replace(/(\d)\.\?\s*(?=[A-Za-z])/g,'$1. ').replace(/([A-Za-z])\(/g,'$1 (')
-    .replace(/\(\s*\)/g,'').replace(/\(\s*(?=[,.;:!?]|$)/g,'')
-    .replace(/^\s*vs\.?\s+/i,'').replace(/^[\s.;:!?/]+/,'').replace(/[,;:]+\s*$/,'')
-    .replace(/[,.;:/]+$/g,'').replace(/\s{2,}/g,' ').trim();
+let currentTab='intro';
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-function chineseText(text){
-  const hasChinese=/[\u3400-\u9fff\uf900-\ufaff]/.test(text);
-  let localized=text;
-  const keywords=[];
-  if(!hasChinese){
-    const term=text.trim();
-    for(const [pattern,translation,preserveEnglish] of glossary){
-      if(new RegExp('^(?:'+pattern.source+')$',pattern.flags.replace(/g/g,'')).test(term)){
-        return preserveEnglish&&translation!==term?translation+' ('+term+')':translation;
-      }
-    }
-  }
-  if(hasChinese){
-    glossary.forEach(([pattern,translation,preserveEnglish])=>{
-      localized=localized.replace(pattern,(match,...args)=>{
-        if(!preserveEnglish)return translation;
-        const offset=Number(args[args.length-2])||0,source=String(args[args.length-1]);
-        const english=match.replace(/\s*\(([^)]*)\)/,' / $1');
-        const prefix=source.slice(0,offset);
-        const alreadyTranslated=new RegExp(translation+'\\s*$').test(prefix);
-        const inTranslationParens=new RegExp(translation+'\\s*\\(\\s*$').test(prefix);
-        const term=alreadyTranslated
-          ?'('+english+')'
-          :inTranslationParens?english:translation===english?translation:translation+' ('+english+')';
-        const index=keywords.push(term)-1;
-        return '\uE000'+index+'\uE001';
-      });
-    });
-  }
-  localized=localized.replace(/([。！？])\s*[A-Za-z][^。！？]*/g,'$1')
-    .replace(/[A-Za-z][A-Za-z0-9'().:\/=+*_-]*/g,'').replace(/([\u3400-\u9fff]+)\s+\1/g,'$1')
-    .replace(/\(\s*\)/g,'').replace(/(^|[。！？])\s*[,;:/]+/g,'$1')
-    .replace(/([。！？])\s*[,;:]+\s*/g,'$1').replace(/\s+[,;:]+\s*(?=[\u3400-\u9fff])/g,'')
-    .replace(/\s+[,;:]+\s+/g,' ')
-    .replace(/[,;:]+\s*$/,'').replace(/\(\s*(?=[，。；：、。！？]|$)/g,'')
-    .replace(/\s+\)/g,')').replace(/\s{2,}/g,' ').trim()
-    .replace(/\uE000(\d+)\uE001/g,(_,index)=>keywords[Number(index)])
-    .replace(/([\u3400-\u9fff]+)\s*\(([^)]+)\)\s*\(\s*\1\s*\)/g,'$1 ($2)');
-  return !hasChinese&&!/\d/.test(localized)?'':localized;
+function T(zh,en){
+  return '<span data-i18n data-zh="'+esc(zh)+'" data-en="'+esc(en)+'">'+esc(language==='zh'?zh:en)+'</span>';
 }
-function localizeTextNodes(root=document.querySelector('main')){
-  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(node){
-    const parent=node.parentElement;
-    return parent&&!parent.closest('script,style,pre,code,textarea,a,[data-title-zh],[data-language-copy]')&&!parent.matches('#tab-m0 > h2,#tab-m1 > h2,#tab-m2 > h2,#tab-m3 > h2,#tab-m4 > h2')
-      &&(originalText.has(node)||node.nodeValue.trim())?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;
-  }});
-  const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
-  nodes.forEach(node=>{
-    if(!originalText.has(node))originalText.set(node,node.nodeValue);
-    const source=originalText.get(node);
-    const localized=language==='en'?englishText(source):chineseText(source);
-    node.nodeValue=localized
-      ?(source[0].trim()?'':' ')+localized+(source[source.length-1].trim()?'':' ')
-      :'';
-  });
+function L(zh,en){
+  return language==='zh'?zh:en;
 }
 function animateTab(tab){
   if(!window.gsap||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
@@ -787,27 +658,32 @@ function animateTab(tab){
   gsap.fromTo(tab,{autoAlpha:0,y:8},{autoAlpha:1,y:0,duration:0.32,ease:'power2.out',clearProps:'opacity,visibility,transform'});
 }
 function show(id){
+  currentTab=id;
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id==='tab-'+id));
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===id));
   const tab=$('tab-'+id);
-  window.scrollTo(0,0);if(id==='progress')refresh();localizeTextNodes(tab);animateTab(tab);
+  window.scrollTo(0,0);if(id==='progress')refresh();animateTab(tab);
 }
 function buildNav(){
   const copy=UI[language],tabs=TABS.slice();
-  $('nav').innerHTML=tabs.map((t,i)=>'<button data-t="'+t[0]+'">'+copy.nav[i]+'</button>').join('');
+  $('nav').innerHTML=tabs.map((t,i)=>'<button data-t="'+t[0]+'" class="'+(t[0]===currentTab?'on':'')+'">'+copy.nav[i]+'</button>').join('');
   $('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>show(b.dataset.t));
 }
 function applyLanguage(){
   const copy=UI[language];
   document.documentElement.lang=language==='zh'?'zh-Hant':'en';
-  $('page-title').textContent=copy.title;$('page-subtitle').textContent=copy.subtitle;
-  $('intro-kicker').textContent=copy.kicker;$('intro-title').textContent=copy.intro;
-  $('progress-title').textContent=copy.progress;$('language-toggle').textContent=copy.toggle;
+  document.title=L('Cloud Lab 10 · 彈性伸縮模擬實驗','Cloud Lab 10 · Auto Scaling Simulator');
+  document.querySelectorAll('[data-i18n]').forEach(node=>{node.textContent=node.dataset[language];});
+  ['aria-label','title','alt'].forEach(attribute=>{
+    document.querySelectorAll('[data-zh-'+attribute+'][data-en-'+attribute+']').forEach(node=>{
+      const key=language+attribute.replace(/(^|-)([a-z])/g,(_,__,letter)=>letter.toUpperCase());
+      node.setAttribute(attribute,node.dataset[key]);
+    });
+  });
+  $('progress-title').textContent=copy.progress;
   copy.missions.forEach((title,i)=>document.querySelector('#tab-m'+i+' > h2').textContent=title);
-  document.querySelectorAll('[data-language-copy]').forEach(node=>{node.textContent=node.dataset[''+language];});
-  buildNav();refresh();localizeTextNodes();
-  document.querySelectorAll('[data-title-zh]').forEach(heading=>{heading.textContent=language==='zh'?heading.dataset.titleZh:heading.dataset.titleEn;});
-  document.querySelectorAll('canvas').forEach(canvas=>{if(canvas._simResult)drawChart(canvas,canvas._simResult,canvas._simUpto||T);});
+  buildNav();refresh();
+  document.querySelectorAll('canvas').forEach(canvas=>{if(canvas._simResult)drawChart(canvas,canvas._simResult,canvas._simUpto||SIM_T);});
   const active=document.querySelector('.tab.on');if(active)animateTab(active);
 }
 function initPersist(){
@@ -818,11 +694,9 @@ function initPersist(){
     e.addEventListener('input',h);e.addEventListener('change',h);
   });
 }
-window.addEventListener('hashchange',()=>{buildNav();});
 initPersist();
 ['m0','m1','m2','m3','m4'].forEach(renderQuiz);
 initM0();initM1();initM2();initM3();initM4();initConsole();
-new MutationObserver(records=>{if(records.some(record=>record.addedNodes.length))localizeTextNodes();}).observe(document.querySelector('main'),{childList:true,subtree:true});
 $('language-toggle').onclick=()=>{language=language==='zh'?'en':'zh';localStorage.setItem('cc10-language',language);applyLanguage();};
 applyLanguage();show('intro');
 </script>
