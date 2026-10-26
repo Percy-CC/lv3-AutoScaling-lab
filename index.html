@@ -5,33 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cloud Lab 10 · Auto Scaling Simulator 運算規模縮放模擬實驗</title>
 <style>
-:root{--b:#0070c0;--g:#00a05a;--r:#d33;--o:#e8890c;--bg:#f4f6f9;--card:#fff;--tx:#1d2733;--mut:#667}
+:root{--b:#1769d1;--g:#16856c;--r:#c33c4b;--o:#ffbf4a;--bg:#edf4fb;--card:#fff;--tx:#112239;--mut:#60728a;--line:#dbe4f0;--cyan:#51d5e8}
 *{box-sizing:border-box}
-body{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;background:var(--bg);color:var(--tx);line-height:1.55}
-header{background:#12324f;color:#fff;padding:10px 16px}
-header h1{font-size:18px;margin:0 0 6px}
-.prof{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px}
-.prof input{padding:4px 6px;border:1px solid #9ab;border-radius:4px;width:110px}
-#timer{margin-left:auto;font-weight:bold}
-nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;background:#dfe7ef;position:sticky;top:0;z-index:5}
-nav button{border:1px solid #9ab;background:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:13px}
+body{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei","Segoe UI",sans-serif;background:linear-gradient(135deg,#f6f9fd 0%,var(--bg) 100%);color:var(--tx);line-height:1.6}
+header{background:radial-gradient(circle at 82% 18%,#1d5e9f 0,transparent 28%),linear-gradient(120deg,#09172d,#102e52);color:#fff;padding:26px max(20px,calc((100vw - 1120px)/2));border-bottom:4px solid var(--cyan)}
+.brand{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}.brand-mark{display:flex;gap:14px;align-items:center}.cloud{width:44px;height:44px;display:grid;place-items:center;border:1px solid #76e4f1;border-radius:14px;background:#ffffff13;font-size:24px}
+header h1{font-size:clamp(23px,3vw,34px);line-height:1.15;letter-spacing:-.03em;margin:0}.subtitle{margin:5px 0 0;color:#b9d1e9;font-size:14px}
+.language{border:1px solid #87dfea;background:#ffffff12;color:#fff;border-radius:999px;padding:8px 13px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}.language:hover{background:#ffffff24}.language:focus-visible,button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--o);outline-offset:2px}
+nav{display:flex;gap:5px;padding:9px max(16px,calc((100vw - 1120px)/2));background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;overflow-x:auto}
+nav button{border:0;border-radius:7px;background:transparent;color:#4e627b;padding:8px 12px;cursor:pointer;font:600 13px inherit;white-space:nowrap}
+nav button:hover{background:#edf5ff;color:var(--b)}
 nav button.on{background:var(--b);color:#fff;border-color:var(--b)}
 nav button.done{border-color:var(--g)}
-main{max-width:1000px;margin:12px auto;padding:0 12px 60px}
+main{max-width:1120px;margin:22px auto;padding:0 18px 70px}
 .tab{display:none}.tab.on{display:block}
-.card{background:var(--card);border-radius:8px;padding:12px 14px;margin:10px 0;box-shadow:0 1px 3px #0002}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:14px 0;box-shadow:0 8px 20px #17365b0b}
+.intro-hero{padding:clamp(26px,5vw,52px);background:linear-gradient(135deg,#fff 20%,#e8f8fc);border-color:#b9e8ee}.eyebrow{margin:0 0 8px;color:#0c7991;font-size:13px;font-weight:700}.intro-hero h2{max-width:700px;font-size:clamp(30px,5vw,48px);line-height:1.1;letter-spacing:-.04em;margin:0}.intro-hero p:last-child{max-width:760px;margin-bottom:0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:700px){.grid2{grid-template-columns:1fr}}
-h2{margin:6px 0}h3{margin:4px 0}h4{margin:6px 0}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}.cloud{display:none}header{padding-top:20px;padding-bottom:20px}}
+h2{font-size:25px;letter-spacing:-.025em;margin:6px 0 16px}h3{font-size:18px;margin:4px 0 10px}h4{margin:6px 0}
 label{display:block;margin:6px 0;font-size:14px}
 select,input[type=number],input[type=text],textarea{padding:4px 6px;border:1px solid #9ab;border-radius:4px;font-size:14px}
 textarea{width:100%;font-family:Consolas,monospace}
-button.act{background:var(--b);color:#fff;border:0;border-radius:6px;padding:8px 14px;cursor:pointer;font-size:14px;margin:4px 4px 4px 0}
+button.act{background:var(--b);color:#fff;border:0;border-radius:8px;padding:9px 15px;cursor:pointer;font-size:14px;margin:4px 4px 4px 0}
 button.act:disabled{background:#9ab;cursor:not-allowed}
 button.sec{background:#fff;color:var(--b);border:1px solid var(--b)}
 table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
-th,td{border:1px solid #cdd6df;padding:4px 6px;text-align:left;vertical-align:top}
-th{background:#eef3f8}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:#edf5fc}
 canvas{width:100%;height:auto;background:#fff;border:1px solid #cdd6df;border-radius:6px}
 .metrics{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
 .metrics div{background:#eef3f8;border-radius:6px;padding:4px 10px;font-size:13px}
@@ -53,26 +54,20 @@ pre{background:#101820;color:#d6e2ee;padding:8px;border-radius:6px;overflow:auto
 </head>
 <body>
 <header>
-<h1>☁ 第十課 運算規模縮放 Auto Scaling Simulator · Cloud Computing Lab 10</h1>
-<div class="prof">
-班別 Class <input id="pcls" data-persist placeholder="3A">
-學號 No. <input id="pid" data-persist placeholder="12">
-姓名 Name <input id="pname" data-persist placeholder="Chan TM">
-<span id="timer">⏱ 00:00 / 60:00</span>
-</div>
+<div class="brand"><div class="brand-mark"><div class="cloud">☁</div><div><h1 id="page-title">運算規模縮放實驗室</h1><p class="subtitle" id="page-subtitle">Cloud Computing Lab · Auto Scaling Simulator</p></div></div><button class="language" id="language-toggle" type="button" aria-label="Switch language">English</button></div>
 </header>
 <nav id="nav"></nav>
 <main>
 
 <section class="tab" id="tab-intro">
-<div class="card">
-<h2>實驗簡介 Overview</h2>
+<div class="card intro-hero">
+<p class="eyebrow" id="intro-kicker">互動雲端運算實驗</p>
+<h2 id="intro-title">親手調整系統，找出最合適的擴展策略。</h2>
 <p>本實驗以模擬器重現講義內容:垂直 / 水平縮放、Load Balancing、Auto Scaling 四個設定步驟及四種伸縮模式,再加入 AI (Machine Learning) 流量預測。所有數據均為模擬值,不會連接任何雲端帳戶,亦不會產生費用。<br>
 This lab simulates the lecture content: vertical/horizontal scaling, load balancing, the four Auto Scaling setup steps and scaling modes, plus AI/ML traffic prediction. All numbers are simulated; no cloud account or charges involved.</p>
-<p class="mut">先填寫上方班別、學號、姓名(流量曲線會因學號略有不同)。Fill in your class, number and name first (traffic differs slightly per student).</p>
 </div>
 <div class="card">
-<h3>60 分鐘建議時間表 Suggested 60-minute schedule</h3>
+<h3>建議學習流程 Suggested learning path</h3>
 <table>
 <tr><th>Mission</th><th>內容 Content</th><th>講義對應 Slides</th><th>時間 Time</th><th>分數 Points</th></tr>
 <tr><td>0</td><td>單一伺服器的極限 Limits of one server</td><td>Slide 3, 7</td><td>5 min</td><td>10</td></tr>
@@ -80,7 +75,6 @@ This lab simulates the lecture content: vertical/horizontal scaling, load balanc
 <tr><td>2</td><td>負載均衡 Load Balancing</td><td>Slide 10–11</td><td>10 min</td><td>20</td></tr>
 <tr><td>3</td><td>設定 Auto Scaling(四步驟)Four setup steps</td><td>Slide 9, 12–17</td><td>20 min</td><td>30</td></tr>
 <tr><td>4</td><td>AI 預測性伸縮 Predictive scaling</td><td>延伸 Extension</td><td>12 min</td><td>20</td></tr>
-<tr><td>提交</td><td>反思 + 結果代碼 Reflection + result code</td><td></td><td>3 min</td><td></td></tr>
 </table>
 </div>
 <div class="card">
@@ -94,6 +88,11 @@ This lab simulates the lecture content: vertical/horizontal scaling, load balanc
 <li>可用度 Availability = 成功處理的請求 ÷ 總請求。</li>
 </ul>
 </div>
+</section>
+
+<section class="tab" id="tab-progress">
+<h2 id="progress-title">學習進度</h2>
+<div class="card" id="scorebox"></div>
 </section>
 
 <section class="tab" id="tab-m0">
@@ -233,7 +232,7 @@ The default is a moving average, which lags behind. Edit <code>predict()</code> 
 <section class="tab" id="tab-console">
 <h2>Console 參考 Real Cloud Console Reference</h2>
 <div class="card">
-<p>以下欄位對應阿里雲 Auto Scaling 主控台。請將教師自行截取的畫面放入 <code>img/</code> 資料夾(檔名如下),頁面會自動顯示。官方文件 Official docs:
+<p>以下欄位對應阿里雲 Auto Scaling 主控台。將截圖放入 <code>img/</code> 資料夾(檔名如下),頁面會自動顯示。官方文件 Official docs:
 <a href="https://www.alibabacloud.com/help/zh/auto-scaling/latest/scale-ecs-instances" target="_blank" rel="noopener">scale-ecs-instances</a>。
 主控台介面可能更新,名稱以實際畫面為準。The console UI changes over time; use what you see on screen.</p>
 </div>
@@ -253,39 +252,10 @@ The default is a moving average, which lags behind. Edit <code>predict()</code> 
 </div>
 </section>
 
-<section class="tab" id="tab-submit">
-<h2>提交 Submit</h2>
-<div class="card" id="scorebox"></div>
-<div class="card">
-<h3>反思題 Reflection</h3>
-<p>學校 Open Day 報名網站會在公佈後 5 分鐘內有大量訪問。你會用動態、定時、固定數量還是預測模式?請說明原因(最多 300 字)。<br>
-A school Open Day registration site gets a surge within 5 minutes of the announcement. Which scaling mode would you use and why? (max 300 characters)</p>
-<textarea id="reflect" data-persist style="height:110px" maxlength="300"></textarea>
-</div>
-<div class="card">
-<button class="act" id="gen">產生結果代碼 Generate result code</button>
-<textarea id="codeout" readonly style="height:90px"></textarea>
-<button class="act sec" id="copy">複製 Copy</button> <span class="fb" id="submsg"></span>
-<p class="mut">將代碼貼到老師指定的表單 / 聊天室 / Padlet。代碼附有簡單校驗碼,只可防止無意修改,不能防止刻意作弊。Paste the code where your teacher asks. The checksum only catches accidental edits.</p>
-</div>
-</section>
-
-<section class="tab" id="tab-teacher">
-<h2>教師總覽 Teacher Dashboard</h2>
-<div class="card">
-<p>每行貼上一個學生的結果代碼。Paste one result code per line.</p>
-<textarea id="tcodes" style="height:140px" placeholder="CC10.xxxxx.yyyyyyyy"></textarea>
-<button class="act" id="tparse">解析 Parse</button>
-<button class="act sec" id="tcsv">匯出 CSV Export</button>
-<button class="act sec" id="tload">從 Endpoint 載入 Load from endpoint</button>
-<span class="fb" id="tmsg"></span>
-</div>
-<div class="card" id="tstats"></div>
-<div class="card" style="overflow:auto" id="ttable"></div>
-</section>
 
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
 <script>
 'use strict';
 //SIM-START
@@ -419,10 +389,10 @@ function defState(){return {start:null,m:{},quiz:{},f:{}};}
 function loadState(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.m)return Object.assign(defState(),s);}catch(e){}return defState();}
 let S=loadState();
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
-const TABS=[['intro','簡介 Intro'],['m0','M0'],['m1','M1'],['m2','M2'],['m3','M3'],['m4','M4 AI'],['console','Console 參考'],['submit','提交 Submit']];
+const TABS=[['intro','簡介'],['progress','學習進度'],['m0','M0'],['m1','M1'],['m2','M2'],['m3','M3'],['m4','M4 AI'],['console','雲端參考']];
 const PTS=[10,20,20,30,20];
 
-function seedFor(n){return fnv(($('pcls').value||'')+'|'+($('pid').value||'')+'|'+n)||1;}
+function seedFor(n){return fnv('autoscaling-lab|'+n)||1;}
 function ensureStart(){if(!S.start){S.start=Date.now();save();}}
 function pct(x){return (x*100).toFixed(1)+'%';}
 function sum(r,fail){return {a:+r.avail.toFixed(4),c:Math.round(r.cost),o:r.over,p:r.peak,f:!!fail};}
@@ -449,11 +419,14 @@ function drawChart(cv,r,upto){
   const iline=(arr,col)=>{c.strokeStyle=col;c.lineWidth=2;c.beginPath();
     for(let t=0;t<upto;t++){const y=Y2(arr[t]);if(t===0)c.moveTo(X(t),y);else{c.lineTo(X(t),Y2(arr[t-1]));c.lineTo(X(t),y);}}c.stroke();};
   iline(s.total,'#e8890c');iline(s.run,'#00a05a');
-  c.fillStyle='#0070c0';c.fillText('● 流量 Load (rps)',L+6,12);
-  c.fillStyle='#00a05a';c.fillText('● 容量 Capacity',L+130,12);
-  c.fillStyle='#d33';c.fillText('■ 未處理 Dropped',L+230,12);
-  c.fillStyle='#e8890c';c.fillText('● 實例總數 Instances',L+340,12);
-  c.fillStyle='#00a05a';c.fillText('● 運行中 Running',L+460,12);
+  const labels=language==='zh'
+    ?['● 流量（每秒請求）','● 容量','■ 未處理','● 實例總數','● 運行中']
+    :['● Load (rps)','● Capacity','■ Dropped','● Instances','● Running'];
+  c.fillStyle='#0070c0';c.fillText(labels[0],L+6,12);
+  c.fillStyle='#00a05a';c.fillText(labels[1],L+150,12);
+  c.fillStyle='#d33';c.fillText(labels[2],L+250,12);
+  c.fillStyle='#e8890c';c.fillText(labels[3],L+355,12);
+  c.fillStyle='#00a05a';c.fillText(labels[4],L+485,12);
 }
 function runHtml(r,title,id){
   const ok=r.avail>=0.99;
@@ -467,10 +440,16 @@ function runHtml(r,title,id){
 }
 function renderRun(box,r,title,animate){
   const id='cv'+Math.random().toString(36).slice(2,9);
-  box.innerHTML=runHtml(r,title,id);
-  if(!animate){drawChart($(id),r,T);return;}
-  let u=0;drawChart($(id),r,0);
-  const h=setInterval(()=>{u+=10;drawChart($(id),r,Math.min(u,T));if(u>=T)clearInterval(h);},18);
+  const englishTitle=englishText(title.replace(/^Mission (\d+)/,(match,index)=>UI.en.missions[+index]));
+  const chineseTitle=chineseText(title.replace(/^Mission (\d+)/,(match,index)=>UI.zh.missions[+index]));
+  box.innerHTML=runHtml(r,language==='zh'?chineseTitle:englishTitle,id);
+  const heading=box.querySelector('h4');
+  heading.dataset.titleZh=chineseTitle;
+  heading.dataset.titleEn=englishTitle;
+  const canvas=$(id);canvas._simResult=r;
+  if(!animate){canvas._simUpto=T;drawChart(canvas,r,T);return;}
+  let u=0;canvas._simUpto=0;drawChart(canvas,r,0);
+  const h=setInterval(()=>{u+=10;canvas._simUpto=Math.min(u,T);drawChart(canvas,r,canvas._simUpto);if(u>=T)clearInterval(h);},18);
 }
 
 const QUIZ={
@@ -561,9 +540,9 @@ function refresh(){
     const b=document.querySelector('#nav button[data-t="m'+i+'"]');if(b)b.classList.toggle('done',done);
   }
   const sb=$('scorebox');
-  if(sb){let h='<h3>成績摘要 Score summary</h3><table><tr><th>Mission</th><th>分數 Score</th><th>滿分 Max</th></tr>';
+  if(sb){const copy=UI[language]||UI.zh;let h='<h3>'+copy.score+'</h3><table><tr><th>Mission</th><th>'+copy.scoreLabel+'</th><th>'+copy.max+'</th></tr>';
     for(let i=0;i<5;i++)h+='<tr><td>M'+i+'</td><td>'+missionScore(i)+'</td><td>'+PTS[i]+'</td></tr>';
-    h+='<tr><th>總分 Total</th><th>'+totalScore()+'</th><th>100</th></tr></table>';sb.innerHTML=h;}
+    h+='<tr><th>'+copy.total+'</th><th>'+totalScore()+'</th><th>100</th></tr></table>';sb.innerHTML=h;}
 }
 
 // Mission handlers
@@ -687,79 +666,75 @@ function initConsole(){
   shots.forEach((s,i)=>{const im=document.querySelector('#shot'+i+' img');im.onerror=()=>{im.replaceWith(Object.assign(document.createElement('div'),{innerHTML:'尚未放入截圖 No screenshot yet.<br>請放置 Place file: <code>'+s[0]+'</code>'}));};});
 }
 
-// Submit
-function b64u(s){const b=new TextEncoder().encode(s);let bin='';b.forEach(x=>bin+=String.fromCharCode(x));return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
-function unb64u(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const bin=atob(s);return new TextDecoder().decode(Uint8Array.from(bin,c=>c.charCodeAt(0)));}
-function chk(js){return fnv(js+SALT).toString(16).padStart(8,'0');}
-function buildCode(){
-  const m3=S.m.m3||{},m4=(S.m.m4||{}).trend,m1=S.m.m1||{},m2=S.m.m2||{};
-  const p={v:1,i:$('pid').value.trim(),c:$('pcls').value.trim(),n:$('pname').value.trim(),t:Date.now(),
-    d:S.start?Math.round((Date.now()-S.start)/60000):0,
-    p:[0,1,2,3,4].map(missionScore),tot:totalScore(),
-    k:[m1.h?m1.h.a:null,m2.lc?m2.lc.a:null,m3.spike?m3.spike.a:null,m3.daily?m3.daily.a:null,m3.night?m3.night.c:null,m4?m4.pr.a:null],
-    r:($('reflect').value||'').slice(0,300)};
-  const js=JSON.stringify(p);
-  return 'CC10.'+b64u(js)+'.'+chk(js);
+// Navigation, persistence
+const UI={
+  zh:{title:'運算規模縮放實驗室',subtitle:'雲端運算實驗 · 自動擴展模擬器',kicker:'互動雲端運算實驗',intro:'親手調整系統，找出最合適的擴展策略。',progress:'學習進度',toggle:'English',nav:['簡介','學習進度','任務一','任務二','任務三','任務四','任務五：AI','雲端參考'],missions:['任務一 · 單一伺服器的極限','任務二 · 垂直縮放與水平縮放','任務三 · 負載平衡','任務四 · 設定自動擴展','任務五 · AI 預測性擴展'],score:'成績摘要',scoreLabel:'分數',max:'滿分',total:'總分'},
+  en:{title:'Auto Scaling Lab',subtitle:'Cloud Computing Lab · Auto Scaling Simulator',kicker:'Interactive cloud computing lab',intro:'Tune the system and discover the right scaling strategy.',progress:'Learning progress',toggle:'繁體中文',nav:['Overview','Progress','Mission 1','Mission 2','Mission 3','Mission 4','Mission 5: AI','Cloud reference'],missions:["Mission 1 · One server's limit",'Mission 2 · Scaling up vs. scaling out','Mission 3 · Load balancing','Mission 4 · Configure Auto Scaling','Mission 5 · AI predictive scaling'],score:'Score summary',scoreLabel:'Score',max:'Max',total:'Total'}
+};
+let language=localStorage.getItem('cc10-language')==='en'?'en':'zh';
+const originalText=new WeakMap();
+const glossary=[
+  [/\bAuto Scaling\b/g,'自動擴展'],[/\bLoad Balancer\b/g,'負載平衡器'],[/\bLoad Balancing\b/g,'負載平衡'],
+  [/\bLeast Connections\b/g,'最少連線'],[/\bRound Robin\b/g,'輪詢'],[/\bPredictive scaling\b/gi,'預測性擴展'],
+  [/\bReactive scaling\b/gi,'被動擴展'],[/\bScaling Group\b/g,'伸縮組'],[/\bScaling Configuration\b/g,'伸縮配置'],
+  [/\bScaling Rules?\b/g,'伸縮規則'],[/\bCloudMonitor\b/g,'雲端監控'],[/\bAvailability\b/g,'可用度'],
+  [/\bScenario\b/g,'情境'],[/\bCost\b/g,'成本'],[/\bGoals?\b/g,'目標'],[/\bScore\b/g,'分數'],
+  [/\bTarget\b/g,'目標'],[/\bRun\b/g,'執行'],[/\bConfirm\b/g,'確認'],[/\bReset code\b/g,'重設程式碼'],
+  [/\bCopy prompt\b/g,'複製提示'],[/\bQuick check\b/g,'檢查理解'],[/\bHint\b/g,'提示']
+];
+function englishText(text){
+  return text.replace(/[\u3400-\u9fff\uf900-\ufaff]/g,'').replace(/[，。；：、（）「」]/g,' ')
+    .replace(/(\d)[,?]+(?=\s*[A-Za-z])/g,'$1').replace(/\s+([,.;:!?])/g,'$1')
+    .replace(/^[\s,.;:!?]+/,'').replace(/\s{2,}/g,' ').trim();
 }
-function initSubmit(){
-  $('gen').onclick=()=>{
-    if(!$('pid').value.trim()||!$('pcls').value.trim()||!$('pname').value.trim()){$('submsg').textContent='請先填寫班別、學號、姓名 Fill in class, number and name first.';return;}
-    const code=buildCode();$('codeout').value=code;$('submsg').textContent='';
-    if(SUBMIT_ENDPOINT){fetch(SUBMIT_ENDPOINT,{method:'POST',mode:'no-cors',body:code}).then(()=>{$('submsg').textContent='已自動提交 Submitted to endpoint.';}).catch(()=>{});}
-  };
-  $('copy').onclick=()=>{const v=$('codeout').value;if(!v)return;
-    (navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>{$('submsg').textContent='已複製 Copied';},()=>{$('codeout').select();document.execCommand('copy');$('submsg').textContent='已複製 Copied';});};
+function chineseText(text){
+  let localized=text;
+  glossary.forEach(pair=>{localized=localized.replace(pair[0],pair[1]);});
+  return localized.replace(/([。！？])\s*[A-Za-z][^。！？]*/g,'$1')
+    .replace(/[A-Za-z][A-Za-z0-9'().:\/=+*_-]*/g,'').replace(/([\u3400-\u9fff]+)\s+\1/g,'$1')
+    .replace(/\(\s*\)/g,'').replace(/(^|[。！？])\s*[,;:/]+/g,'$1')
+    .replace(/\s{2,}/g,' ').trim();
 }
-
-// Teacher
-let TROWS=[];
-function parseCode(line){
-  line=line.trim();const a=line.split('.');
-  if(a.length!==3||a[0]!=='CC10')return null;
-  try{const js=unb64u(a[1]);const p=JSON.parse(js);p.valid=(chk(js)===a[2]);return p;}catch(e){return null;}
+function localizeTextNodes(root=document.querySelector('main')){
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(node){
+    const parent=node.parentElement;
+    return parent&&!parent.closest('script,style,pre,code,textarea,[data-title-zh]')&&!parent.matches('#tab-m0 > h2,#tab-m1 > h2,#tab-m2 > h2,#tab-m3 > h2,#tab-m4 > h2')
+      &&node.nodeValue.trim()?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;
+  }});
+  const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+  nodes.forEach(node=>{
+    if(!originalText.has(node))originalText.set(node,node.nodeValue);
+    const source=originalText.get(node);
+    node.nodeValue=language==='en'?englishText(source):chineseText(source);
+  });
 }
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-function renderTeacher(lines){
-  const map={};let bad=0;
-  lines.forEach(l=>{if(!l.trim())return;const p=parseCode(l);if(!p){bad++;return;}
-    const key=p.c+'|'+p.i;if(!map[key]||map[key].t<p.t)map[key]=p;});
-  TROWS=Object.values(map).sort((x,y)=>(x.c+'').localeCompare(y.c+'')||(+x.i-+y.i));
-  const n=TROWS.length;
-  let st='<b>人數 Students: '+n+'</b>'+(bad?' · <span class="bad">無法解析 unparsable: '+bad+'</span>':'');
-  if(n){const avg=k=>(TROWS.reduce((a,r)=>a+(r.p[k]||0),0)/n).toFixed(1);
-    st+='<br>平均分 Average — M0 '+avg(0)+' · M1 '+avg(1)+' · M2 '+avg(2)+' · M3 '+avg(3)+' · M4 '+avg(4)+' · 總分 Total '+(TROWS.reduce((a,r)=>a+r.tot,0)/n).toFixed(1);}
-  $('tstats').innerHTML=st;
-  let h='<table><tr><th>班</th><th>學號</th><th>姓名</th><th>M0</th><th>M1</th><th>M2</th><th>M3</th><th>M4</th><th>總分</th><th>用時 min</th><th>M1 水平</th><th>M2 LC</th><th>M3 spike</th><th>M3 daily</th><th>M3 night $</th><th>M4 預測</th><th>校驗</th><th>反思 Reflection</th></tr>';
-  const pc=v=>v==null?'—':(v*100).toFixed(1)+'%';
-  TROWS.forEach(r=>{h+='<tr><td>'+esc(r.c)+'</td><td>'+esc(r.i)+'</td><td>'+esc(r.n)+'</td>'+r.p.map(x=>'<td>'+x+'</td>').join('')+
-    '<td><b>'+r.tot+'</b></td><td>'+r.d+'</td><td>'+pc(r.k[0])+'</td><td>'+pc(r.k[1])+'</td><td>'+pc(r.k[2])+'</td><td>'+pc(r.k[3])+'</td><td>'+(r.k[4]==null?'—':'$'+r.k[4])+'</td><td>'+pc(r.k[5])+'</td><td>'+(r.valid?'✔':'<span class="bad">✖</span>')+'</td><td>'+esc(r.r)+'</td></tr>';});
-  $('ttable').innerHTML=h+'</table>';
+function animateTab(tab){
+  if(!window.gsap||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  gsap.killTweensOf(tab);
+  gsap.fromTo(tab,{autoAlpha:0,y:8},{autoAlpha:1,y:0,duration:0.32,ease:'power2.out',clearProps:'opacity,visibility,transform'});
 }
-function initTeacher(){
-  $('tparse').onclick=()=>renderTeacher($('tcodes').value.split(/\r?\n/));
-  $('tcsv').onclick=()=>{
-    const head=['class','no','name','M0','M1','M2','M3','M4','total','minutes','m1_h_avail','m2_lc_avail','m3_spike_avail','m3_daily_avail','m3_night_cost','m4_pred_avail','valid','reflection'];
-    const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
-    const rows=TROWS.map(r=>[r.c,r.i,r.n].concat(r.p,[r.tot,r.d],r.k,[r.valid,r.r]).map(q).join(','));
-    const blob=new Blob(['\ufeff'+head.join(',')+'\n'+rows.join('\n')],{type:'text/csv'});
-    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='lab10-results.csv';a.click();
-  };
-  $('tload').onclick=()=>{
-    if(!SUBMIT_ENDPOINT){$('tmsg').textContent='尚未設定 SUBMIT_ENDPOINT Endpoint not configured.';return;}
-    fetch(SUBMIT_ENDPOINT+'?action=list').then(r=>r.json()).then(a=>{$('tcodes').value=a.join('\n');renderTeacher(a);$('tmsg').textContent='已載入 Loaded '+a.length;}).catch(e=>{$('tmsg').textContent='載入失敗 Failed: '+e.message;});
-  };
-}
-
-// Navigation, persistence, timer
 function show(id){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id==='tab-'+id));
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===id));
-  window.scrollTo(0,0);if(id==='submit')refresh();
+  const tab=$('tab-'+id);
+  window.scrollTo(0,0);if(id==='progress')refresh();localizeTextNodes(tab);animateTab(tab);
 }
 function buildNav(){
-  const tabs=TABS.slice();if(location.hash==='#teacher')tabs.push(['teacher','教師 Teacher']);
-  $('nav').innerHTML=tabs.map(t=>'<button data-t="'+t[0]+'">'+t[1]+'</button>').join('');
+  const copy=UI[language],tabs=TABS.slice();
+  $('nav').innerHTML=tabs.map((t,i)=>'<button data-t="'+t[0]+'">'+copy.nav[i]+'</button>').join('');
   $('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>show(b.dataset.t));
+}
+function applyLanguage(){
+  const copy=UI[language];
+  document.documentElement.lang=language==='zh'?'zh-Hant':'en';
+  $('page-title').textContent=copy.title;$('page-subtitle').textContent=copy.subtitle;
+  $('intro-kicker').textContent=copy.kicker;$('intro-title').textContent=copy.intro;
+  $('progress-title').textContent=copy.progress;$('language-toggle').textContent=copy.toggle;
+  copy.missions.forEach((title,i)=>document.querySelector('#tab-m'+i+' > h2').textContent=title);
+  buildNav();refresh();localizeTextNodes();
+  document.querySelectorAll('[data-title-zh]').forEach(heading=>{heading.textContent=language==='zh'?heading.dataset.titleZh:heading.dataset.titleEn;});
+  document.querySelectorAll('canvas').forEach(canvas=>{if(canvas._simResult)drawChart(canvas,canvas._simResult,canvas._simUpto||T);});
+  const active=document.querySelector('.tab.on');if(active)animateTab(active);
 }
 function initPersist(){
   document.querySelectorAll('[data-persist]').forEach(e=>{
@@ -769,20 +744,13 @@ function initPersist(){
     e.addEventListener('input',h);e.addEventListener('change',h);
   });
 }
-function tick(){
-  if(!S.start){$('timer').textContent='⏱ 00:00 / 60:00';return;}
-  const s=Math.floor((Date.now()-S.start)/1000),mm=String(Math.floor(s/60)).padStart(2,'0'),ss=String(s%60).padStart(2,'0');
-  $('timer').textContent='⏱ '+mm+':'+ss+' / 60:00';
-  $('timer').style.color=s>3600?'#ff8a8a':'#fff';
-}
 window.addEventListener('hashchange',()=>{buildNav();});
-buildNav();
 initPersist();
 ['m0','m1','m2','m3','m4'].forEach(renderQuiz);
-initM0();initM1();initM2();initM3();initM4();initConsole();initSubmit();initTeacher();
-refresh();show('intro');
-['pcls','pid','pname'].forEach(id=>$(id).addEventListener('input',ensureStart));
-setInterval(tick,1000);tick();
+initM0();initM1();initM2();initM3();initM4();initConsole();
+new MutationObserver(records=>{if(records.some(record=>record.addedNodes.length))localizeTextNodes();}).observe(document.querySelector('main'),{childList:true,subtree:true});
+$('language-toggle').onclick=()=>{language=language==='zh'?'en':'zh';localStorage.setItem('cc10-language',language);applyLanguage();};
+applyLanguage();show('intro');
 </script>
 </body>
 </html>
