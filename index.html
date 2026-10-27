@@ -407,7 +407,7 @@ function predict(history) {
 //SIM-END
 
 const $=id=>document.getElementById(id);
-const KEY='cc10-autoscaling-lab-v2';
+const KEY='cc10-autoscaling-lab-v3';
 function normalizeStudent(value){return String(value||'').trim().toLowerCase();}
 function defState(){return {start:null,student:null,studentSeed:null,m:{},quiz:{},qpick:{},qorder:{},attempt:{},verified:{},attempts:{},f:{}};}
 function loadState(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.m)return Object.assign(defState(),s);}catch(e){}return defState();}
@@ -618,25 +618,9 @@ QBANK.m4.push(
     [demoAI('trend','dynamic'),demoAI('trend','predictive')])
 );
 function paramQuestion(id,build){return {id:id,type:'param',build:build};}
-function numericOptions(correct,distractors){
-  const values=[correct];
-  distractors.forEach(value=>{if(value!==correct&&!values.includes(value)&&values.length<3)values.push(value);});
-  for(let delta=1;values.length<3;delta++){const value=correct+delta;if(!values.includes(value))values.push(value);}
-  return values.map((value,i)=>({id:String.fromCharCode(97+i),value:value}));
-}
-function numericQuestion(id,q,correct,distractors,e,format,demo){
-  return {id:id,q:q,o:numericOptions(correct,distractors).map(option=>({id:option.id,zh:format(option.value,'zh'),en:format(option.value,'en'),ok:option.value===correct})),e:e,demo:demo};
-}
 function questionRandom(id){return rng(fnv(studentSeed+'|'+id));}
 function randomLoad(random,min,max){return (min+Math.floor(random()*(max-min+1)))*50;}
 function constantTraffic(rps){return Array(SIM_T).fill(rps);}
-function capacityDemoPair(load,count,captionA,captionB,scenario){
-  const traffic=constantTraffic(load);
-  return [
-    {cfg:{fleet:Array(count).fill('S'),lb:'lc',fail:null},scenario:scenario,traffic:traffic,caption:captionA},
-    {cfg:{fleet:Array(Math.max(1,count-1)).fill('S'),lb:'lc',fail:null},scenario:scenario,traffic:traffic,caption:captionB}
-  ];
-}
 QBANK.m0.push(
   paramQuestion('m0-param-capacity',seed=>{
     const load=randomLoad(questionRandom('m0-param-capacity'),5,19),needed=Math.ceil(load/100);
@@ -726,27 +710,275 @@ QBANK.m4.push(
         {zh:'少一台時容量無法覆蓋流量。',en:'One fewer instance leaves demand unserved.'},'trend'));
   })
 );
+// ===== QUIZ PATCH v3 =====
+function replaceQ(mid,q){QBANK[mid]=QBANK[mid].filter(x=>x.id!==q.id);QBANK[mid].push(q);}
+const REMOVE_IDS={
+  m0:['m0-capacity-limit','m0-spike'],
+  m1:['m1q1','m1q3','m1-vertical-limit'],
+  m2:['m2q2','m2q3','m2-mixed-size'],
+  m4:['m4q3','m4-history']
+};
+Object.keys(REMOVE_IDS).forEach(mid=>{QBANK[mid]=QBANK[mid].filter(q=>!REMOVE_IDS[mid].includes(q.id));});
+
+function numericOptions(correct,distractors,step){
+  step=step||1;
+  const values=[correct];
+  distractors.forEach(v=>{if(values.length<4&&Number.isFinite(v)&&v>=0&&!values.includes(v))values.push(v);});
+  for(let k=1;values.length<4;k++){
+    [correct+k*step,correct-k*step].forEach(v=>{if(values.length<4&&v>=0&&!values.includes(v))values.push(v);});
+  }
+  return values.map((value,i)=>({id:String.fromCharCode(97+i),value:value}));
+}
+function numericQuestion(id,q,correct,distractors,e,format,demo,step){
+  return {id:id,q:q,o:numericOptions(correct,distractors,step).map(o=>({id:o.id,zh:format(o.value,'zh'),en:format(o.value,'en'),ok:o.value===correct})),e:e,demo:demo};
+}
+function capacityDemoPair(load,count,captionA,captionB,scenario,spec){
+  spec=spec||'S';const traffic=constantTraffic(load);
+  return [
+    {cfg:{fleet:Array(count).fill(spec),lb:'lc',fail:null},scenario:scenario,traffic:traffic,caption:captionA},
+    {cfg:{fleet:Array(Math.max(0,count-1)).fill(spec),lb:'lc',fail:null},scenario:scenario,traffic:traffic,caption:captionB}
+  ];
+}
+function mixedDemo(load,lb,caption){
+  return {cfg:{fleet:['S','S','L'],lb:lb,fail:null},scenario:'steady',traffic:constantTraffic(load),caption:caption};
+}
+function chooseQuestions(mid,attempt,previous){
+  const bank=QBANK[mid],count=QUIZ_COUNTS[mid];
+  const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+  let random;
+  for(let retry=0;retry<100;retry++){
+    const seedText=studentSeed+'|'+mid+(attempt===1?'':'|'+attempt+'|'+retry);
+    random=rng(fnv(seedText));
+    const pool=shuffle(bank.slice()),params=pool.filter(q=>q.type==='param'),selected=[];
+    if(count>=2&&params.length)selected.push(params[0]);
+    pool.forEach(q=>{if(selected.length<count&&!selected.includes(q))selected.push(q);});
+    shuffle(selected);
+    const ids=selected.map(q=>q.id);
+    if(!previous||ids.slice().sort().join('|')!==previous.slice().sort().join('|'))return ids;
+  }
+  throw new Error('Unable to select a different quiz set for '+mid);
+}
+
+function simRankQuestion(c){
+  return paramQuestion(c.id,()=>{
+    const runs=c.pool.map(p=>{
+      const r=runSim(Object.assign({fail:c.fail},p.cfg),c.scenario);
+      return {p:p,v:c.metric==='avail'?r.avail:r.cost};
+    });
+    const sign=c.best==='max'?1:-1,rand=questionRandom(c.id);
+    const order=a=>a.slice().sort((x,y)=>sign*(y.v-x.v));
+    let chosen=null;
+    for(let k=0;k<40&&!chosen;k++){
+      const idx=runs.map((_,i)=>i);
+      for(let i=idx.length-1;i>0;i--){const j=Math.floor(rand()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}
+      const sub=idx.slice(0,c.pick).map(i=>runs[i]),s=order(sub);
+      if(s.length<2||Math.abs(s[0].v-s[1].v)>=c.gap)chosen=sub;
+    }
+    if(!chosen)chosen=runs.slice(0,c.pick);
+    const sorted=order(chosen),best=sorted[0],worst=sorted[sorted.length-1];
+    const fmt=v=>c.metric==='avail'?pct(v):'$'+Math.round(v);
+    const list=lang=>chosen.map(x=>x.p[lang]+' '+fmt(x.v)).join(lang==='zh'?'；':'; ');
+    const mk=(x,zh,en)=>({cfg:Object.assign({fail:c.fail},x.p.cfg),scenario:c.scenario,caption:{zh:x.p.zh+'：'+zh,en:x.p.en+': '+en}});
+    return {id:c.id,q:c.q,
+      o:chosen.map((x,i)=>({id:String.fromCharCode(97+i),zh:x.p.zh,en:x.p.en,ok:x===best})),
+      e:{zh:c.e.zh+'模擬結果 — '+list('zh'),en:c.e.en+' Simulation results — '+list('en')},
+      demo:[mk(best,c.bestCap.zh,c.bestCap.en),mk(worst,c.worstCap.zh,c.worstCap.en)]};
+  });
+}
+const FL=(n,s)=>Array(n).fill(s);
+
+replaceQ('m0',staticQuestion('m0q0','單一伺服器的流量超過其容量時，在這個模擬器中超出部分會怎樣？','In this simulator, what happens to traffic above a single server\'s capacity?',
+  [['無法處理，計入失敗請求，可用度下降','It is not served, counts as failed requests, and availability drops',true],
+   ['自動排隊，下一分鐘全部處理完','It queues and is fully served in the next minute',false],
+   ['伺服器自動升級到較大規格','The server automatically upgrades to a larger specification',false],
+   ['流量自動轉到不存在的備用伺服器','Traffic moves to a standby server that does not exist',false]],
+  {zh:'容量是硬上限。真實系統的佇列也有限，等待過久的請求同樣會逾時。',en:'Capacity is a hard limit. Real queues are also finite, and requests that wait too long time out.'},DEMO_M0));
+replaceQ('m0',staticQuestion('m0q1','圖表中的紅色區域代表甚麼？','What does the red area in the chart represent?',
+  [['流量高於容量、未能成功處理的請求','Traffic above capacity that was not served',true],
+   ['伺服器 CPU 過熱的時段','Periods when the server CPU overheats',false],
+   ['已成功處理但回應較慢的請求','Requests served successfully but slowly',false],
+   ['被負載均衡器拒絕的健康檢查','Health checks rejected by the load balancer',false]],
+  {zh:'紅色面積 = 流量線高於已處理流量的部分，即未處理請求。',en:'Red area = traffic above what was served, i.e. unserved requests.'},DEMO_M0));
+replaceQ('m0',staticQuestion('m0-availability','高峰流量為 420 rps，1 台 S（100 rps）最多處理 100 rps。高峰期間的可用度約為多少？','Peak traffic is 420 rps and one S instance serves at most 100 rps. What is availability during the peak?',
+  [['約 24%','About 24%',true],['約 76%','About 76%',false],['約 42%','About 42%',false],['約 100%','About 100%',false]],
+  {zh:'可用度 = 成功處理 ÷ 總請求 = 100 ÷ 420 ≈ 23.8%。76% 是失敗比例，不是可用度。',en:'Availability = served ÷ total = 100 ÷ 420 ≈ 23.8%. 76% is the failure share, not availability.'},DEMO_M0));
+replaceQ('m0',paramQuestion('m0-param-overload',()=>{
+  const load=randomLoad(questionRandom('m0-param-overload'),5,19),n=Math.ceil(load/100)-1,cap=n*100,miss=load-cap;
+  return numericQuestion('m0-param-overload',
+    {zh:'流量為 '+load+' rps，現有 '+n+' 台 S（每台 100 rps）且全部正常。約有多少 rps 的流量超出總容量而無法處理？',
+     en:'Traffic is '+load+' rps with '+n+' healthy S instances (100 rps each). About how many rps exceed total capacity?'},
+    miss,[cap,load,miss+50,Math.abs(miss-50)],
+    {zh:'超出量 = 流量 − 總容量 = '+load+' − '+cap+' = '+miss+' rps。',en:'Excess = traffic − total capacity = '+load+' − '+cap+' = '+miss+' rps.'},
+    x=>x+' rps',
+    [{cfg:{fleet:FL(n,'S'),lb:'lc',fail:null},scenario:'steady',traffic:constantTraffic(load),
+      caption:{zh:'流量高於綠色容量線的部分（紅色）即超出的流量。',en:'Traffic above the green capacity line (red) is the excess.'}}],50);
+}));
+
+replaceQ('m1',staticQuestion('m1q0','垂直伸縮（Scaling Up）的主要限制是甚麼？','What is the main limitation of vertical scaling (scaling up)?',
+  [['單一執行個體有規格上限，且故障時整個網站停止','One instance has a specification ceiling, and its failure stops the whole site',true],
+   ['垂直伸縮不能增加 CPU 或記憶體','Vertical scaling cannot add CPU or memory',false],
+   ['升級規格後，單台故障的影響會自動分散到其他機器','After upgrading, a single failure is automatically spread to other machines',false],
+   ['垂直伸縮一定要使用 Round Robin','Vertical scaling always requires Round Robin',false]],
+  {zh:'L 規格 (400 rps) 仍低於 420 rps 高峰，且只有一台，故障後容量為 0。',en:'Even L (400 rps) is below the 420 rps peak, and with one instance a failure leaves zero capacity.'},DEMO_M1_FAIL));
+replaceQ('m1',staticQuestion('m1q2','只有 1 台執行個體，在第 100 分鐘故障，最直接的影響是甚麼？','With a single instance failing at minute 100, what is the direct impact?',
+  [['整個網站停止處理請求','The whole site stops serving requests',true],
+   ['容量減半，仍可處理一半流量','Capacity halves and half the traffic is still served',false],
+   ['容量不變，因為 L 規格較大','Capacity is unchanged because L is larger',false],
+   ['費用立即停止計算','Billing stops immediately',false]],
+  {zh:'沒有其他健康執行個體接手，故障後容量為 0。本模擬中故障的執行個體仍在計費，直到被移除。',en:'No healthy instance can take over, so capacity is zero. In this simulation a failed instance still bills until it is removed.'},DEMO_M1_FAIL));
+replaceQ('m1',paramQuestion('m1-param-l-capacity',()=>{
+  const load=randomLoad(questionRandom('m1-param-l-capacity'),9,19),need=Math.ceil(load/400);
+  return numericQuestion('m1-param-l-capacity',
+    {zh:'流量為 '+load+' rps，每台 L 容量 400 rps，最少需要幾台 L？',en:'Traffic is '+load+' rps. Each L serves 400 rps. What is the minimum number of L instances?'},
+    need,[Math.floor(load/400),need-1,need+1,Math.ceil(load/100)],
+    {zh:load+' ÷ 400 = '+(load/400).toFixed(2)+'，向上取整為 '+need+' 台。',en:load+' ÷ 400 = '+(load/400).toFixed(2)+', rounded up to '+need+'.'},
+    (n,lang)=>lang==='zh'?n+' 台 L 執行個體':n+' L instances',
+    capacityDemoPair(load,need,{zh:need+' 台 L：容量足夠。',en:need+' L: enough capacity.'},{zh:(need-1)+' 台 L：容量不足（紅色）。',en:(need-1)+' L: capacity gap (red).'},'steady','L'));
+}));
+replaceQ('m1',paramQuestion('m1-param-scaling',()=>{
+  const load=randomLoad(questionRandom('m1-param-scaling'),5,12),base=Math.ceil(load/200),need=base+1;
+  const d=(n,zh,en)=>({cfg:{fleet:FL(n,'M'),lb:'lc',fail:{at:100,idx:0}},scenario:'steady',traffic:constantTraffic(load),caption:{zh:zh,en:en}});
+  return numericQuestion('m1-param-scaling',
+    {zh:'流量 '+load+' rps，使用 M（200 rps）配合負載均衡器。要在任何 1 台故障後仍能處理全部流量，最少需要幾台 M？',
+     en:'Traffic is '+load+' rps using M instances (200 rps) behind a load balancer. How many M are needed to still serve all traffic after any one fails?'},
+    need,[base,base+2,Math.ceil(load/100)+1,Math.max(1,base-1)],
+    {zh:'正常運作需 '+base+' 台（'+load+' ÷ 200 向上取整），再加 1 台備援 = '+need+' 台。',en:'Normal operation needs '+base+' (rounded up from '+load+' ÷ 200), plus 1 spare = '+need+'.'},
+    (n,lang)=>lang==='zh'?n+' 台 M 執行個體':n+' M instances',
+    [d(need,need+' 台：故障後容量仍足夠（第 100 至 102 分鐘的短暫紅色是偵測延遲）。',need+' instances: capacity holds after the failure (the brief red at minutes 100–102 is detection delay).'),
+     d(base,base+' 台：故障後容量不足。',base+' instances: capacity falls short after the failure.')],1);
+}));
+const POOL_M1=[
+  {zh:'1 × L（沒有負載均衡器）',en:'1 × L (no load balancer)',cfg:{fleet:['L'],lb:'none'}},
+  {zh:'2 × M + 負載均衡器',en:'2 × M + load balancer',cfg:{fleet:FL(2,'M'),lb:'lc'}},
+  {zh:'3 × M + 負載均衡器',en:'3 × M + load balancer',cfg:{fleet:FL(3,'M'),lb:'lc'}},
+  {zh:'4 × S + 負載均衡器',en:'4 × S + load balancer',cfg:{fleet:FL(4,'S'),lb:'lc'}},
+  {zh:'6 × S + 負載均衡器',en:'6 × S + load balancer',cfg:{fleet:FL(6,'S'),lb:'lc'}},
+  {zh:'3 × L + 負載均衡器',en:'3 × L + load balancer',cfg:{fleet:FL(3,'L'),lb:'lc'}}
+];
+replaceQ('m1',simRankQuestion({id:'m1-sim-best-config',
+  q:{zh:'流量高峰 420 rps，第 100 分鐘第一台故障。下列哪個配置的可用度最高？',en:'Peak traffic is 420 rps and the first server fails at minute 100. Which setup has the highest availability?'},
+  pool:POOL_M1,pick:4,scenario:'spike',fail:{at:100,idx:0},metric:'avail',best:'max',gap:0.01,
+  e:{zh:'故障後剩餘容量要高於 420 rps，才能維持高可用度。',en:'After the failure, remaining capacity must exceed 420 rps to stay highly available.'},
+  bestCap:{zh:'可用度最高',en:'highest availability'},worstCap:{zh:'可用度最低',en:'lowest availability'}}));
+
+replaceQ('m2',staticQuestion('m2q0','S、S、L 混合規格時，Round Robin 平均分流會有甚麼問題？','With mixed S, S, and L instances, what is the problem with Round Robin equal splitting?',
+  [['小規格 S 先超載，大規格 L 的容量未被用盡','The smaller S instances overload first while L capacity is left unused',true],
+   ['混合規格時 Round Robin 無法運作','Round Robin cannot work with mixed specifications',false],
+   ['L 因收到較多請求而先故障','L fails first because it receives more requests',false],
+   ['流量會自動全部送到 L','All traffic is automatically sent to L',false]],
+  {zh:'S 與 L 收到相同流量，S 超載而 L 有剩餘容量。',en:'S and L receive the same traffic, so S overloads while L has spare capacity.'},
+  [DEMO_RR('rr',DEMO_RR_CAP),DEMO_RR('lc',DEMO_LC_CAP)]));
+replaceQ('m2',staticQuestion('m2q1','負載均衡器的健康檢查有甚麼作用？','What does a load balancer health check do?',
+  [['停止向被判定不健康的執行個體發送請求','Stops sending requests to instances judged unhealthy',true],
+   ['自動修復故障執行個體的硬件','Automatically repairs the failed instance\'s hardware',false],
+   ['保證故障期間不會有任何請求失敗','Guarantees no request fails during a failure',false],
+   ['增加每台執行個體的容量','Increases each instance\'s capacity',false]],
+  {zh:'本模擬有約 2 分鐘偵測延遲，期間發往故障實例的請求仍會失敗。',en:'This simulation has about a two-minute detection delay, during which requests sent to the failed instance still fail.'},DEMO_HEALTH));
+replaceQ('m2',paramQuestion('m2-param-round-robin',()=>{
+  const load=450+30*Math.floor(questionRandom('m2-param-round-robin')()*6),share=load/3,drop=2*(share-100);
+  return numericQuestion('m2-param-round-robin',
+    {zh:'S、S、L 使用 Round Robin 平均分流，總流量 '+load+' rps，三台都正常。合計約有多少 rps 無法處理？',
+     en:'S, S, and L use Round Robin with '+load+' rps total and all three healthy. About how many rps in total cannot be served?'},
+    drop,[share-100,0,2*share,load-300],
+    {zh:'每台收到 '+share+' rps；每台 S 只能處理 100 rps，兩台 S 各丟 '+(share-100)+' rps，合計 '+drop+' rps。總容量 600 rps 其實足夠，問題在於分配方式。',
+     en:'Each receives '+share+' rps; each S serves only 100 rps, so two S instances drop '+(share-100)+' rps each, '+drop+' rps in total. Total capacity (600 rps) is enough; the issue is the distribution.'},
+    x=>x+' rps',
+    [mixedDemo(load,'rr',{zh:'Round Robin：兩台 S 超載（紅色）。',en:'Round Robin: both S instances overload (red).'}),
+     mixedDemo(load,'lc',{zh:'Least Connections：按容量分配，沒有未處理請求。',en:'Least Connections: capacity-weighted, no unserved requests.'})],10);
+}));
+replaceQ('m2',paramQuestion('m2-param-weighted-share',()=>{
+  const load=randomLoad(questionRandom('m2-param-weighted-share'),7,12),share=Math.round(load*2/3);
+  return numericQuestion('m2-param-weighted-share',
+    {zh:'S、S、L 容量為 100、100、400 rps。Least Connections 按容量比例分配 '+load+' rps 時，L 約收到多少？',
+     en:'S, S, and L have capacities of 100, 100, and 400 rps. With capacity-weighted distribution of '+load+' rps, about how much reaches L?'},
+    share,[Math.round(load/3),Math.round(load/2),share+50,share-50],
+    {zh:'L 佔總容量 400 ÷ 600 = 2/3，因此約收到 '+load+' × 2/3 ≈ '+share+' rps。Round Robin 則每台約 '+Math.round(load/3)+' rps。',
+     en:'L holds 400 ÷ 600 = 2/3 of capacity, so it receives about '+load+' × 2/3 ≈ '+share+' rps. Round Robin would give each about '+Math.round(load/3)+' rps.'},
+    x=>x+' rps',
+    [mixedDemo(load,'rr',{zh:'Round Robin：平均分流。',en:'Round Robin: equal split.'}),
+     mixedDemo(load,'lc',{zh:'Least Connections：L 收到較多流量。',en:'Least Connections: L receives more traffic.'})],50);
+}));
+replaceQ('m2',simRankQuestion({id:'m2-sim-best-mode',
+  q:{zh:'3 台伺服器（S、S、L），流量 250–350 rps，第 100 分鐘第一台故障。哪種模式的可用度最高？',en:'Three servers (S, S, L), 250–350 rps, and the first server fails at minute 100. Which mode has the highest availability?'},
+  pool:[{zh:'沒有負載均衡器',en:'No load balancer',cfg:{fleet:['S','S','L'],lb:'none'}},
+        {zh:'Round Robin',en:'Round Robin',cfg:{fleet:['S','S','L'],lb:'rr'}},
+        {zh:'Least Connections',en:'Least Connections',cfg:{fleet:['S','S','L'],lb:'lc'}}],
+  pick:3,scenario:'steady',fail:{at:100,idx:0},metric:'avail',best:'max',gap:0.01,
+  e:{zh:'故障後剩下 S 與 L，按容量分配才能用盡剩餘的 500 rps 容量。',en:'After the failure only S and L remain; capacity-weighted distribution uses their remaining 500 rps.'},
+  bestCap:{zh:'可用度最高',en:'highest availability'},worstCap:{zh:'可用度最低',en:'lowest availability'}}));
+
+const AS=(max,cool,sus)=>({fleet:['S'],lb:'lc',fail:null,asg:{min:1,max:max,spec:'S',mode:'dynamic',cooldown:cool,outTh:70,inTh:30,sustain:sus,stepOut:2,stepIn:1}});
+const DEMO_MAX=[{cfg:AS(2,3,1),scenario:'spike',caption:{zh:'最大值 2：容量被上限壓住，高峰期仍有未處理請求。',en:'Max 2: capacity is capped and unserved requests remain at the peak.'}},
+                {cfg:AS(6,3,1),scenario:'spike',caption:{zh:'最大值 6：可擴到足夠容量，但也有成本上限。',en:'Max 6: capacity can reach the needed level, still bounded for cost.'}}];
+const DEMO_COOL=[{cfg:AS(8,0,1),scenario:'spike',caption:{zh:'冷卻時間 0：新實例未啟動時又再擴容，總實例數升得較多。',en:'Cooldown 0: scaling repeats before new instances are ready, so the instance count climbs higher.'}},
+                 {cfg:AS(8,5,1),scenario:'spike',caption:{zh:'冷卻時間 5：兩次動作之間留出啟動時間。',en:'Cooldown 5: time between actions allows instances to start.'}}];
+const DEMO_SUST=[{cfg:AS(8,3,1),scenario:'spike',caption:{zh:'連續 1 分鐘：反應最快。',en:'1 consecutive minute: fastest reaction.'}},
+                 {cfg:AS(8,3,5),scenario:'spike',caption:{zh:'連續 5 分鐘：擴容較遲，高峰初段未處理請求較多。',en:'5 consecutive minutes: scale-out is later, so more requests go unserved early in the peak.'}}];
+replaceQ('m3',staticQuestion('m3q3','為何要為伸縮組設定最大執行個體數（Max Size）？','Why set a maximum instance count (Max Size) for a scaling group?',
+  [['限制自動擴容的上限，控制容量與成本','Bounds automatic scale-out to control capacity and cost',true],
+   ['保證所有請求都會成功','Guarantees every request succeeds',false],
+   ['讓最小值自動變成零','Automatically sets the minimum to zero',false],
+   ['讓新執行個體啟動得更快','Makes new instances start faster',false]],
+  {zh:'上限太低會令高峰容量不足；沒有上限則成本可能失控。',en:'Too low a maximum starves the peak; no maximum lets cost grow unchecked.'},DEMO_MAX));
+replaceQ('m3',staticQuestion('m3q5','新執行個體需要 3 分鐘啟動，冷卻時間（Cooldown）的作用是甚麼？','New instances take 3 minutes to start. What is the purpose of the cooldown?',
+  [['避免在新實例尚未生效時重複觸發伸縮動作','Avoids repeated scaling actions before new instances take effect',true],
+   ['令新執行個體立即完成啟動','Makes new instances finish starting immediately',false],
+   ['取消啟動期間的費用','Cancels charges during startup',false],
+   ['增加每台執行個體的容量','Increases each instance\'s capacity',false]],
+  {zh:'啟動期間 CPU 仍然偏高，沒有冷卻時間會持續擴容而超出需要。',en:'CPU stays high while instances boot; without a cooldown, scaling keeps adding more than needed.'},DEMO_COOL));
+replaceQ('m3',staticQuestion('m3-sustain','警報設為「連續 5 分鐘 CPU ≥ 70%」而不是「連續 1 分鐘」，主要影響是甚麼？','What is the main effect of alarming on "5 consecutive minutes of CPU ≥ 70%" instead of 1 minute?',
+  [['減少短暫尖峰造成的誤觸發，但擴容反應較慢','Fewer false triggers from brief spikes, but slower scale-out',true],
+   ['擴容更快，因為判斷更準確','Faster scale-out because the decision is more accurate',false],
+   ['新執行個體的啟動時間縮短','New instances start sooner',false],
+   ['只影響縮容，不影響擴容','Only affects scale-in, not scale-out',false]],
+  {zh:'連續分鐘越多越穩定，但高峰初段容量不足的時間會更長。',en:'More consecutive minutes is steadier, but capacity stays short for longer at the start of a peak.'},DEMO_SUST));
+replaceQ('m3',staticQuestion('m3-step-asym','常見做法是擴容時一次加較多台、縮容時一次只減較少台。主要原因是甚麼？','Why is it common to add more instances per scale-out but remove fewer per scale-in?',
+  [['容量不足的代價較高；縮容保守可避免容量不足與反覆震盪','Running short is costlier; cautious scale-in avoids shortages and oscillation',true],
+   ['縮容會令費用增加','Scaling in increases cost',false],
+   ['Min Size 只在擴容時生效','Min Size only applies when scaling out',false],
+   ['平台規定縮容步長必須為 1','The platform requires the scale-in step to be 1',false]],
+  {zh:'高峰漏接請求會直接影響用戶，多付幾分鐘費用的代價較低。',en:'Missing requests at peak directly hurts users; a few extra minutes of cost is cheaper.'}));
+replaceQ('m3',paramQuestion('m3-param-cost',()=>{
+  const n=1+Math.floor(questionRandom('m3-param-cost')()*4),unit=+(1.9*SIM_T).toFixed(2),cost=+(n*unit).toFixed(2);
+  return numericQuestion('m3-param-cost',
+    {zh:'M 規格每分鐘 $1.90，'+n+' 台連續運行 '+SIM_T+' 分鐘，模擬成本是多少？',en:'M costs $1.90 per minute. What is the simulated cost of '+n+' instances running '+SIM_T+' minutes?'},
+    cost,[+(cost+unit).toFixed(2),+(cost/n).toFixed(2),+(n*1.9).toFixed(2),+(cost*2).toFixed(2)],
+    {zh:'1.90 × '+n+' × '+SIM_T+' = $'+cost.toFixed(2)+'。',en:'1.90 × '+n+' × '+SIM_T+' = $'+cost.toFixed(2)+'.'},
+    x=>'$'+x.toFixed(2),
+    [{cfg:{fleet:FL(n,'M'),lb:'lc',fail:null},scenario:'night',traffic:constantTraffic(15),caption:{zh:'夜間流量很低，持續運行的執行個體仍按分鐘計費。',en:'Night traffic is low, but running instances still bill per minute.'}}],unit);
+}));
+
+replaceQ('m4',staticQuestion('m4-ma-lag','預設的 5 筆移動平均為何在 trend（穩定上升）情境會滯後？','Why does the default 5-sample moving average lag in the trend (steady ramp-up) scenario?',
+  [['平均值反映過去，上升時會低於最新流量','The average reflects the past, so it sits below the latest traffic while rising',true],
+   ['移動平均使用未來的數據','The moving average uses future data',false],
+   ['移動平均會放大隨機波動','The moving average amplifies random noise',false],
+   ['移動平均需要 24 小時數據才能計算','The moving average needs 24 hours of data',false]],
+  {zh:'上升趨勢中，平均值落後於最新值，預測偏低，因而擴容太遲。',en:'During a rise the average trails the latest value, so the forecast is low and scale-out is late.'},demoAI('trend','predictive')));
+replaceQ('m4',paramQuestion('m4-param-extrapolate',()=>{
+  const r=questionRandom('m4-param-extrapolate'),s=10+5*Math.floor(r()*5),v0=100+20*Math.floor(r()*8);
+  const h=[0,1,2,3,4].map(i=>v0+i*s),latest=h[4],mean=h.reduce((a,b)=>a+b,0)/5,ans=latest+5*s;
+  return numericQuestion('m4-param-extrapolate',
+    {zh:'最近 5 分鐘的流量依次為 '+h.join('、')+' rps（每分鐘穩定增加 '+s+' rps）。用「最新值 + 每分鐘增長 × 5」預測 5 分鐘後，約是多少？',
+     en:'Traffic over the last 5 minutes was '+h.join(', ')+' rps (rising '+s+' rps per minute). Using "latest + slope × 5", what is the 5-minute-ahead forecast?'},
+    ans,[mean,latest,latest+s],
+    {zh:'最新值 '+latest+' + '+s+' × 5 = '+ans+' rps。移動平均只得 '+mean+' rps，明顯偏低。',en:'Latest '+latest+' + '+s+' × 5 = '+ans+' rps. The moving average gives only '+mean+' rps, clearly low.'},
+    x=>x+' rps',undefined,s);
+}));
+replaceQ('m4',paramQuestion('m4-param-scaleout',()=>{
+  const load=randomLoad(questionRandom('m4-param-scaleout'),5,19),total=Math.ceil(load/100),add=total-1;
+  return numericQuestion('m4-param-scaleout',
+    {zh:'目前有 1 台 S，預測需求為 '+load+' rps，每台可處理 100 rps，至少需新增幾台？',en:'There is one S instance. Forecast demand is '+load+' rps and each serves 100 rps. How many additional instances are needed?'},
+    add,[add+1,total,Math.max(0,add-1)],
+    {zh:'總需求 '+load+' ÷ 100 向上取整 = '+total+' 台，已有 1 台，需新增 '+add+' 台。',en:'Total need '+load+' ÷ 100 rounded up = '+total+'; one already runs, so add '+add+'.'},
+    (n,lang)=>lang==='zh'?n+' 台 S 執行個體':n+' S instances',
+    capacityDemoPair(load,total,{zh:total+' 台 S：容量足夠。',en:total+' S: enough capacity.'},{zh:(total-1)+' 台 S：容量不足。',en:(total-1)+' S: capacity gap.'},'steady'));
+}));
 function questionById(mid,id){
   const question=QBANK[mid].find(q=>q.id===id);
   if(!question)return null;
   return question.type==='param'?Object.assign({},question.build(studentSeed),{id:question.id,type:question.type}):question;
 }
 function activeQuestions(mid){return (S.qpick[mid]||[]).map(id=>questionById(mid,id)).filter(Boolean);}
-function chooseQuestions(mid,attempt,previous){
-  const bank=QBANK[mid],count=QUIZ_COUNTS[mid];
-  for(let retry=0;retry<100;retry++){
-    const seedText=studentSeed+'|'+mid+(attempt===1?'':'|'+attempt+'|'+retry);
-    const random=rng(fnv(seedText)),params=bank.filter(q=>q.type==='param');
-    const selected=[params[Math.floor(random()*params.length)]];
-    const remaining=bank.filter(q=>q.id!==selected[0].id);
-    for(let i=remaining.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[remaining[i],remaining[j]]=[remaining[j],remaining[i]];}
-    selected.push.apply(selected,remaining.slice(0,count-1));
-    for(let i=selected.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[selected[i],selected[j]]=[selected[j],selected[i]];}
-    const ids=selected.map(q=>q.id);
-    if(!previous||ids.slice().sort().join('|')!==previous.slice().sort().join('|'))return ids;
-  }
-  throw new Error('Unable to select a different quiz set for '+mid);
-}
 function orderedOptions(q){
   if(!S.qorder[q.id]){
     const options=q.o.slice(),random=rng(fnv(studentSeed+'|'+q.id));
