@@ -16,7 +16,8 @@ nav{display:flex;gap:5px;padding:9px max(16px,calc((100vw - 1120px)/2));backgrou
 nav button{border:0;border-radius:7px;background:transparent;color:#4e627b;padding:8px 12px;cursor:pointer;font:600 13px inherit;white-space:nowrap}
 nav button:hover{background:#edf5ff;color:var(--b)}
 nav button.on{background:var(--b);color:#fff;border-color:var(--b)}
-nav button.done{border-color:var(--g)}
+nav button.done{color:var(--g);box-shadow:inset 0 -3px var(--g)}
+nav button.done.on{color:#fff;box-shadow:inset 0 -3px #8ee3a7}
 main{max-width:1120px;margin:22px auto;padding:0 18px 70px}
 .tab{display:none}.tab.on{display:block}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:14px 0;box-shadow:0 8px 20px #17365b0b}
@@ -43,6 +44,20 @@ canvas{width:100%;height:auto;background:#fff;border:1px solid #cdd6df;border-ra
 .q{margin:10px 0}.q p{margin:4px 0;font-weight:bold}
 .q label{font-weight:normal;margin:2px 0}
 .fb{font-size:13px;margin-left:6px}
+.q-status{display:inline-block;width:1.6em;font-weight:700}
+.quiz-result{margin:8px 0;padding:8px 10px;border-left:3px solid var(--line);background:#f5f8fb}
+.quiz-demo{min-width:0;margin:10px 0;padding:10px;border:1px solid var(--line);border-radius:8px}
+.quiz-demo canvas{display:block;width:100%;height:auto}
+.quiz-demo figcaption{font-size:13px;color:var(--mut);margin-top:6px}
+.quiz-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px}
+.quiz-actions .mut{margin:0}
+.student-info{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.student-info{justify-content:flex-end}
+dialog{width:min(440px,calc(100% - 32px));border:1px solid var(--line);border-radius:14px;padding:24px;color:var(--tx);box-shadow:0 20px 60px #102e5240}
+dialog::backdrop{background:#09172dcc}
+dialog h2{margin-top:0}
+dialog label{font-weight:600}
+.student-tools{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:12px;color:#b9d1e9;font-size:13px}
 pre{background:#101820;color:#d6e2ee;padding:8px;border-radius:6px;overflow:auto;font-size:12px;max-height:220px}
 .step{border-left:5px solid var(--b)}
 .step.fin{border-left-color:var(--g)}
@@ -53,8 +68,18 @@ pre{background:#101820;color:#d6e2ee;padding:8px;border-radius:6px;overflow:auto
 </style>
 </head>
 <body>
+<dialog id="student-dialog" aria-labelledby="student-dialog-title">
+<form id="student-form">
+<h2 id="student-dialog-title" data-i18n data-zh="開始實驗前，請輸入學生編號或姓名" data-en="Enter your student ID or name to begin">開始實驗前，請輸入學生編號或姓名</h2>
+<p data-i18n data-zh="題目會依此識別碼固定抽選。請使用相同編號返回實驗。" data-en="Your questions are seeded by this ID. Use the same ID when returning.">題目會依此識別碼固定抽選。請使用相同編號返回實驗。</p>
+<label for="student-input" data-i18n data-zh="學生編號或姓名（必填）" data-en="Student ID or name (required)">學生編號或姓名（必填）</label>
+<input id="student-input" type="text" required autocomplete="off" maxlength="80">
+<button type="submit" class="act" data-i18n data-zh="開始實驗" data-en="Start lab">開始實驗</button>
+</form>
+</dialog>
 <header>
 <div class="brand"><div class="brand-mark"><div class="cloud">☁</div><div><h1 id="page-title" data-i18n data-zh="彈性伸縮實驗室" data-en="Auto Scaling Lab">彈性伸縮實驗室</h1><p class="subtitle" id="page-subtitle" data-i18n data-zh="雲端運算實驗 · 彈性伸縮模擬器" data-en="Cloud Computing Lab · Auto Scaling Simulator">雲端運算實驗 · 彈性伸縮模擬器</p></div></div><button class="language" id="language-toggle" type="button" data-i18n data-zh="English" data-en="繁體中文" data-zh-aria-label="切換至英文" data-en-aria-label="Switch to Traditional Chinese">English</button></div>
+<div class="student-tools"><span id="student-badge"></span><button class="language" id="change-student" type="button" data-i18n data-zh="更換學生" data-en="Change student">更換學生</button></div>
 </header>
 <nav id="nav"></nav>
 <main>
@@ -63,12 +88,12 @@ pre{background:#101820;color:#d6e2ee;padding:8px;border-radius:6px;overflow:auto
 <div class="card intro-hero">
 <p class="eyebrow" id="intro-kicker" data-i18n data-zh="互動雲端運算實驗" data-en="Interactive cloud computing lab">互動雲端運算實驗</p>
 <h2 id="intro-title" data-i18n data-zh="親手調整系統，找出最合適的伸縮策略。" data-en="Tune the system and discover the right scaling strategy.">親手調整系統，找出最合適的伸縮策略。</h2>
-<p data-i18n data-zh="本實驗以模擬器重現講義內容：垂直伸縮、水平伸縮、負載均衡（Load Balancing）、彈性伸縮（Auto Scaling）的四個設定步驟及四種伸縮模式，再加入人工智能（AI）流量預測。所有數據均為模擬值，不會連接任何雲端帳戶，亦不會產生費用。" data-en="This lab simulates the lecture content: vertical scaling, horizontal scaling, load balancing, the four Auto Scaling setup steps, four scaling modes, and AI traffic prediction. All figures are simulated; no cloud account is connected and no charges are incurred.">本實驗以模擬器重現講義內容：垂直伸縮、水平伸縮、負載均衡（Load Balancing）、彈性伸縮（Auto Scaling）的四個設定步驟及四種伸縮模式，再加入人工智能（AI）流量預測。所有數據均為模擬值，不會連接任何雲端帳戶，亦不會產生費用。</p>
+<p data-i18n data-zh="本實驗以模擬器重現簡報內容：垂直伸縮、水平伸縮、負載均衡（Load Balancing）、彈性伸縮（Auto Scaling）的四個設定步驟及四種伸縮模式，再加入人工智能（AI）流量預測。所有數據均為模擬值，不會連接任何雲端帳戶，亦不會產生費用。" data-en="This lab simulates the lecture content: vertical scaling, horizontal scaling, load balancing, the four Auto Scaling setup steps, four scaling modes, and AI traffic prediction. All figures are simulated; no cloud account is connected and no charges are incurred.">本實驗以模擬器重現簡報內容：垂直伸縮、水平伸縮、負載均衡（Load Balancing）、彈性伸縮（Auto Scaling）的四個設定步驟及四種伸縮模式，再加入人工智能（AI）流量預測。所有數據均為模擬值，不會連接任何雲端帳戶，亦不會產生費用。</p>
 </div>
 <div class="card">
 <h3 data-i18n data-zh="建議學習流程" data-en="Suggested learning path">建議學習流程</h3>
 <table>
-<tr><th data-i18n data-zh="任務" data-en="Mission">任務</th><th data-i18n data-zh="內容" data-en="Content">內容</th><th data-i18n data-zh="講義對應" data-en="Slides">講義對應</th><th data-i18n data-zh="時間" data-en="Time">時間</th><th data-i18n data-zh="分數" data-en="Points">分數</th></tr>
+<tr><th data-i18n data-zh="任務" data-en="Mission">任務</th><th data-i18n data-zh="內容" data-en="Content">內容</th><th data-i18n data-zh="簡報對應" data-en="Slides">簡報對應</th><th data-i18n data-zh="時間" data-en="Time">時間</th><th data-i18n data-zh="分數" data-en="Points">分數</th></tr>
 <tr><td>0</td><td data-i18n data-zh="單一伺服器的極限" data-en="One server's limit">單一伺服器的極限</td><td data-i18n data-zh="投影片 3、7" data-en="Slides 3, 7">投影片 3、7</td><td data-i18n data-zh="5 分鐘" data-en="5 min">5 分鐘</td><td>10</td></tr>
 <tr><td>1</td><td data-i18n data-zh="垂直伸縮與水平伸縮" data-en="Vertical vs. horizontal scaling">垂直伸縮與水平伸縮</td><td data-i18n data-zh="投影片 5–7" data-en="Slides 5–7">投影片 5–7</td><td data-i18n data-zh="10 分鐘" data-en="10 min">10 分鐘</td><td>20</td></tr>
 <tr><td>2</td><td data-i18n data-zh="負載均衡（Load Balancing）" data-en="Load balancing">負載均衡（Load Balancing）</td><td data-i18n data-zh="投影片 10–11" data-en="Slides 10–11">投影片 10–11</td><td data-i18n data-zh="10 分鐘" data-en="10 min">10 分鐘</td><td>20</td></tr>
@@ -91,6 +116,7 @@ pre{background:#101820;color:#d6e2ee;padding:8px;border-radius:6px;overflow:auto
 
 <section class="tab" id="tab-progress">
 <h2 id="progress-title" data-i18n data-zh="學習進度" data-en="Learning progress">學習進度</h2>
+<div class="card student-info"><button type="button" class="act sec" id="download-results" data-i18n data-zh="下載成績 JSON" data-en="Download results JSON">下載成績 JSON</button></div>
 <div class="card" id="scorebox"></div>
 </section>
 
@@ -154,7 +180,7 @@ pre{background:#101820;color:#d6e2ee;padding:8px;border-radius:6px;overflow:auto
 <h2 data-i18n data-zh="任務 3 · 設定彈性伸縮（Auto Scaling）的四個步驟" data-en="Mission 3 · Four Auto Scaling setup steps">任務 3 · 設定彈性伸縮（Auto Scaling）的四個步驟</h2>
 <div class="goals" id="goals-m3"></div>
 <div class="card">
-<p data-i18n data-zh="按講義 Slide 13 的順序完成四個步驟，每步按「確認」。同一組設定會同時測試三個情境：" data-en="Follow the four steps in the order shown on Slide 13 and confirm each one. The same configuration will be tested in three scenarios:">按講義 Slide 13 的順序完成四個步驟，每步按「確認」。同一組設定會同時測試三個情境：</p>
+<p data-i18n data-zh="按簡報 Slide 13 的順序完成四個步驟，每步按「確認」。同一組設定會同時測試三個情境：" data-en="Follow the four steps in the order shown on Slide 13 and confirm each one. The same configuration will be tested in three scenarios:">按簡報 Slide 13 的順序完成四個步驟，每步按「確認」。同一組設定會同時測試三個情境：</p>
 <ul>
 <li><span class="tag">spike</span><span data-i18n data-zh=" 放學後突然高峰（動態模式）" data-en=" Sudden after-school spike (dynamic mode)"> 放學後突然高峰（動態模式）</span></li>
 <li><span class="tag">daily</span><span data-i18n data-zh=" 每日 17:00–18:00 固定高峰（定時模式）" data-en=" Daily fixed peak from 17:00–18:00 (scheduled mode)"> 每日 17:00–18:00 固定高峰（定時模式）</span></li>
@@ -381,10 +407,13 @@ function predict(history) {
 //SIM-END
 
 const $=id=>document.getElementById(id);
-const KEY='cc10-autoscaling-lab-v1';
-function defState(){return {start:null,m:{},quiz:{},f:{}};}
+const KEY='cc10-autoscaling-lab-v2';
+function normalizeStudent(value){return String(value||'').trim().toLowerCase();}
+function defState(){return {start:null,student:null,studentSeed:null,m:{},quiz:{},qpick:{},qorder:{},attempt:{},verified:{},attempts:{},f:{}};}
 function loadState(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.m)return Object.assign(defState(),s);}catch(e){}return defState();}
 let S=loadState();
+let studentSeed=S.studentSeed||0;
+if(S.student){studentSeed=fnv(SALT+'|'+normalizeStudent(S.student));S.studentSeed=studentSeed;}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 const TABS=[['intro','簡介'],['progress','學習進度'],['m0','M0'],['m1','M1'],['m2','M2'],['m3','M3'],['m4','M4 AI'],['console','雲端參考']];
 const PTS=[10,20,20,30,20];
@@ -393,7 +422,7 @@ function seedFor(n){return fnv('autoscaling-lab|'+n)||1;}
 function ensureStart(){if(!S.start){S.start=Date.now();save();}}
 function pct(x){return (x*100).toFixed(1)+'%';}
 function sum(r,fail){return {a:+r.avail.toFixed(4),c:Math.round(r.cost),o:r.over,p:r.peak,f:!!fail};}
-function runSim(cfg,scen){const tr=makeTraffic(scen,seedFor(scen));return simulate(cfg,tr);}
+function runSim(cfg,scen,traffic){const tr=traffic||makeTraffic(scen,seedFor(scen));return simulate(cfg,tr);}
 function num(id,def,lo,hi){let v=parseFloat($(id).value);if(!isFinite(v))v=def;return Math.max(lo,Math.min(hi,Math.round(v)));}
 
 function drawChart(cv,r,upto){
@@ -423,6 +452,18 @@ function drawChart(cv,r,upto){
   c.fillStyle='#e8890c';c.fillText(labels[3],LEFT+355,12);
   c.fillStyle='#00a05a';c.fillText(labels[4],LEFT+485,12);
 }
+function redrawChart(cv){
+  if(!cv||!cv._simResult)return;
+  drawChart(cv,cv._simResult,cv._simUpto===undefined?SIM_T:cv._simUpto);
+  const highlight=cv._demoHighlight;
+  if(!highlight)return;
+  const c=cv.getContext('2d'),left=52,right=14,width=cv.width-left-right;
+  const x=left+highlight.from*width/SIM_T,w=(highlight.to-highlight.from)*width/SIM_T;
+  c.fillStyle='rgba(255,191,74,0.22)';
+  c.fillRect(x,18,w,192);c.fillRect(x,236,w,cv.height-258);
+  c.strokeStyle='rgba(180,120,0,0.8)';c.lineWidth=1;
+  c.strokeRect(x,18,w,192);c.strokeRect(x,236,w,cv.height-258);
+}
 function runHtml(r,title,id){
   const ok=r.avail>=0.99;
   return '<div class="runbox"><h4>'+title+'</h4><canvas id="'+id+'" width="900" height="330"></canvas>'+
@@ -437,37 +478,356 @@ function renderRun(box,r,titleObj,animate){
   const id='cv'+Math.random().toString(36).slice(2,9);
   box.innerHTML=runHtml(r,T(titleObj.zh,titleObj.en),id);
   const canvas=$(id);canvas._simResult=r;
-  if(!animate){canvas._simUpto=SIM_T;drawChart(canvas,r,SIM_T);return;}
-  let u=0;canvas._simUpto=0;drawChart(canvas,r,0);
-  const h=setInterval(()=>{u+=10;canvas._simUpto=Math.min(u,SIM_T);drawChart(canvas,r,canvas._simUpto);if(u>=SIM_T)clearInterval(h);},18);
+  if(!animate){canvas._simUpto=SIM_T;redrawChart(canvas);return;}
+  let u=0;canvas._simUpto=0;redrawChart(canvas);
+  const h=setInterval(()=>{u+=10;canvas._simUpto=Math.min(u,SIM_T);redrawChart(canvas);if(u>=SIM_T)clearInterval(h);},18);
 }
 
-const QUIZ={
-m0:[{q:{zh:'單一伺服器收到的流量超過其容量時，超出部分會怎樣？',en:'What happens to traffic above one server\'s capacity?'},
- o:[{zh:'自動變快',en:'It speeds up'},{zh:'部分請求失敗或逾時',en:'Some requests fail or time out'},{zh:'成本自動下降',en:'Cost drops'}],a:1,e:{zh:'容量是硬上限，多出的請求會失敗或逾時。',en:'Capacity is a hard limit; excess requests fail or time out.'}}],
-m1:[{q:{zh:'垂直伸縮的主要限制是甚麼？',en:'What are the main limits of vertical scaling?'},o:[{zh:'單一執行個體有規格上限，且是單點故障',en:'One instance has a specification limit and is a single point of failure'},{zh:'不能改變 CPU／RAM',en:'CPU and RAM cannot be changed'},{zh:'必須使用負載均衡器',en:'It requires a load balancer'}],a:0,e:{zh:'L 規格仍低於 420 rps 高峰，故障後整個網站亦會停止。',en:'Even L is below the 420 rps peak, and one failure stops the whole site.'}},{q:{zh:'水平伸縮為何需要負載均衡器？',en:'Why does horizontal scaling need a load balancer?'},o:[{zh:'加密流量',en:'Encrypt traffic'},{zh:'把流量分配給多個執行個體',en:'Distribute traffic across instances'},{zh:'備份資料',en:'Back up data'}],a:1,e:{zh:'沒有負載均衡器，用戶只會連到其中一個執行個體。',en:'Without a load balancer, users connect to only one instance.'}}],
-m2:[{q:{zh:'執行個體規格不同時，Round Robin 有甚麼問題？',en:'What is the problem with Round Robin and mixed specifications?'},o:[{zh:'平均分配會令小執行個體先超載',en:'Equal splitting overloads smaller instances first'},{zh:'速度太快',en:'It is too fast'},{zh:'不能用於 HTTP',en:'It cannot be used with HTTP'}],a:0,e:{zh:'S 與 L 收到相同流量，L 的容量因而被浪費。',en:'S and L receive the same traffic, wasting L capacity.'}},{q:{zh:'負載均衡器的健康檢查有甚麼作用？',en:'What is the purpose of load balancer health checks?'},o:[{zh:'增加 CPU',en:'Increase CPU'},{zh:'停止把流量送到故障執行個體',en:'Stop sending traffic to failed instances'},{zh:'降低價格',en:'Lower price'}],a:1,e:{zh:'本模擬有約 2 分鐘偵測延遲，期間部分請求仍會失敗。',en:'This simulation has about a two-minute detection delay, during which requests can still fail.'}}],
-m3:[{q:{zh:'依講義，彈性伸縮本身是否收費？',en:'According to the slides, is Auto Scaling itself charged?'},o:[{zh:'收費',en:'Charged'},{zh:'免費，但自動建立的 ECS 執行個體按量付費',en:'Free, but the ECS instances it creates are pay-as-you-go'},{zh:'永久免費，包括執行個體',en:'Everything is permanently free, including instances'}],a:1,e:{zh:'參考投影片 3。',en:'See Slide 3.'}},{q:{zh:'最小執行個體數的作用是甚麼？',en:'What does the minimum size do?'},o:[{zh:'保證至少有這個數量的運行執行個體',en:'Keeps at least this many instances running'},{zh:'限制 CPU 最高值',en:'Caps CPU'},{zh:'限制每日費用',en:'Caps daily cost'}],a:0,e:{zh:'最小值太大會在夜間浪費成本；太小則高峰時容量不足。',en:'A large minimum wastes money at night; a small one lacks peak capacity.'}},{q:{zh:'未把負載均衡器附加到伸縮組時，新執行個體會怎樣？',en:'What happens when no load balancer is attached to the scaling group?'},o:[{zh:'照樣收到流量',en:'Still receive traffic'},{zh:'啟動並計費，但收不到流量',en:'Start and bill, but receive no traffic'},{zh:'自動刪除',en:'Be deleted automatically'}],a:1,e:{zh:'這是常見的設定錯誤。',en:'This is a common configuration error.'}}],
-m4:[{q:{zh:'預測性伸縮最適合哪種流量？',en:'Which traffic best suits predictive scaling?'},o:[{zh:'有規律或穩定趨勢的流量',en:'Regular or steady-trend traffic'},{zh:'完全無法預料的突發流量',en:'Totally unpredictable surges'},{zh:'零流量',en:'Zero traffic'}],a:0,e:{zh:'預測依賴歷史數據，突發事件不在歷史之中。',en:'Forecasts rely on history; sudden events are not in it.'}},{q:{zh:'為何應先以「只預測、不執行」模式驗證？',en:'Why validate a forecast before letting it scale?'},o:[{zh:'預測可能不準，先檢查可避免浪費或容量不足',en:'Forecasts can be wrong; checking avoids waste or shortages'},{zh:'預測會令執行個體收費',en:'Forecasting bills instances'},{zh:'負載均衡器要求這樣做',en:'The load balancer requires it'}],a:0,e:{zh:'預測規則亦需要至少 24 小時監控數據才能產生預測。',en:'Predictive rules also need at least 24 hours of monitoring data.'}}]
-};
-function renderQuiz(mid){
-  const box=$('quiz-'+mid);let h='<h3>'+T('檢查理解','Quick check')+'</h3>';
-  QUIZ[mid].forEach((q,i)=>{
-    const k=mid+'q'+i,sel=S.quiz[k];
-    h+='<div class="q"><p>'+(i+1)+'. '+T(q.q.zh,q.q.en)+'</p>';
-    q.o.forEach((o,j)=>{h+='<label><input type="radio" name="'+k+'" value="'+j+'"'+(sel===j?' checked':'')+'> '+T(o.zh,o.en)+'</label>';});
-    h+='<span class="fb" id="fb-'+k+'">'+(sel===undefined?'':(sel===q.a?'<span class="ok">✔ '+T(q.e.zh,q.e.en)+'</span>':'<span class="bad">✖ '+T('再想想','Try again')+'</span>'))+'</span></div>';
-  });
-  box.innerHTML=h;
-  box.querySelectorAll('input[type=radio]').forEach(inp=>inp.addEventListener('change',()=>{
-    const k=inp.name,i=+k.slice(k.indexOf('q')+1),mid2=k.slice(0,k.indexOf('q'));
-    S.quiz[k]=+inp.value;save();
-    const q=QUIZ[mid2][i];
-    $('fb-'+k).innerHTML=(+inp.value===q.a)?'<span class="ok">✔ '+T(q.e.zh,q.e.en)+'</span>':'<span class="bad">✖ '+T('再想想','Try again')+'</span>';
-    refresh();
-  }));
+const DEMO_M0={cfg:{fleet:['S'],lb:'none',fail:null},scenario:'spike',
+  caption:{zh:'流量高於綠色容量線的部分，以紅色表示未處理的請求。',en:'The red area is unserved traffic above the green capacity line.'}};
+const DEMO_M1_FAIL={cfg:{fleet:['L'],lb:'none',fail:{at:100,idx:0}},scenario:'spike',
+  caption:{zh:'第 100 分鐘單點故障後，綠色容量線降至 0，網站停止處理流量。',en:'After the single instance fails at minute 100, capacity falls to zero.'}};
+const DEMO_LB=(lb,caption)=>({cfg:{fleet:['S','S','S','S'],lb:lb,fail:null},scenario:'spike',caption:caption});
+const DEMO_RR=(lb,caption)=>({cfg:{fleet:['S','S','L'],lb:lb,fail:null},scenario:'steady',caption:caption});
+const DEMO_HEALTH={cfg:{fleet:['S','S','L'],lb:'lc',fail:{at:100,idx:0}},scenario:'steady',highlight:{from:100,to:102},
+  caption:{zh:'留意第 100 至 102 分鐘的半透明區間：健康檢查偵測延遲期間仍會有請求失敗。',en:'The shaded minutes 100–102 show failures during the health-check detection delay.'}};
+const DEMO_MIN=[
+  {cfg:{fleet:['S'],lb:'lc',fail:null,asg:{min:1,max:4,spec:'S',mode:'fixed'}},scenario:'night',
+    caption:{zh:'最小數量為 1：夜間只需一台執行個體，成本較低。',en:'Minimum 1 keeps one instance overnight and costs less.'}},
+  {cfg:{fleet:['S','S','S','S'],lb:'lc',fail:null,asg:{min:4,max:4,spec:'S',mode:'fixed'}},scenario:'night',
+    caption:{zh:'最小數量為 4：相同夜間流量下，閒置執行個體仍會產生成本。',en:'Minimum 4 keeps idle instances running and increases night-time cost.'}}
+];
+const DEMO_NO_LB={cfg:{fleet:['S'],lb:'none',fail:null,asg:{min:1,max:4,spec:'S',mode:'dynamic',cooldown:0,outTh:70,inTh:0,sustain:1,stepOut:2,stepIn:1,attachLb:false}},scenario:'spike',
+  caption:{zh:'伸縮組會建立並計費新執行個體，但沒有負載均衡器時，流量仍只到第一台。',en:'New instances are billed, but without a load balancer traffic still reaches only the first instance.'}};
+function demoAI(scenario,mode){
+  return {cfg:{fleet:['S'],lb:'lc',fail:null,asg:{min:1,max:8,cooldown:3,spec:'S',attachLb:true,outTh:70,inTh:30,sustain:1,stepOut:2,stepIn:1,
+    mode:mode,hybrid:false,predictFn:history=>history.slice(-5).reduce((a,b)=>a+b,0)/Math.min(history.length,5)}},scenario:scenario,
+    caption:{zh:scenario+' 情境 · '+(mode==='dynamic'?'Reactive 需等 CPU 超標後才擴容。':'Predictive 依歷史流量提前調整執行個體數。'),
+      en:scenario+' scenario · '+(mode==='dynamic'?'Reactive waits for CPU to exceed its threshold.':'Predictive scales ahead using traffic history.')}};
 }
-function quizCount(mid){let c=0;QUIZ[mid].forEach((q,i)=>{if(S.quiz[mid+'q'+i]===q.a)c++;});return [c,QUIZ[mid].length];}
+const DEMO_LB_NONE={zh:'無負載均衡器：流量只送到第一台，其他伺服器閒置。',en:'Without a load balancer, only the first server receives traffic.'};
+const DEMO_LB_ON={zh:'有負載均衡器：流量分配到多台伺服器，提升可處理容量。',en:'The load balancer distributes traffic across servers to increase capacity.'};
+const DEMO_RR_CAP={zh:'Round Robin 對每台平均分流；小型 S 可能先超載。',en:'Round Robin splits traffic equally, which can overload the smaller S instances.'};
+const DEMO_LC_CAP={zh:'Least Connections 在此模擬中按容量比例分配流量。',en:'Least Connections distributes traffic by capacity in this simulation.'};
+const STATIC_QUIZ={
+m0:[
+  {id:'m0q0',q:{zh:'單一伺服器收到的流量超過其容量時，超出部分會怎樣？',en:'What happens to traffic above one server\'s capacity?'},
+   o:[{zh:'自動變快',en:'It speeds up'},{zh:'部分請求失敗或逾時',en:'Some requests fail or time out'},{zh:'成本自動下降',en:'Cost drops'}],a:1,e:{zh:'容量是硬上限，多出的請求會失敗或逾時。',en:'Capacity is a hard limit; excess requests fail or time out.'},demo:DEMO_M0},
+  {id:'m0q1',q:{zh:'一台容量為 100 rps 的 S 伺服器收到 420 rps 時，哪項描述正確？',en:'What happens when a 100-rps S server receives 420 rps?'},
+   o:[{zh:'伺服器會自動擴大容量',en:'The server automatically increases its capacity'},{zh:'最多處理約 100 rps，其餘請求未能處理',en:'It serves at most about 100 rps; the rest go unserved'},{zh:'流量會自動平均到不存在的伺服器',en:'Traffic is shared with servers that do not exist'}],a:1,e:{zh:'單一執行個體不會因流量增加而自動增加容量。',en:'A single instance does not gain capacity automatically when traffic rises.'},demo:DEMO_M0}
+],
+m1:[
+  {id:'m1q0',q:{zh:'垂直伸縮的主要限制是甚麼？',en:'What are the main limits of vertical scaling?'},
+   o:[{zh:'單一執行個體有規格上限，且是單點故障',en:'One instance has a specification limit and is a single point of failure'},{zh:'不能改變 CPU／RAM',en:'CPU and RAM cannot be changed'},{zh:'必須使用負載均衡器',en:'It requires a load balancer'}],a:0,e:{zh:'L 規格仍低於 420 rps 高峰，故障後整個網站亦會停止。',en:'Even L is below the 420 rps peak, and one failure stops the whole site.'},demo:DEMO_M1_FAIL},
+  {id:'m1q1',q:{zh:'水平伸縮為何需要負載均衡器？',en:'Why does horizontal scaling need a load balancer?'},
+   o:[{zh:'加密流量',en:'Encrypt traffic'},{zh:'把流量分配給多個執行個體',en:'Distribute traffic across instances'},{zh:'備份資料',en:'Back up data'}],a:1,e:{zh:'負載均衡器會把請求送到多台伺服器，避免只使用一台的容量。',en:'A load balancer sends requests to multiple servers instead of relying on one.'},
+   demo:[DEMO_LB('none',DEMO_LB_NONE),DEMO_LB('lc',DEMO_LB_ON)]},
+  {id:'m1q2',q:{zh:'第 100 分鐘單一執行個體故障，最直接的影響是甚麼？',en:'What is the direct impact when the only instance fails at minute 100?'},
+   o:[{zh:'整個網站暫停處理請求',en:'The whole site stops serving requests'},{zh:'成本立刻減半',en:'The cost immediately halves'},{zh:'容量保持不變',en:'Capacity stays unchanged'}],a:0,e:{zh:'沒有其他健康執行個體接手，故障後容量為 0。',en:'No healthy instance can take over, so capacity becomes zero.'},demo:DEMO_M1_FAIL},
+  {id:'m1q3',q:{zh:'相較於單一大型伺服器，多台伺服器配合負載均衡器的優點是甚麼？',en:'What is an advantage of multiple servers behind a load balancer?'},
+   o:[{zh:'沒有單一伺服器故障就令全站停止的問題',en:'One server failing does not necessarily stop the whole site'},{zh:'不需要計算總容量',en:'Total capacity no longer matters'},{zh:'每台伺服器都不會故障',en:'Servers can no longer fail'}],a:0,e:{zh:'其他健康執行個體可繼續處理流量，但整體容量仍須足夠。',en:'Healthy instances can continue serving traffic, though total capacity still matters.'},
+   demo:[DEMO_LB('none',DEMO_LB_NONE),DEMO_LB('lc',DEMO_LB_ON)]}
+],
+m2:[
+  {id:'m2q0',q:{zh:'執行個體規格不同時，Round Robin 有甚麼問題？',en:'What is the problem with Round Robin and mixed specifications?'},
+   o:[{zh:'平均分配會令小執行個體先超載',en:'Equal splitting overloads smaller instances first'},{zh:'速度太快',en:'It is too fast'},{zh:'不能用於 HTTP',en:'It cannot be used for HTTP'}],a:0,e:{zh:'S 與 L 收到相同流量，L 的容量因而被浪費。',en:'S and L receive the same traffic, wasting L capacity.'},
+   demo:[DEMO_RR('rr',DEMO_RR_CAP),DEMO_RR('lc',DEMO_LC_CAP)]},
+  {id:'m2q1',q:{zh:'負載均衡器的健康檢查有甚麼作用？',en:'What is the purpose of load balancer health checks?'},
+   o:[{zh:'增加 CPU',en:'Increase CPU'},{zh:'停止把流量送到故障執行個體',en:'Stop sending traffic to failed instances'},{zh:'降低價格',en:'Lower price'}],a:1,e:{zh:'本模擬有約 2 分鐘偵測延遲，期間部分請求仍會失敗。',en:'This simulation has about a two-minute detection delay, during which requests can still fail.'},demo:DEMO_HEALTH},
+  {id:'m2q2',q:{zh:'沒有負載均衡器時，這個模擬器會把流量送到哪裡？',en:'Where does this simulator send traffic when there is no load balancer?'},
+   o:[{zh:'平均送到所有執行個體',en:'Equally to every instance'},{zh:'只送到第一台執行個體',en:'Only to the first instance'},{zh:'不送到任何執行個體',en:'To no instances'}],a:1,e:{zh:'沒有負載均衡器時，其他執行個體不會接收用戶流量。',en:'Without a load balancer, the other instances receive no user traffic.'},
+   demo:[DEMO_LB('none',DEMO_LB_NONE),DEMO_LB('lc',DEMO_LB_ON)]},
+  {id:'m2q3',q:{zh:'S、S、L 混合規格時，哪種分配方式較能利用總容量？',en:'Which distribution better uses total capacity for S, S, and L instances?'},
+   o:[{zh:'不分規格，一律平均分配',en:'Split equally regardless of instance size'},{zh:'按執行個體容量比例分配',en:'Distribute in proportion to instance capacity'},{zh:'只使用最小規格',en:'Use only the smallest instance'}],a:1,e:{zh:'按容量比例分配，可避免大型執行個體閒置而小型執行個體過載。',en:'Capacity-aware distribution avoids idling large instances while overloading small ones.'},
+   demo:[DEMO_RR('rr',DEMO_RR_CAP),DEMO_RR('lc',DEMO_LC_CAP)]}
+],
+m3:[
+  {id:'m3q0',q:{zh:'依簡報，彈性伸縮本身是否收費？',en:'According to the slides, is Auto Scaling itself charged?'},
+   o:[{zh:'收費',en:'Charged'},{zh:'免費，但自動建立的 ECS 執行個體按量付費',en:'Free, but the ECS instances it creates are pay-as-you-go'},{zh:'永久免費，包括執行個體',en:'Everything is permanently free, including instances'}],a:1,e:{zh:'服務本身免費，建立的雲端執行個體仍會計費。',en:'See Slide 3: the service is free, but created cloud instances are still billed.'}},
+  {id:'m3q1',q:{zh:'最小執行個體數的作用是甚麼？',en:'What does the minimum size do?'},
+   o:[{zh:'保證至少有這個數量的運行執行個體',en:'Keeps at least this many instances running'},{zh:'限制 CPU 最高值',en:'Caps CPU'},{zh:'限制每日費用',en:'Caps daily cost'}],a:0,e:{zh:'最小值太大會在夜間浪費成本；太小則高峰時容量不足。',en:'A large minimum wastes money at night; a small one lacks peak capacity.'},demo:DEMO_MIN},
+  {id:'m3q2',q:{zh:'未把負載均衡器附加到伸縮組時，新執行個體會怎樣？',en:'What happens when no load balancer is attached to the scaling group?'},
+   o:[{zh:'照樣收到流量',en:'Still receive traffic'},{zh:'啟動並計費，但收不到流量',en:'Start and bill, but receive no traffic'},{zh:'自動刪除',en:'Be deleted automatically'}],a:1,e:{zh:'執行個體會建立和計費，但用戶流量仍只送到既有的第一台。',en:'Instances are created and billed, but user traffic still goes only to the first one.'},demo:DEMO_NO_LB},
+  {id:'m3q3',q:{zh:'建立伸縮組後，為甚麼要設定最大執行個體數？',en:'Why set a maximum instance count for a scaling group?'},
+   o:[{zh:'限制自動擴容的上限，避免無界增加',en:'Bound automatic scale-out and prevent unbounded growth'},{zh:'保證所有請求都成功',en:'Guarantee every request succeeds'},{zh:'讓最小值自動變成零',en:'Automatically set the minimum to zero'}],a:0,e:{zh:'最大值限制伸縮組可建立的數量，並協助控制容量與成本。',en:'The maximum bounds group size and helps control capacity and cost.'},demo:DEMO_NO_LB},
+  {id:'m3q4',q:{zh:'每日固定時間會出現高峰時，哪一種方式可在高峰前預先增加容量？',en:'When demand peaks at a regular time each day, what can add capacity in advance?'},
+   o:[{zh:'定時伸縮規則',en:'A scheduled scaling rule'},{zh:'等待故障發生',en:'Wait for a failure'},{zh:'關閉健康檢查',en:'Disable health checks'}],a:0,e:{zh:'定時規則可在預期高峰前調整執行個體數。',en:'A scheduled rule can adjust instance count before a predictable peak.'},
+   demo:{cfg:{fleet:['S'],lb:'lc',fail:null,asg:{min:1,max:5,spec:'S',mode:'scheduled',cooldown:0,stepOut:1,stepIn:1,sustain:1,outTh:70,inTh:30,sched:[{t:110,n:4}]}},scenario:'daily',
+     caption:{zh:'綠線在預定時間前上升，顯示排程已預先增加容量。',en:'The green capacity line rises at the scheduled time, ahead of the demand peak.'}}},
+  {id:'m3q5',q:{zh:'新執行個體啟動需要時間時，設定冷卻時間有甚麼用途？',en:'Why configure a cooldown when new instances take time to start?'},
+   o:[{zh:'避免短時間內重複觸發伸縮動作',en:'Avoid repeatedly triggering scaling actions in a short period'},{zh:'令新執行個體立即完成啟動',en:'Make new instances start instantly'},{zh:'取消執行個體費用',en:'Remove instance charges'}],a:0,e:{zh:'冷卻時間可避免反覆調整；新執行個體仍需要啟動時間。',en:'Cooldown helps avoid repeated adjustments; instances still need time to start.'},demo:DEMO_NO_LB}
+],
+m4:[
+  {id:'m4q0',q:{zh:'預測性伸縮最適合哪種流量？',en:'Which traffic best suits predictive scaling?'},
+   o:[{zh:'有規律或穩定趨勢的流量',en:'Regular or steady-trend traffic'},{zh:'完全無法預料的突發流量',en:'Totally unpredictable surges'},{zh:'零流量',en:'Zero traffic'}],a:0,e:{zh:'預測依賴歷史數據，突發事件不在歷史之中。',en:'Forecasts rely on history; sudden events are not in it.'},
+   demo:[demoAI('trend','dynamic'),demoAI('trend','predictive'),demoAI('viral','dynamic'),demoAI('viral','predictive')]},
+  {id:'m4q1',q:{zh:'為何應先以「只預測、不執行」模式驗證？',en:'Why validate a forecast before letting it scale?'},
+   o:[{zh:'預測可能不準，先檢查可避免浪費或容量不足',en:'Forecasts can be wrong; checking avoids waste or shortages'},{zh:'預測會令執行個體收費',en:'Forecasting bills instances'},{zh:'負載均衡器要求這樣做',en:'The load balancer requires it'}],a:0,e:{zh:'先觀察預測表現，可減少錯誤預測造成的浪費或容量不足。',en:'Observing forecast quality first reduces waste or shortages from incorrect predictions.'},
+   demo:[demoAI('trend','predictive'),demoAI('viral','predictive')]},
+  {id:'m4q2',q:{zh:'突發流量為何可能令預測性伸縮失準？',en:'Why can a sudden surge make predictive scaling inaccurate?'},
+   o:[{zh:'突發事件未必出現在歷史數據中',en:'The sudden event may not appear in historical data'},{zh:'執行個體不支援流量',en:'Instances do not support traffic'},{zh:'預測會停用負載均衡器',en:'Forecasting disables the load balancer'}],a:0,e:{zh:'預測依賴歷史流量，未曾出現的突發狀況難以提前推算。',en:'Forecasts depend on past traffic, so unseen surges are hard to anticipate.'},
+   demo:[demoAI('viral','dynamic'),demoAI('viral','predictive')]},
+  {id:'m4q3',q:{zh:'預測程式使用近期流量資料的目的是甚麼？',en:'Why does a prediction function use recent traffic history?'},
+   o:[{zh:'估算接下來的需求',en:'Estimate upcoming demand'},{zh:'修改過去已服務的請求',en:'Change requests already served'},{zh:'移除伸縮組上限',en:'Remove the scaling group maximum'}],a:0,e:{zh:'預測函數根據近期歷史估算未來需求，再由伸縮規則調整容量。',en:'The function estimates future demand from recent history so scaling rules can adjust capacity.'},
+   demo:[demoAI('trend','dynamic'),demoAI('trend','predictive')]}
+]
+};
+const QUIZ_COUNTS={m0:1,m1:2,m2:2,m3:3,m4:2};
+function staticQuestion(id,zh,en,options,e,demo){
+  return {id:id,type:'static',q:{zh:zh,en:en},o:options.map((option,i)=>({id:String.fromCharCode(97+i),zh:option[0],en:option[1],ok:!!option[2]})),e:e,demo:demo};
+}
+const QBANK={};
+Object.keys(STATIC_QUIZ).forEach(mid=>{
+  QBANK[mid]=STATIC_QUIZ[mid].map(q=>({id:q.id,type:'static',q:q.q,
+    o:q.o.map((option,i)=>({id:String.fromCharCode(97+i),zh:option.zh,en:option.en,ok:i===q.a})),e:q.e,demo:q.demo}));
+});
+QBANK.m0.push(
+  staticQuestion('m0-capacity-limit','單一伺服器的容量是硬上限，超出容量的請求會怎樣？','A single server has a hard capacity limit. What happens to excess requests?',
+    [['伺服器自動增加 CPU','The server automatically adds CPU',false],['部分請求失敗或逾時','Some requests fail or time out',true],['請求會排入永不停止的佇列','Requests wait in a queue forever',false]],
+    {zh:'單一執行個體不會自動增加容量，超載部分無法成功處理。',en:'A single instance does not add capacity automatically; excess requests are not served.'},DEMO_M0),
+  staticQuestion('m0-spike','哪個設計最能避免單一伺服器成為全站單點故障？','Which design best avoids a single server becoming a site-wide single point of failure?',
+    [['多台執行個體配合負載均衡器','Multiple instances behind a load balancer',true],['只升級一台伺服器','Upgrade only one server',false],['提高單一伺服器的流量','Send more traffic to one server',false]],
+    {zh:'多台健康執行個體可互相承接流量，負載均衡器會把請求分配出去。',en:'Multiple healthy instances can share traffic through a load balancer.'},DEMO_M1_FAIL)
+);
+QBANK.m1.push(
+  staticQuestion('m1-vertical-limit','垂直伸縮的主要限制是甚麼？','What is a main limitation of vertical scaling?',
+    [['單一執行個體有規格上限，且是單點故障','One instance has a size limit and is a single point of failure',true],['不能增加 CPU 或記憶體','CPU and memory cannot be increased',false],['每次都必須改用 Round Robin','It always requires Round Robin',false]],
+    {zh:'最大規格仍有容量上限，單一執行個體故障亦會影響全站。',en:'The largest size still has a capacity limit, and its failure affects the whole site.'},DEMO_M1_FAIL),
+  staticQuestion('m1-failover','多台執行個體中一台故障後，負載均衡器可做甚麼？','What can a load balancer do when one of several instances fails?',
+    [['在健康檢查後停止向故障執行個體送流量','Stop routing traffic to the failed instance after health checks',true],['自動提高故障機器規格','Automatically upgrade the failed machine',false],['保證剩餘伺服器永不超載','Guarantee the remaining servers never overload',false]],
+    {zh:'健康檢查偵測故障後可停止分流，但偵測延遲期間仍可能有失敗請求。',en:'Health checks can stop routing after detecting failure, though requests may fail during detection delay.'},DEMO_HEALTH)
+);
+QBANK.m2.push(
+  staticQuestion('m2-lb-purpose','負載均衡器的主要工作是甚麼？','What is the primary job of a load balancer?',
+    [['把請求分配到多個健康執行個體','Distribute requests across healthy instances',true],['自動修改資料庫內容','Automatically modify database contents',false],['替伺服器增加實體容量','Add physical capacity to a server',false]],
+    {zh:'它分配流量並可配合健康檢查避開故障執行個體。',en:'It distributes traffic and can avoid unhealthy instances using health checks.'},
+    [DEMO_LB('none',DEMO_LB_NONE),DEMO_LB('lc',DEMO_LB_ON)]),
+  staticQuestion('m2-mixed-size','混合 S 與 L 規格時，Round Robin 的平均分流可能造成甚麼問題？','What can equal Round Robin splitting do with mixed S and L instances?',
+    [['小型 S 先超載，而 L 容量未充分使用','Overload smaller S instances while underusing L capacity',true],['L 一定會先故障','L will always fail first',false],['流量會自動變少','Traffic automatically decreases',false]],
+    {zh:'Round Robin 不考慮規格容量；Least Connections 在此模擬中按容量比例分配。',en:'Round Robin ignores instance size; Least Connections is capacity-weighted in this simulation.'},
+    [DEMO_RR('rr',DEMO_RR_CAP),DEMO_RR('lc',DEMO_LC_CAP)])
+);
+QBANK.m4.push(
+  staticQuestion('m4-history','預測性伸縮為甚麼不一定能預測突發爆紅？','Why may predictive scaling fail to anticipate a sudden viral surge?',
+    [['突發事件可能未出現在歷史流量資料中','The sudden event may not appear in historical traffic data',true],['預測器會自動關閉所有伺服器','The predictor automatically shuts down all servers',false],['歷史資料會降低伺服器容量','Historical data reduces server capacity',false]],
+    {zh:'預測依賴過往流量，沒有先例的突發需求很難預先推算。',en:'Forecasts rely on past traffic, so unseen demand is hard to anticipate.'},
+    [demoAI('viral','dynamic'),demoAI('viral','predictive')]),
+  staticQuestion('m4-reactive','Reactive（被動）伸縮通常在甚麼時候開始擴容？','When does reactive scaling usually begin to scale out?',
+    [['監控指標超過設定門檻後','After a monitored metric exceeds its threshold',true],['流量發生前五分鐘','Five minutes before traffic arrives',false],['不論流量都固定擴容','At a fixed rate regardless of traffic',false]],
+    {zh:'Reactive 需等門檻觸發並等待新執行個體啟動；Predictive 可依預測提前擴容。',en:'Reactive waits for a threshold and instance startup; predictive scaling can act ahead of demand.'},
+    [demoAI('trend','dynamic'),demoAI('trend','predictive')])
+);
+function paramQuestion(id,build){return {id:id,type:'param',build:build};}
+function numericOptions(correct,distractors){
+  const values=[correct];
+  distractors.forEach(value=>{if(value!==correct&&!values.includes(value)&&values.length<3)values.push(value);});
+  for(let delta=1;values.length<3;delta++){const value=correct+delta;if(!values.includes(value))values.push(value);}
+  return values.map((value,i)=>({id:String.fromCharCode(97+i),value:value}));
+}
+function numericQuestion(id,q,correct,distractors,e,format,demo){
+  return {id:id,q:q,o:numericOptions(correct,distractors).map(option=>({id:option.id,zh:format(option.value,'zh'),en:format(option.value,'en'),ok:option.value===correct})),e:e,demo:demo};
+}
+function questionRandom(id){return rng(fnv(studentSeed+'|'+id));}
+function randomLoad(random,min,max){return (min+Math.floor(random()*(max-min+1)))*50;}
+function constantTraffic(rps){return Array(SIM_T).fill(rps);}
+function capacityDemoPair(load,count,captionA,captionB,scenario){
+  const traffic=constantTraffic(load);
+  return [
+    {cfg:{fleet:Array(count).fill('S'),lb:'lc',fail:null},scenario:scenario,traffic:traffic,caption:captionA},
+    {cfg:{fleet:Array(Math.max(1,count-1)).fill('S'),lb:'lc',fail:null},scenario:scenario,traffic:traffic,caption:captionB}
+  ];
+}
+QBANK.m0.push(
+  paramQuestion('m0-param-capacity',seed=>{
+    const load=randomLoad(questionRandom('m0-param-capacity'),5,19),needed=Math.ceil(load/100);
+    return numericQuestion('m0-param-capacity',{zh:'流量為 '+load+' rps，每台 S 可處理 100 rps，最少需要幾台才能處理全部流量？',en:'Traffic is '+load+' rps. Each S serves 100 rps. What is the minimum number of S instances needed?'},
+      needed,[Math.floor(load/100),needed-1,needed+1],{zh:'用流量除以每台容量並向上取整，才能確保總容量足夠。',en:'Divide demand by per-instance capacity and round up to cover all traffic.'},
+      (n,lang)=>lang==='zh'?n+' 台 S 執行個體':n+' S instances',
+      capacityDemoPair(load,needed,{zh:'足夠配置：容量至少等於流量。',en:'Enough instances provide capacity at least equal to demand.'},
+        {zh:'少一台：總容量不足，紅色部分為未處理流量。',en:'One fewer instance leaves a capacity gap shown in red.'},'steady'));
+  }),
+  paramQuestion('m0-param-overload',()=>{
+    const load=randomLoad(questionRandom('m0-param-overload'),5,19),needed=Math.ceil(load/100);
+    return numericQuestion('m0-param-overload',{zh:'流量為 '+load+' rps，若只有 '+(needed-1)+' 台 S（每台 100 rps），每秒約有多少 rps 超出總容量？',en:'Traffic is '+load+' rps. With only '+(needed-1)+' S instances (100 rps each), how many rps exceed total capacity?'},
+      load-(needed-1)*100,[load-(needed-1)*100+25,load-(needed-1)*100-25,load],{zh:'超出容量的流量無法處理；圖中紅色區域呈現未處理請求。',en:'Traffic above capacity is unserved; the red chart area shows those requests.'},
+      (n)=>n+' rps',
+      [{cfg:{fleet:Array(needed-1).fill('S'),lb:'lc',fail:null},scenario:'steady',traffic:constantTraffic(load),caption:{zh:'流量高於總容量，紅色部分是未處理請求。',en:'Traffic exceeds total capacity; red indicates unserved requests.'}}]);
+  })
+);
+QBANK.m1.push(
+  paramQuestion('m1-param-l-capacity',()=>{
+    const load=randomLoad(questionRandom('m1-param-l-capacity'),5,19),needed=Math.ceil(load/400);
+    return numericQuestion('m1-param-l-capacity',{zh:'流量為 '+load+' rps，每台 L 容量 400 rps，最少需要幾台 L 才足夠？',en:'Traffic is '+load+' rps. Each L serves 400 rps. What is the minimum number of L instances needed?'},
+      needed,[Math.floor(load/400),needed-1,needed+1],{zh:'執行個體數量需向上取整；一台大型伺服器仍有容量上限。',en:'Instance counts must round up; even one large server has a capacity limit.'},
+      (n,lang)=>lang==='zh'?n+' 台 L 執行個體':n+' L instances',
+      capacityDemoPair(load,Math.max(1,needed),{zh:'足夠 L 配置。',en:'The L instances provide enough capacity.'},
+        {zh:'少一台 L 時容量不足。',en:'One fewer L instance leaves insufficient capacity.'},'spike'));
+  }),
+  paramQuestion('m1-param-scaling',()=>{
+    const load=randomLoad(questionRandom('m1-param-scaling'),5,19),needed=Math.ceil(load/100);
+    return numericQuestion('m1-param-scaling',{zh:'把 '+load+' rps 分配到容量各 100 rps 的 S 執行個體，至少需要幾台？',en:'How many 100-rps S instances are needed to serve '+load+' rps?'},
+      needed,[Math.floor(load/100),needed-1,needed+1],{zh:'水平伸縮可用多台執行個體累加容量，數量按總流量向上取整。',en:'Horizontal scaling adds capacity across instances; round the required count up.'},
+      (n,lang)=>lang==='zh'?n+' 台 S 執行個體':n+' S instances',
+      capacityDemoPair(load,needed,{zh:'配置達到需求容量。',en:'This configuration meets the demand.'},
+        {zh:'少一台時容量低於需求。',en:'One fewer instance falls below demand.'},'spike'));
+  })
+);
+QBANK.m2.push(
+  paramQuestion('m2-param-round-robin',()=>{
+    const load=randomLoad(questionRandom('m2-param-round-robin'),7,19),share=Math.round(load/3);
+    return numericQuestion('m2-param-round-robin',{zh:'S、S、L 三台使用 Round Robin 平均分流，總流量 '+load+' rps 時，每台約收到多少 rps？',en:'With S, S, and L behind Round Robin, total traffic is '+load+' rps. About how much does each receive?'},
+      share,[share+50,share-50,load],{zh:'Round Robin 對三台平均分配；若 S 收到超過 100 rps，較小的 S 會先超載。',en:'Round Robin splits traffic equally; an S instance overloads above 100 rps.'},
+      n=>n+' rps',
+      [DEMO_RR('rr',{zh:'Round Robin 對 S、S、L 平均分流。',en:'Round Robin splits traffic equally across S, S, and L.'}),
+       DEMO_RR('lc',{zh:'Least Connections 在模擬中按容量比例分流。',en:'Least Connections splits traffic by capacity in this simulation.'})]);
+  }),
+  paramQuestion('m2-param-weighted-share',()=>{
+    const load=randomLoad(questionRandom('m2-param-weighted-share'),7,19),share=Math.round(load*2/3);
+    return numericQuestion('m2-param-weighted-share',{zh:'S、S、L 的容量為 100、100、400 rps。Least Connections 按容量比例分配 '+load+' rps 時，L 約收到多少？',en:'S, S, and L have capacities 100, 100, and 400 rps. With capacity-weighted distribution of '+load+' rps, how much reaches L?'},
+      share,[Math.round(load/3),share+50,share-50],{zh:'L 佔三台總容量的三分之二，因此約接收總流量的三分之二。',en:'L provides two-thirds of total capacity, so it receives about two-thirds of traffic.'},
+      n=>n+' rps',
+      [DEMO_RR('rr',DEMO_RR_CAP),DEMO_RR('lc',DEMO_LC_CAP)]);
+  })
+);
+QBANK.m3.push(
+  paramQuestion('m3-param-cost',()=>{
+    const instances=1+Math.floor(questionRandom('m3-param-cost')()*4),cost=+(instances*1.9*SIM_T).toFixed(2);
+    return numericQuestion('m3-param-cost',{zh:'M 規格每分鐘 $1.90，'+instances+' 台連續運行 '+SIM_T+' 分鐘，模擬成本是多少？',en:'M costs $1.90 per minute. What is the simulated cost for '+instances+' instances running '+SIM_T+' minutes?'},
+      cost,[+(cost+1.9*SIM_T).toFixed(2),+(cost-1.9*SIM_T).toFixed(2),+(cost/instances).toFixed(2)],{zh:'每分鐘價格 × 執行個體數 × 運行分鐘數。',en:'Price per minute × instance count × runtime in minutes.'},
+      n=>'$'+n.toFixed(2),
+      [{cfg:{fleet:Array(instances).fill('M'),lb:'lc',fail:null},scenario:'night',traffic:constantTraffic(15),caption:{zh:'夜間流量很低，持續運行的執行個體仍按分鐘計費。',en:'Instances are billed per minute even when night-time traffic is low.'}}]);
+  }),
+  paramQuestion('m3-param-minimum',()=>{
+    const load=randomLoad(questionRandom('m3-param-minimum'),5,19),needed=Math.ceil(load/100);
+    return numericQuestion('m3-param-minimum',{zh:'高峰流量為 '+load+' rps，每台 S 容量 100 rps。Min Size 至少應設為幾台才有足夠初始容量？',en:'Peak demand is '+load+' rps and each S serves 100 rps. What minimum size gives enough initial capacity?'},
+      needed,[Math.floor(load/100),needed-1,needed+1],{zh:'Min Size 設得過低會在伸縮反應前容量不足；設定過高則增加低流量時成本。',en:'A low minimum can lack capacity before scaling reacts; a high one costs more at low demand.'},
+      (n,lang)=>lang==='zh'?n+' 台 S 執行個體':n+' S instances',
+      [{cfg:{fleet:Array(needed).fill('S'),lb:'lc',fail:null},scenario:'steady',traffic:constantTraffic(load),caption:{zh:'初始執行個體數足以提供需求容量。',en:'The initial instance count provides enough capacity.'}},
+       {cfg:{fleet:Array(Math.max(1,needed-1)).fill('S'),lb:'lc',fail:null},scenario:'steady',traffic:constantTraffic(load),caption:{zh:'Min Size 少一台時，初始容量不足。',en:'One fewer initial instance leaves a capacity gap.'}}]);
+  })
+);
+QBANK.m4.push(
+  paramQuestion('m4-param-predictive-count',()=>{
+    const load=randomLoad(questionRandom('m4-param-predictive-count'),5,19),needed=Math.ceil(load/(100*0.7));
+    const build=max=>({fleet:['S'],lb:'lc',fail:null,asg:{min:1,max:max,spec:'S',mode:'predictive',cooldown:0,outTh:70,inTh:30,sustain:1,stepOut:1,stepIn:1,
+      predictFn:history=>history.slice(-5).reduce((sum,value)=>sum+value,0)/Math.min(history.length,5)}});
+    return numericQuestion('m4-param-predictive-count',{zh:'預測流量為 '+load+' rps，每台 S 的目標使用率為 70%，至少需要幾台 S？',en:'Forecast demand is '+load+' rps. At a 70% target utilization per S, how many instances are needed?'},
+      needed,[Math.ceil(load/100),needed-1,needed+1],{zh:'每台 S 以 70 rps 作為目標容量，所需數量向上取整。',en:'At 70% utilization, each S provides 70 rps of target capacity; round up.'},
+      (n,lang)=>lang==='zh'?n+' 台 S 執行個體':n+' S instances',
+      [{cfg:build(needed),scenario:'trend',traffic:constantTraffic(load),caption:{zh:'最大數量足以符合預測需求。',en:'The maximum permits enough instances for forecast demand.'}},
+       {cfg:build(Math.max(1,needed-1)),scenario:'trend',traffic:constantTraffic(load),caption:{zh:'最大數量少一台時，容量無法達到預測需求。',en:'One fewer maximum instance cannot meet forecast demand.'}}]);
+  }),
+  paramQuestion('m4-param-scaleout',()=>{
+    const load=randomLoad(questionRandom('m4-param-scaleout'),5,19),additional=Math.ceil(load/100)-1;
+    return numericQuestion('m4-param-scaleout',{zh:'目前有 1 台 S，預測需求為 '+load+' rps，若每台可處理 100 rps，至少需新增幾台？',en:'There is one S instance. Forecast demand is '+load+' rps and each serves 100 rps. How many additional instances are needed?'},
+      additional,[additional+1,additional-1,Math.ceil(load/100)],{zh:'總需求向上取整後，再扣除已運行的 1 台。',en:'Round the total required instance count up, then subtract the one already running.'},
+      (n,lang)=>lang==='zh'?n+' 台 S 執行個體':n+' S instances',
+      capacityDemoPair(load,Math.ceil(load/100),{zh:'Predictive 配置新增足夠執行個體。',en:'Predictive adds enough instances to meet demand.'},
+        {zh:'少一台時容量無法覆蓋流量。',en:'One fewer instance leaves demand unserved.'},'trend'));
+  })
+);
+function questionById(mid,id){
+  const question=QBANK[mid].find(q=>q.id===id);
+  if(!question)return null;
+  return question.type==='param'?Object.assign({},question.build(studentSeed),{id:question.id,type:question.type}):question;
+}
+function activeQuestions(mid){return (S.qpick[mid]||[]).map(id=>questionById(mid,id)).filter(Boolean);}
+function chooseQuestions(mid,attempt,previous){
+  const bank=QBANK[mid],count=QUIZ_COUNTS[mid];
+  for(let retry=0;retry<100;retry++){
+    const seedText=studentSeed+'|'+mid+(attempt===1?'':'|'+attempt+'|'+retry);
+    const random=rng(fnv(seedText)),params=bank.filter(q=>q.type==='param');
+    const selected=[params[Math.floor(random()*params.length)]];
+    const remaining=bank.filter(q=>q.id!==selected[0].id);
+    for(let i=remaining.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[remaining[i],remaining[j]]=[remaining[j],remaining[i]];}
+    selected.push.apply(selected,remaining.slice(0,count-1));
+    for(let i=selected.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[selected[i],selected[j]]=[selected[j],selected[i]];}
+    const ids=selected.map(q=>q.id);
+    if(!previous||ids.slice().sort().join('|')!==previous.slice().sort().join('|'))return ids;
+  }
+  throw new Error('Unable to select a different quiz set for '+mid);
+}
+function orderedOptions(q){
+  if(!S.qorder[q.id]){
+    const options=q.o.slice(),random=rng(fnv(studentSeed+'|'+q.id));
+    for(let i=options.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[options[i],options[j]]=[options[j],options[i]];}
+    S.qorder[q.id]=options.map(o=>o.id);save();
+  }
+  return S.qorder[q.id].map(id=>q.o.find(o=>o.id===id)).filter(Boolean);
+}
+function ensureQuizSet(mid){
+  S.qpick=S.qpick||{};S.qorder=S.qorder||{};S.attempt=S.attempt||{};S.quiz=S.quiz||{};
+  if(!S.attempt[mid])S.attempt[mid]=1;
+  if(!S.qpick[mid])S.qpick[mid]=chooseQuestions(mid,S.attempt[mid],null);
+}
+function quizAnswered(mid){return activeQuestions(mid).filter(q=>S.quiz[q.id]!==undefined).length;}
+function isCorrect(q,answer){const option=q.o.find(o=>o.id===answer);return !!(option&&option.ok);}
+function correctOption(q){return q.o.find(o=>o.ok);}
+function quizCount(mid){
+  const questions=activeQuestions(mid),verified=S.verified&&S.verified[mid];
+  if(!verified)return [0,questions.length];
+  let correct=0;questions.forEach(q=>{if(isCorrect(q,verified.answers[q.id]))correct++;});
+  return [correct,questions.length];
+}
+function renderQuiz(mid){
+  if(!S.student)return;
+  ensureQuizSet(mid);
+  const box=$('quiz-'+mid),questions=activeQuestions(mid),verified=S.verified&&S.verified[mid],demos=[];
+  let h='<h3>'+T('檢查理解','Quick check')+'</h3>';
+  questions.forEach((q,i)=>{
+    const selected=S.quiz[q.id],options=orderedOptions(q);
+    let mark=selected===undefined?'○':'●',aria=L(selected===undefined?'未作答':'已作答',selected===undefined?'Not answered':'Answered');
+    if(verified){const correct=isCorrect(q,verified.answers[q.id]);mark=correct?'✔':'✖';aria=L(correct?'答對':'答錯',correct?'Correct answer':'Incorrect answer');}
+    h+='<div class="q"><p><span class="q-status" role="img" aria-label="'+aria+'">'+mark+'</span>'+(i+1)+'. '+T(q.q.zh,q.q.en)+'</p>';
+    options.forEach(o=>{h+='<label><input type="radio" name="'+q.id+'" value="'+o.id+'"'+(selected===o.id?' checked':'')+(verified?' disabled':'')+'> '+T(o.zh,o.en)+'</label>';});
+    if(verified){
+      const answer=verified.answers[q.id],correct=isCorrect(q,answer),studentOption=q.o.find(o=>o.id===answer),correctAnswer=correctOption(q);
+      h+='<div class="quiz-result"><div>'+T('你的答案：','Your answer: ')+T(studentOption.zh,studentOption.en)+'</div><div>'+T('正確答案：','Correct answer: ')+T(correctAnswer.zh,correctAnswer.en)+'</div><div><span class="'+(correct?'ok':'bad')+'" role="img" aria-label="'+L(correct?'答對':'答錯',correct?'Correct':'Incorrect')+'">'+(correct?'✔':'✖')+'</span> '+T(q.e.zh,q.e.en)+'</div></div>';
+      if(q.demo)(Array.isArray(q.demo)?q.demo:[q.demo]).forEach((demo,index)=>{
+        const id='demo-'+mid+'-'+q.id+'-'+index;
+        h+='<figure class="quiz-demo"><canvas id="'+id+'" width="900" height="330" role="img" aria-label="'+esc(L(demo.caption.zh,demo.caption.en))+'"></canvas><figcaption>'+T(demo.caption.zh,demo.caption.en)+'</figcaption><div class="metrics" id="metrics-'+id+'"></div></figure>';
+        demos.push({id:id,demo:demo});
+      });
+    }
+    h+='</div>';
+  });
+  h+='<div class="quiz-actions"><button type="button" class="act" id="verify-'+mid+'"'+(verified?' hidden':'')+'>'+T('驗證並解釋答案','Check and explain answers')+'</button><span class="mut" id="answered-'+mid+'"></span>';
+  if(verified)h+='<button type="button" class="act sec" id="redo-'+mid+'">'+T('重做本關測驗','Retake this mission quiz')+'</button>';
+  h+='</div>';
+  box.innerHTML=h;
+  demos.forEach(item=>{
+    const canvas=$(item.id),result=runSim(item.demo.cfg,item.demo.scenario,item.demo.traffic);
+    canvas._simResult=result;canvas._simUpto=SIM_T;canvas._demoHighlight=item.demo.highlight||null;redrawChart(canvas);
+    $('metrics-'+item.id).innerHTML='<div>'+T('成本','Cost')+' <b>$'+Math.round(result.cost)+'</b></div><div>'+T('未處理請求','Dropped requests')+' <b>'+result.dropped.toLocaleString()+'</b></div>';
+  });
+  box.querySelectorAll('input[type=radio]').forEach(inp=>inp.addEventListener('change',()=>{
+    S.quiz[inp.name]=inp.value;save();
+    const status=inp.closest('.q').querySelector('.q-status');
+    status.textContent='●';status.setAttribute('aria-label',L('已作答','Answered'));
+    updateQuizControls(mid);refresh();
+  }));
+  const verify=$('verify-'+mid);
+  if(verify)verify.addEventListener('click',()=>{
+    const answers={};questions.forEach(q=>{answers[q.id]=S.quiz[q.id];});
+    const record={time:new Date().toISOString(),answers:answers,attempt:S.attempt[mid]};
+    S.verified=S.verified||{};S.verified[mid]=record;
+    S.attempts=S.attempts||{};S.attempts[mid]=S.attempts[mid]||[];S.attempts[mid].push(record);
+    save();renderQuiz(mid);refresh();
+  });
+  const redo=$('redo-'+mid);
+  if(redo)redo.addEventListener('click',()=>{
+    const previous=S.qpick[mid];S.attempt[mid]++;
+    S.qpick[mid]=chooseQuestions(mid,S.attempt[mid],previous);
+    previous.forEach(id=>delete S.quiz[id]);
+    delete S.verified[mid];save();renderQuiz(mid);refresh();
+  });
+  updateQuizControls(mid);
+}
+function updateQuizControls(mid){
+  const questions=activeQuestions(mid),answered=quizAnswered(mid),button=$('verify-'+mid),counter=$('answered-'+mid);
+  if(button)button.disabled=answered!==questions.length;
+  if(counter)counter.textContent=L('已作答 '+answered+' / '+questions.length+' 題',answered+' of '+questions.length+' answered');
+}
 
 function goalList(i){
   const m=S.m['m'+i]||{};
@@ -498,20 +858,52 @@ function missionScore(i){
   return Math.round(PTS[i]*(0.6*sim+0.4*qf)*10)/10;
 }
 function totalScore(){let s=0;for(let i=0;i<5;i++)s+=missionScore(i);return Math.round(s*10)/10;}
+function missionComplete(i){
+  const q=quizCount('m'+i),verified=S.verified&&S.verified['m'+i];
+  return goalList(i).every(x=>x[1])&&!!verified&&q[0]===q[1];
+}
+function missionStatus(i){
+  const mid='m'+i,questions=activeQuestions(mid),answered=quizAnswered(mid);
+  if(missionComplete(i))return {mark:'✔',aria:L('完成','Complete'),text:L('✔ 完成','✔ Complete')};
+  if(!(S.verified&&S.verified[mid])&&answered===questions.length)return {mark:'',aria:L('待驗證','Awaiting verification'),text:L('待驗證','Awaiting verification')};
+  const started=goalList(i).some(x=>x[1])||answered>0||!!(S.verified&&S.verified[mid])||!!(S.attempt&&S.attempt[mid]>1);
+  return started?{mark:'◐',aria:L('進行中','In progress'),text:L('◐ 進行中','◐ In progress')}:
+    {mark:'○',aria:L('未開始','Not started'),text:L('○ 未開始','○ Not started')};
+}
+function resultData(){
+  const missions=[];
+  for(let i=0;i<5;i++){
+    const mid='m'+i,records=S.attempts&&S.attempts[mid]||[];
+    missions.push({
+      missionId:mid,score:missionScore(i),status:missionStatus(i).aria,attempts:records.map(record=>({
+        time:record.time,attempt:record.attempt,answers:Object.keys(record.answers).map(id=>{
+          const question=questionById(mid,id),answer=record.answers[id],studentOption=question.o.find(o=>o.id===answer),correct=correctOption(question);
+          return {questionId:id,question:{zh:question.q.zh,en:question.q.en},studentAnswer:answer,
+            studentAnswerText:{zh:studentOption.zh,en:studentOption.en},correctAnswer:correct.id,
+            correctAnswerText:{zh:correct.zh,en:correct.en},correct:studentOption.ok};
+        })
+      }))
+    });
+  }
+  return {studentId:S.student,studentSeed:S.studentSeed,exportedAt:new Date().toISOString(),score:totalScore(),missions:missions};
+}
 function refresh(){
   for(let i=0;i<5;i++){
     const g=goalList(i),q=quizCount('m'+i);
     let h='<b>'+T('目標（模擬 60% ＋ 測驗 40%，滿分 '+PTS[i]+'）','Goals (Simulation 60% + Quiz 40%, max '+PTS[i]+')')+'</b><br>';
-    g.forEach(x=>{h+=(x[1]?'<span class="ok">✔ ':'<span class="bad">✖ ')+x[0]+'</span><br>';});
-    h+=T('測驗：','Quiz: ')+q[0]+'/'+q[1]+' · '+T('本關得分：','Mission score: ')+'<b>'+missionScore(i)+'</b>';
+    g.forEach(x=>{const done=!!x[1];h+='<span class="'+(done?'ok':'bad')+'" role="img" aria-label="'+L(done?'已達成':'尚未達成',done?'Achieved':'Not achieved')+'">'+(done?'✔':'✖')+'</span> '+x[0]+'<br>';});
+    const verified=S.verified&&S.verified['m'+i];
+    h+=T('測驗：','Quiz: ')+q[0]+'/'+q[1]+' · '+(verified?'':T('未驗證','Not verified')+' · ')+T('本關得分：','Mission score: ')+'<b>'+missionScore(i)+'</b>';
     $('goals-m'+i).innerHTML=h;
-    const done=g.every(x=>x[1])&&q[0]===q[1];
-    const b=document.querySelector('#nav button[data-t="m'+i+'"]');if(b)b.classList.toggle('done',done);
   }
   const sb=$('scorebox');
-  if(sb){let h='<h3>'+T('成績摘要','Score summary')+'</h3><table><tr><th>'+T('任務','Mission')+'</th><th>'+T('分數','Score')+'</th><th>'+T('滿分','Max')+'</th></tr>';
-    for(let i=0;i<5;i++)h+='<tr><td>'+T('任務 '+i,'Mission '+i)+'</td><td>'+missionScore(i)+'</td><td>'+PTS[i]+'</td></tr>';
-    h+='<tr><th>'+T('總分','Total')+'</th><th>'+totalScore()+'</th><th>100</th></tr></table>';sb.innerHTML=h;}
+  if(sb){let h='<h3>'+T('成績摘要','Score summary')+'</h3><table><tr><th>'+T('任務','Mission')+'</th><th>'+T('分數','Score')+'</th><th>'+T('滿分','Max')+'</th><th>'+T('狀態','Status')+'</th><th>'+T('嘗試次數','Attempts')+'</th></tr>';
+    for(let i=0;i<5;i++){
+      const state=missionStatus(i);
+      h+='<tr><td>'+T('任務 '+i,'Mission '+i)+'</td><td>'+missionScore(i)+'</td><td>'+PTS[i]+'</td><td><span role="img" aria-label="'+state.aria+'">'+state.text+'</span></td><td>'+(S.attempt&&S.attempt['m'+i]||0)+'</td></tr>';
+    }
+    h+='<tr><th colspan="2">'+T('總分','Total')+'</th><th>'+totalScore()+'</th><td></td><td></td></tr></table>';sb.innerHTML=h;}
+  buildNav();
 }
 
 // Mission handlers
@@ -632,8 +1024,7 @@ function initConsole(){
   ['img/asg-2-scaling-config.png','2. 創建伸縮配置 Scaling Configuration','執行個體類型、鏡像 Image'],
   ['img/asg-3-scaling-rule.png','3. 創建伸縮規則 Scaling Rule','簡單 / 步進 / 目標追蹤 / 預測 規則'],
   ['img/asg-4-alarm-task.png','4. 創建警報任務 Alarm Task','CPU 閾值、連續次數、觸發的規則']];
-  $('shots').innerHTML=shots.map((s,i)=>'<div class="card"><h3>'+s[1]+'</h3><div class="shot" id="shot'+i+'"><img src="'+s[0]+'" alt="'+s[1]+'"><div>'+s[2]+'</div></div></div>').join('');
-  shots.forEach((s,i)=>{const im=document.querySelector('#shot'+i+' img');im.onerror=()=>{im.replaceWith(Object.assign(document.createElement('div'),{innerHTML:'尚未放入截圖 No screenshot yet.<br>請放置 Place file: <code>'+s[0]+'</code>'}));};});
+  $('shots').innerHTML=shots.map((s,i)=>'<div class="card"><h3>'+s[1]+'</h3><div class="shot" id="shot'+i+'"><div>尚未放入截圖 No screenshot yet.<br>請放置 Place file: <code>'+s[0]+'</code></div><div>'+s[2]+'</div></div></div>').join('');
 }
 
 // Navigation, persistence
@@ -666,8 +1057,15 @@ function show(id){
 }
 function buildNav(){
   const copy=UI[language],tabs=TABS.slice();
-  $('nav').innerHTML=tabs.map((t,i)=>'<button data-t="'+t[0]+'" class="'+(t[0]===currentTab?'on':'')+'">'+copy.nav[i]+'</button>').join('');
+  $('nav').innerHTML=tabs.map((t,i)=>{
+    const mission=i>=2&&i<=6?i-2:-1,done=mission>=0&&missionComplete(mission);
+    const label=copy.nav[i]+(done?' ✔':'');
+    return '<button data-t="'+t[0]+'" class="'+(t[0]===currentTab?'on':'')+(done?' done':'')+'"'+(done?' aria-label="'+esc(copy.nav[i]+' · '+L('已完成','Completed'))+'"':'')+'>'+label+'</button>';
+  }).join('');
   $('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>show(b.dataset.t));
+}
+function updateStudentBadge(){
+  $('student-badge').textContent=S.student?L('學生：','Student: ')+S.student:'';
 }
 function applyLanguage(){
   const copy=UI[language];
@@ -682,8 +1080,11 @@ function applyLanguage(){
   });
   $('progress-title').textContent=copy.progress;
   copy.missions.forEach((title,i)=>document.querySelector('#tab-m'+i+' > h2').textContent=title);
+  updateStudentBadge();
+  if(!S.student)return;
+  ['m0','m1','m2','m3','m4'].forEach(renderQuiz);
   buildNav();refresh();
-  document.querySelectorAll('canvas').forEach(canvas=>{if(canvas._simResult)drawChart(canvas,canvas._simResult,canvas._simUpto||SIM_T);});
+  document.querySelectorAll('canvas').forEach(redrawChart);
   const active=document.querySelector('.tab.on');if(active)animateTab(active);
 }
 function initPersist(){
@@ -694,11 +1095,37 @@ function initPersist(){
     e.addEventListener('input',h);e.addEventListener('change',h);
   });
 }
-initPersist();
-['m0','m1','m2','m3','m4'].forEach(renderQuiz);
-initM0();initM1();initM2();initM3();initM4();initConsole();
 $('language-toggle').onclick=()=>{language=language==='zh'?'en':'zh';localStorage.setItem('cc10-language',language);applyLanguage();};
-applyLanguage();show('intro');
+const studentDialog=$('student-dialog'),studentInput=$('student-input');
+studentDialog.addEventListener('cancel',event=>event.preventDefault());
+$('student-form').addEventListener('submit',event=>{
+  event.preventDefault();
+  const name=studentInput.value.trim();
+  if(!name){studentInput.setCustomValidity(L('請輸入學生編號或姓名。','Enter a student ID or name.'));studentInput.reportValidity();return;}
+  studentInput.setCustomValidity('');
+  if(!S.student)S=defState();
+  S.student=name;S.studentSeed=fnv(SALT+'|'+normalizeStudent(name));studentSeed=S.studentSeed;
+  save();location.reload();
+});
+$('change-student').onclick=()=>{
+  if(!confirm(L('更換學生會清除目前所有學習進度，確定繼續？','Changing students clears all current progress. Continue?')))return;
+  S=defState();save();studentSeed=0;studentInput.value='';updateStudentBadge();studentDialog.showModal();studentInput.focus();
+};
+function initializeLab(){
+  initPersist();
+  ['m0','m1','m2','m3','m4'].forEach(renderQuiz);
+  initM0();initM1();initM2();initM3();initM4();initConsole();
+  $('download-results').onclick=()=>{
+    const blob=new Blob([JSON.stringify(resultData(),null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob),link=document.createElement('a');
+    const student=(S.student||'student').trim().replace(/[^\w.-]+/g,'-')||'student';
+    link.href=url;link.download='autoscaling-lab-'+student+'.json';
+    document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  };
+  applyLanguage();show('intro');
+}
+if(S.student&&S.student.trim())initializeLab();
+else{S.student=null;studentInput.value='';studentDialog.showModal();studentInput.focus();applyLanguage();}
 </script>
 </body>
 </html>
