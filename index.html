@@ -1258,7 +1258,7 @@ function initConsole(){
     {file:'img/asg-3-scaling-rule.png',title:{zh:'3. 建立伸縮規則',en:'3. Create a scaling rule'},details:{zh:'簡單、步進、目標追蹤與預測規則',en:'Simple, step, target-tracking, and predictive rules'}},
     {file:'img/asg-4-alarm-task.png',title:{zh:'4. 建立警報任務',en:'4. Create an alarm task'},details:{zh:'CPU 閾值、連續次數、觸發的規則',en:'CPU threshold, consecutive evaluation periods, and triggered rule'}}
   ];
-  $('shots').innerHTML=shots.map((s,i)=>'<div class="card"><h3>'+T(s.title.zh,s.title.en)+'</h3><div class="shot" id="shot'+i+'"><div>'+T('尚未放入截圖','No screenshot added yet')+'<br>'+T('請放置檔案：','Place file: ')+'<code>'+s.file+'</code></div><div>'+T(s.details.zh,s.details.en)+'</div></div></div>').join('');
+  $('shots').innerHTML=shots.map((s,i)=>'<div class="card"><h3>'+T(s.title.zh,s.title.en)+'</h3><div class="shot" id="shot'+i+'"><img src="'+s.file+'" alt="" data-zh-alt="'+esc(s.title.zh)+'" data-en-alt="'+esc(s.title.en)+'" loading="lazy"><div>'+T(s.details.zh,s.details.en)+'</div></div></div>').join('');
 }
 
 // Navigation, persistence
