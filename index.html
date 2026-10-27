@@ -421,7 +421,7 @@ const PTS=[10,20,20,30,20];
 function seedFor(n){return fnv('autoscaling-lab|'+n)||1;}
 function ensureStart(){if(!S.start){S.start=Date.now();save();}}
 function pct(x){return (x*100).toFixed(1)+'%';}
-function sum(r,fail){return {a:+r.avail.toFixed(4),c:Math.round(r.cost),o:r.over,p:r.peak,f:!!fail};}
+function sum(r,fail){return {a:r.avail,c:Math.round(r.cost),o:r.over,p:r.peak,f:!!fail};}
 function runSim(cfg,scen,traffic){const tr=traffic||makeTraffic(scen,seedFor(scen));return simulate(cfg,tr);}
 function num(id,def,lo,hi){let v=parseFloat($(id).value);if(!isFinite(v))v=def;return Math.max(lo,Math.min(hi,Math.round(v)));}
 
