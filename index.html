@@ -93,12 +93,12 @@ pre{background:#101820;color:#d6e2ee;padding:8px;border-radius:6px;overflow:auto
 <div class="card">
 <h3 data-i18n data-zh="建議學習流程" data-en="Suggested learning path">建議學習流程</h3>
 <table>
-<tr><th data-i18n data-zh="任務" data-en="Mission">任務</th><th data-i18n data-zh="內容" data-en="Content">內容</th><th data-i18n data-zh="簡報對應" data-en="Slides">簡報對應</th><th data-i18n data-zh="時間" data-en="Time">時間</th><th data-i18n data-zh="分數" data-en="Points">分數</th></tr>
-<tr><td>0</td><td data-i18n data-zh="單一伺服器的極限" data-en="One server's limit">單一伺服器的極限</td><td data-i18n data-zh="投影片 3、7" data-en="Slides 3, 7">投影片 3、7</td><td data-i18n data-zh="5 分鐘" data-en="5 min">5 分鐘</td><td>10</td></tr>
-<tr><td>1</td><td data-i18n data-zh="垂直伸縮與水平伸縮" data-en="Vertical vs. horizontal scaling">垂直伸縮與水平伸縮</td><td data-i18n data-zh="投影片 5–7" data-en="Slides 5–7">投影片 5–7</td><td data-i18n data-zh="10 分鐘" data-en="10 min">10 分鐘</td><td>20</td></tr>
-<tr><td>2</td><td data-i18n data-zh="負載均衡（Load Balancing）" data-en="Load balancing">負載均衡（Load Balancing）</td><td data-i18n data-zh="投影片 10–11" data-en="Slides 10–11">投影片 10–11</td><td data-i18n data-zh="10 分鐘" data-en="10 min">10 分鐘</td><td>20</td></tr>
-<tr><td>3</td><td data-i18n data-zh="設定彈性伸縮（Auto Scaling）的四個步驟" data-en="Four Auto Scaling setup steps">設定彈性伸縮（Auto Scaling）的四個步驟</td><td data-i18n data-zh="投影片 9、12–17" data-en="Slides 9, 12–17">投影片 9、12–17</td><td data-i18n data-zh="20 分鐘" data-en="20 min">20 分鐘</td><td>30</td></tr>
-<tr><td>4</td><td data-i18n data-zh="人工智能預測性伸縮" data-en="AI predictive scaling">人工智能預測性伸縮</td><td data-i18n data-zh="延伸" data-en="Extension">延伸</td><td data-i18n data-zh="12 分鐘" data-en="12 min">12 分鐘</td><td>20</td></tr>
+<tr><th data-i18n data-zh="任務" data-en="Mission">任務</th><th data-i18n data-zh="內容" data-en="Content">內容</th></tr>
+<tr><td>0</td><td data-i18n data-zh="單一伺服器的極限" data-en="One server's limit">單一伺服器的極限</td></tr>
+<tr><td>1</td><td data-i18n data-zh="垂直伸縮與水平伸縮" data-en="Vertical vs. horizontal scaling">垂直伸縮與水平伸縮</td></tr>
+<tr><td>2</td><td data-i18n data-zh="負載均衡（Load Balancing）" data-en="Load balancing">負載均衡（Load Balancing）</td></tr>
+<tr><td>3</td><td data-i18n data-zh="設定彈性伸縮（Auto Scaling）的四個步驟" data-en="Four Auto Scaling setup steps">設定彈性伸縮（Auto Scaling）的四個步驟</td></tr>
+<tr><td>4</td><td data-i18n data-zh="人工智能預測性伸縮" data-en="AI predictive scaling">人工智能預測性伸縮</td></tr>
 </table>
 </div>
 <div class="card">
@@ -201,29 +201,29 @@ pre{background:#101820;color:#d6e2ee;padding:8px;border-radius:6px;overflow:auto
 <label><span data-i18n data-zh="新執行個體規格 " data-en="New instance specification ">新執行個體規格 </span><select id="m3spec" data-persist><option value="S" selected data-i18n data-zh="S · 100 每秒請求 · $1/分鐘" data-en="S · 100 rps · $1/min">S · 100 每秒請求 · $1/分鐘</option><option value="M" data-i18n data-zh="M · 200 每秒請求 · $1.9/分鐘" data-en="M · 200 rps · $1.9/min">M · 200 每秒請求 · $1.9/分鐘</option><option value="L" data-i18n data-zh="L · 400 每秒請求 · $3.6/分鐘" data-en="L · 400 rps · $3.6/min">L · 400 每秒請求 · $3.6/分鐘</option></select></label>
 <button class="act sec" data-step="2" data-i18n data-zh="確認步驟 2" data-en="Confirm step 2">確認步驟 2</button> <span class="fb" id="sf2"></span></div>
 
-<div class="card step" id="st3"><h3>步驟三 Step 3 · 創建伸縮規則 Scaling Rules</h3>
-<label>伸縮模式 Mode
+<div class="card step" id="st3"><h3 data-i18n data-zh="步驟 3 · 建立伸縮規則" data-en="Step 3 · Create scaling rules">步驟 3 · 建立伸縮規則</h3>
+<label><span data-i18n data-zh="伸縮模式" data-en="Scaling mode">伸縮模式</span>
 <select id="m3mode" data-persist>
-<option value="dynamic">動態模式 Dynamic(按 CPU)</option>
-<option value="scheduled">定時模式 Scheduled</option>
-<option value="fixed">固定數量模式 Fixed(= Min Size)</option>
-<option value="custom" selected>自訂模式 Custom(動態 + 定時)</option>
+<option value="dynamic" data-i18n data-zh="動態模式（按 CPU）" data-en="Dynamic (CPU-based)">動態模式（按 CPU）</option>
+<option value="scheduled" data-i18n data-zh="定時模式" data-en="Scheduled">定時模式</option>
+<option value="fixed" data-i18n data-zh="固定數量模式（等於 Min Size）" data-en="Fixed (equal to Min Size)">固定數量模式（等於 Min Size）</option>
+<option value="custom" selected data-i18n data-zh="自訂模式（動態＋定時）" data-en="Custom (dynamic + scheduled)">自訂模式（動態＋定時）</option>
 </select></label>
-<label>擴容時增加執行個體數 Scale-out step <input type="number" id="m3so" data-persist min="1" max="5" value="2"></label>
-<label>縮容時減少執行個體數 Scale-in step <input type="number" id="m3si" data-persist min="1" max="5" value="1"></label>
-<table><tr><th>定時任務 Scheduled task</th><th>時間 Time (HH:MM)</th><th>調整至執行個體數 Set count to</th></tr>
+<label><span data-i18n data-zh="擴容步長" data-en="Scale-out step">擴容步長</span> <input type="number" id="m3so" data-persist min="1" max="5" value="2"></label>
+<label><span data-i18n data-zh="縮容步長" data-en="Scale-in step">縮容步長</span> <input type="number" id="m3si" data-persist min="1" max="5" value="1"></label>
+<table><tr><th data-i18n data-zh="定時任務" data-en="Scheduled task">定時任務</th><th data-i18n data-zh="時間（HH:MM）" data-en="Time (HH:MM)">時間（HH:MM）</th><th data-i18n data-zh="調整至執行個體數" data-en="Set instance count to">調整至執行個體數</th></tr>
 <tr><td>#1</td><td><input type="text" id="m3t1" data-persist value="16:50" size="6"></td><td><input type="number" id="m3n1" data-persist min="0" max="10" value="4"></td></tr>
 <tr><td>#2</td><td><input type="text" id="m3t2" data-persist value="18:00" size="6"></td><td><input type="number" id="m3n2" data-persist min="0" max="10" value="1"></td></tr></table>
-<button class="act sec" data-step="3">確認步驟三 Confirm</button> <span class="fb" id="sf3"></span></div>
+<button class="act sec" data-step="3" data-i18n data-zh="確認步驟 3" data-en="Confirm step 3">確認步驟 3</button> <span class="fb" id="sf3"></span></div>
 
-<div class="card step" id="st4"><h3>步驟四 Step 4 · 創建警報任務 Alert (CloudMonitor)</h3>
-<label>CPU ≥ 此值時觸發擴容 Scale-out when CPU ≥ <input type="number" id="m3out" data-persist min="30" max="100" value="70"> %</label>
-<label>CPU ≤ 此值時觸發縮容 Scale-in when CPU ≤ <input type="number" id="m3in" data-persist min="0" max="60" value="30"> %</label>
-<label>連續分鐘數 Consecutive minutes <input type="number" id="m3sus" data-persist min="1" max="5" value="1"></label>
-<button class="act sec" data-step="4">確認步驟四 Confirm</button> <span class="fb" id="sf4"></span></div>
+<div class="card step" id="st4"><h3 data-i18n data-zh="步驟 4 · 建立警報任務（CloudMonitor）" data-en="Step 4 · Create an alert task (CloudMonitor)">步驟 4 · 建立警報任務（CloudMonitor）</h3>
+<label><span data-i18n data-zh="CPU ≥ 此值時觸發擴容" data-en="Scale out when CPU ≥">CPU ≥ 此值時觸發擴容</span> <input type="number" id="m3out" data-persist min="30" max="100" value="70"> %</label>
+<label><span data-i18n data-zh="CPU ≤ 此值時觸發縮容" data-en="Scale in when CPU ≤">CPU ≤ 此值時觸發縮容</span> <input type="number" id="m3in" data-persist min="0" max="60" value="30"> %</label>
+<label><span data-i18n data-zh="連續分鐘數" data-en="Consecutive minutes">連續分鐘數</span> <input type="number" id="m3sus" data-persist min="1" max="5" value="1"></label>
+<button class="act sec" data-step="4" data-i18n data-zh="確認步驟 4" data-en="Confirm step 4">確認步驟 4</button> <span class="fb" id="sf4"></span></div>
 
 <div class="card">
-<button class="act" id="m3run" disabled>▶ 測試三個情境 Run all 3 scenarios</button>
+<button class="act" id="m3run" disabled data-i18n data-zh="▶ 測試三個情境" data-en="▶ Run all 3 scenarios">▶ 測試三個情境</button>
 <div id="m3warn"></div>
 <div id="cmp-m3"></div>
 <div id="out-m3a"></div><div id="out-m3b"></div><div id="out-m3c"></div>
@@ -244,9 +244,9 @@ pre{background:#101820;color:#d6e2ee;padding:8px;border-radius:6px;overflow:auto
 <button class="act sec" id="m4reset" data-i18n data-zh="重設程式碼" data-en="Reset code">重設程式碼</button>
 <button class="act sec" id="m4ai" data-i18n data-zh="複製 AI 提示" data-en="Copy AI prompt">複製 AI 提示</button>
 <span class="fb" id="m4msg"></span>
-<p class="mut">注意:無限迴圈會令瀏覽器分頁停頓,執行前請避免 while(true)。Avoid infinite loops; they will freeze the tab.</p>
-<details><summary>提示 Hint 1</summary><p>用最近 6 筆數據的變化量計算每分鐘增長率 slope,再用「最新值 + slope × 5」預測 5 分鐘後。Use the change over the last 6 samples as slope; predict latest + slope × 5.</p></details>
-<details><summary>提示 Hint 2</summary><p>數據有隨機波動。可先用最近 3 筆平均值作起點,再計算斜率。Data is noisy; smooth with a 3-sample average before computing the slope.</p></details>
+<p class="mut" data-i18n data-zh="注意：無限迴圈會令瀏覽器分頁停頓，執行前請避免使用 while(true)。" data-en="Warning: Infinite loops can freeze the browser tab. Avoid while(true) before running your code.">注意：無限迴圈會令瀏覽器分頁停頓，執行前請避免使用 while(true)。</p>
+<details><summary data-i18n data-zh="提示 1" data-en="Hint 1">提示 1</summary><p data-i18n data-zh="用最近 6 筆數據的變化量計算每分鐘增長率（slope），再用「最新值 + slope × 5」預測 5 分鐘後。" data-en="Calculate the per-minute growth rate (slope) from the last 6 samples, then predict 5 minutes ahead with latest value + slope × 5.">用最近 6 筆數據的變化量計算每分鐘增長率（slope），再用「最新值 + slope × 5」預測 5 分鐘後。</p></details>
+<details><summary data-i18n data-zh="提示 2" data-en="Hint 2">提示 2</summary><p data-i18n data-zh="數據有隨機波動。可先用最近 3 筆平均值作起點，再計算斜率。" data-en="Traffic data is noisy. Smooth it with a 3-sample average before calculating the slope.">數據有隨機波動。可先用最近 3 筆平均值作起點，再計算斜率。</p></details>
 </div>
 <div class="card"><div id="cmp-m4"></div><div id="out-m4a"></div><div id="out-m4b"></div></div>
 <div class="card" id="quiz-m4"></div>
@@ -255,22 +255,22 @@ pre{background:#101820;color:#d6e2ee;padding:8px;border-radius:6px;overflow:auto
 <section class="tab" id="tab-console">
 <h2 data-i18n data-zh="Console 參考" data-en="Cloud console reference">Console 參考</h2>
 <div class="card">
-<p>以下欄位對應阿里雲 Auto Scaling 主控台。將截圖放入 <code>img/</code> 資料夾(檔名如下),頁面會自動顯示。官方文件 Official docs:
-<a href="https://www.alibabacloud.com/help/zh/auto-scaling/latest/scale-ecs-instances" target="_blank" rel="noopener">scale-ecs-instances</a>。
-主控台介面可能更新,名稱以實際畫面為準。The console UI changes over time; use what you see on screen.</p>
+<p><span data-i18n data-zh="以下欄位對應阿里雲 Auto Scaling 主控台。將截圖放入 " data-en="The fields below correspond to the Alibaba Cloud Auto Scaling console. Place screenshots in the ">以下欄位對應阿里雲 Auto Scaling 主控台。將截圖放入 </span><code>img/</code><span data-i18n data-zh=" 資料夾（檔名如下），頁面會自動顯示。官方文件：" data-en=" folder using the filenames below; the page will display them automatically. Official documentation:"> 資料夾（檔名如下），頁面會自動顯示。官方文件：</span>
+<a href="https://www.alibabacloud.com/help/zh/auto-scaling/latest/scale-ecs-instances" target="_blank" rel="noopener">scale-ecs-instances</a><span data-i18n data-zh="。" data-en=". ">。</span>
+<span data-i18n data-zh="主控台介面可能更新，請以實際畫面為準。" data-en="The console UI may change; use the labels shown in the current interface.">主控台介面可能更新，請以實際畫面為準。</span></p>
 </div>
 <div id="shots"></div>
 <div class="card">
 <h3 data-i18n data-zh="模擬器欄位與真實介面對照" data-en="Simulator-to-console field mapping">模擬器欄位與真實介面對照</h3>
 <table>
-<tr><th>模擬器 Simulator</th><th>真實雲端概念 Real console concept</th></tr>
-<tr><td>Min / Max Size, Cooldown</td><td>伸縮組 Scaling group 的最小/最大執行個體數、冷卻時間</td></tr>
-<tr><td>附加 Load Balancer</td><td>伸縮組關聯 SLB / ALB / CLB,新執行個體才會加入後端伺服器組</td></tr>
-<tr><td>執行個體規格</td><td>伸縮配置 Scaling configuration(執行個體類型 + 鏡像 Image)</td></tr>
-<tr><td>擴容 / 縮容執行個體數</td><td>伸縮規則 Scaling rule(例如增加 N 台 / 減少 N 台)</td></tr>
-<tr><td>CPU 閾值 + 連續分鐘</td><td>警報任務 Alarm / event-triggered task（雲監控（CloudMonitor）指標）</td></tr>
-<tr><td>定時任務</td><td>定時任務 Scheduled task</td></tr>
-<tr><td>Predictive</td><td>預測性伸縮規則 Predictive scaling rule(官方建議先只預測不執行,驗證後才啟用)</td></tr>
+<tr><th data-i18n data-zh="模擬器欄位" data-en="Simulator field">模擬器欄位</th><th data-i18n data-zh="真實雲端概念" data-en="Real cloud concept">真實雲端概念</th></tr>
+<tr><td data-i18n data-zh="最小／最大執行個體數、冷卻時間（Min / Max Size, Cooldown）" data-en="Min / Max Size, Cooldown">最小／最大執行個體數、冷卻時間（Min / Max Size, Cooldown）</td><td data-i18n data-zh="伸縮組（Scaling group）的最小／最大執行個體數與冷卻時間" data-en="Minimum/maximum instance counts and cooldown for a scaling group">伸縮組（Scaling group）的最小／最大執行個體數與冷卻時間</td></tr>
+<tr><td data-i18n data-zh="附加 Load Balancer" data-en="Attach load balancer">附加 Load Balancer</td><td data-i18n data-zh="伸縮組關聯 SLB / ALB / CLB，新執行個體才會加入後端伺服器組" data-en="Associate an SLB / ALB / CLB with the scaling group so new instances join its backend server group">伸縮組關聯 SLB / ALB / CLB，新執行個體才會加入後端伺服器組</td></tr>
+<tr><td data-i18n data-zh="執行個體規格" data-en="Instance specification">執行個體規格</td><td data-i18n data-zh="伸縮配置（Scaling configuration）：執行個體類型與鏡像（Image）" data-en="Scaling configuration: instance type and image">伸縮配置（Scaling configuration）：執行個體類型與鏡像（Image）</td></tr>
+<tr><td data-i18n data-zh="擴容／縮容執行個體數" data-en="Scale-out / scale-in instance count">擴容／縮容執行個體數</td><td data-i18n data-zh="伸縮規則（Scaling rule），例如增加或減少 N 台" data-en="Scaling rule, such as adding or removing N instances">伸縮規則（Scaling rule），例如增加或減少 N 台</td></tr>
+<tr><td data-i18n data-zh="CPU 閾值＋連續分鐘" data-en="CPU threshold + consecutive minutes">CPU 閾值＋連續分鐘</td><td data-i18n data-zh="警報／事件觸發任務（Alarm / event-triggered task）的雲監控（CloudMonitor）指標" data-en="CloudMonitor metrics for an alarm or event-triggered task">警報／事件觸發任務（Alarm / event-triggered task）的雲監控（CloudMonitor）指標</td></tr>
+<tr><td data-i18n data-zh="定時任務" data-en="Scheduled task">定時任務</td><td data-i18n data-zh="定時任務（Scheduled task）" data-en="Scheduled task">定時任務（Scheduled task）</td></tr>
+<tr><td data-i18n data-zh="預測性伸縮（Predictive）" data-en="Predictive scaling">預測性伸縮（Predictive）</td><td data-i18n data-zh="預測性伸縮規則；建議先只預測不執行，驗證後才啟用" data-en="Predictive scaling rule; forecast without executing first, then enable after validation">預測性伸縮規則；建議先只預測不執行，驗證後才啟用</td></tr>
 </table>
 </div>
 </section>
@@ -542,8 +542,8 @@ m2:[
    demo:[DEMO_RR('rr',DEMO_RR_CAP),DEMO_RR('lc',DEMO_LC_CAP)]}
 ],
 m3:[
-  {id:'m3q0',q:{zh:'依簡報，彈性伸縮本身是否收費？',en:'According to the slides, is Auto Scaling itself charged?'},
-   o:[{zh:'收費',en:'Charged'},{zh:'免費，但自動建立的 ECS 執行個體按量付費',en:'Free, but the ECS instances it creates are pay-as-you-go'},{zh:'永久免費，包括執行個體',en:'Everything is permanently free, including instances'}],a:1,e:{zh:'服務本身免費，建立的雲端執行個體仍會計費。',en:'See Slide 3: the service is free, but created cloud instances are still billed.'}},
+  {id:'m3q0',q:{zh:'彈性伸縮服務本身是否收費？',en:'Is the Auto Scaling service itself charged?'},
+   o:[{zh:'收費',en:'Charged'},{zh:'服務本身免費，但自動建立的 ECS 執行個體按量付費',en:'The service is free, but the ECS instances it creates are pay-as-you-go'},{zh:'永久免費，包括執行個體',en:'Everything is permanently free, including instances'}],a:1,e:{zh:'彈性伸縮服務本身免費，但建立的雲端執行個體仍會計費。',en:'The Auto Scaling service itself is free, but the cloud instances it creates are still billed.'}},
   {id:'m3q1',q:{zh:'最小執行個體數的作用是甚麼？',en:'What does the minimum size do?'},
    o:[{zh:'保證至少有這個數量的運行執行個體',en:'Keeps at least this many instances running'},{zh:'限制 CPU 最高值',en:'Caps CPU'},{zh:'限制每日費用',en:'Caps daily cost'}],a:0,e:{zh:'最小值太大會在夜間浪費成本；太小則高峰時容量不足。',en:'A large minimum wastes money at night; a small one lacks peak capacity.'},demo:DEMO_MIN},
   {id:'m3q2',q:{zh:'未把負載均衡器附加到伸縮組時，新執行個體會怎樣？',en:'What happens when no load balancer is attached to the scaling group?'},
@@ -1184,7 +1184,7 @@ function m3cfg(){
 function initM3(){
   S.steps=S.steps||[false,false,false,false];
   const setSteps=()=>{
-    for(let i=1;i<=4;i++){$('st'+i).classList.toggle('fin',!!S.steps[i-1]);$('sf'+i).textContent=S.steps[i-1]?'✔ 已確認 confirmed':'';}
+    for(let i=1;i<=4;i++){$('st'+i).classList.toggle('fin',!!S.steps[i-1]);$('sf'+i).innerHTML=S.steps[i-1]?T('✔ 已確認','✔ Confirmed'):'';}
     $('m3run').disabled=!S.steps.every(Boolean);
   };
   document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{ensureStart();S.steps[+b.dataset.step-1]=true;save();setSteps();refresh();});
@@ -1194,9 +1194,9 @@ function initM3(){
   $('m3run').onclick=()=>{
     const cfg=m3cfg(),a=cfg.asg;
     let w='';
-    if(!a.attachLb)w+='<div class="warn">⚠ 未附加 Load Balancer:新增的執行個體不會收到流量。Load balancer not attached: new instances receive no traffic.</div>';
-    if(cfg.rawMax<a.min)w+='<div class="warn">⚠ '+T('最大執行個體數小於最小執行個體數，已自動調整。','Maximum size is below minimum size and was adjusted.')+'</div>';
-    if((a.mode==='scheduled'||a.mode==='custom')&&a.sched.length===0)w+='<div class="warn">⚠ 定時任務時間格式不正確 (HH:MM, 15:00–18:59)。Invalid scheduled time.</div>';
+    if(!a.attachLb)w+='<div class="warn">'+T('⚠ 未附加負載均衡器：新增的執行個體不會收到流量。','⚠ Load balancer is not attached: new instances will not receive traffic.')+'</div>';
+    if(cfg.rawMax<a.min)w+='<div class="warn">'+T('⚠ 最大執行個體數小於最小執行個體數，已自動調整。','⚠ Maximum size is below minimum size and was adjusted.')+'</div>';
+    if((a.mode==='scheduled'||a.mode==='custom')&&a.sched.length===0)w+='<div class="warn">'+T('⚠ 定時任務時間格式不正確（HH:MM，15:00–18:59）。','⚠ Invalid scheduled task time (HH:MM, 15:00–18:59).')+'</div>';
     $('m3warn').innerHTML=w;
     const res={};
     [['spike','a','放學後高峰 spike'],['daily','b','每日固定高峰 daily'],['night','c','夜間 night']].forEach(x=>{
@@ -1206,14 +1206,14 @@ function initM3(){
       res[x[0]]=sum(r,false);renderRun($('out-m3'+x[1]),r,titles[x[0]],true);
     });
     S.m.m3=res;save();
-    let h='<table><tr><th>情境 Scenario</th><th>可用度 Availability</th><th>目標 Target</th><th>成本 Cost</th><th>目標 Target</th></tr>';
-    h+='<tr><td>spike</td><td>'+pct(res.spike.a)+'</td><td>≥ 97%</td><td>$'+res.spike.c+'</td><td>≤ $1000</td></tr>';
-    h+='<tr><td>daily</td><td>'+pct(res.daily.a)+'</td><td>≥ 97%</td><td>$'+res.daily.c+'</td><td>—</td></tr>';
-    h+='<tr><td>night</td><td>'+pct(res.night.a)+'</td><td>—</td><td>$'+res.night.c+'</td><td>≤ $300</td></tr></table>';
+    let h='<table><tr><th>'+T('情境','Scenario')+'</th><th>'+T('可用度','Availability')+'</th><th>'+T('目標','Target')+'</th><th>'+T('成本','Cost')+'</th><th>'+T('目標','Target')+'</th></tr>';
+    h+='<tr><td>'+T('放學後高峰（spike）','After-school peak (spike)')+'</td><td>'+pct(res.spike.a)+'</td><td>≥ 97%</td><td>$'+res.spike.c+'</td><td>≤ $1000</td></tr>';
+    h+='<tr><td>'+T('每日固定高峰（daily）','Daily fixed peak (daily)')+'</td><td>'+pct(res.daily.a)+'</td><td>≥ 97%</td><td>$'+res.daily.c+'</td><td>—</td></tr>';
+    h+='<tr><td>'+T('夜間（night）','Night-time (night)')+'</td><td>'+pct(res.night.a)+'</td><td>—</td><td>$'+res.night.c+'</td><td>≤ $300</td></tr></table>';
     $('cmp-m3').innerHTML=h;refresh();
   };
   setSteps();
-  if(S.m.m3)$('cmp-m3').innerHTML='<p class="mut">已有上次結果,可重新測試。Previous results saved; run again to see charts.</p>';
+  if(S.m.m3)$('cmp-m3').innerHTML='<p class="mut">'+T('已有上次結果，可重新測試。','Previous results saved; run again to see charts.')+'</p>';
 }
 function compileFn(src){
   const f=new Function(src+'\nreturn predict;')();
@@ -1252,11 +1252,13 @@ function initM4(){
 
 // Console tab
 function initConsole(){
-  const shots=[['img/asg-1-scaling-group.png','1. 創建伸縮組 Scaling Group','Min / Max Size、Cooldown、關聯 Load Balancer'],
-  ['img/asg-2-scaling-config.png','2. 創建伸縮配置 Scaling Configuration','執行個體類型、鏡像 Image'],
-  ['img/asg-3-scaling-rule.png','3. 創建伸縮規則 Scaling Rule','簡單 / 步進 / 目標追蹤 / 預測 規則'],
-  ['img/asg-4-alarm-task.png','4. 創建警報任務 Alarm Task','CPU 閾值、連續次數、觸發的規則']];
-  $('shots').innerHTML=shots.map((s,i)=>'<div class="card"><h3>'+s[1]+'</h3><div class="shot" id="shot'+i+'"><div>尚未放入截圖 No screenshot yet.<br>請放置 Place file: <code>'+s[0]+'</code></div><div>'+s[2]+'</div></div></div>').join('');
+  const shots=[
+    {file:'img/asg-1-scaling-group.png',title:{zh:'1. 建立伸縮組',en:'1. Create a scaling group'},details:{zh:'最小／最大執行個體數、冷卻時間、關聯負載均衡器',en:'Minimum/maximum instance counts, cooldown, and load balancer association'}},
+    {file:'img/asg-2-scaling-config.png',title:{zh:'2. 建立伸縮配置',en:'2. Create a scaling configuration'},details:{zh:'執行個體類型、鏡像（Image）',en:'Instance type and image'}},
+    {file:'img/asg-3-scaling-rule.png',title:{zh:'3. 建立伸縮規則',en:'3. Create a scaling rule'},details:{zh:'簡單、步進、目標追蹤與預測規則',en:'Simple, step, target-tracking, and predictive rules'}},
+    {file:'img/asg-4-alarm-task.png',title:{zh:'4. 建立警報任務',en:'4. Create an alarm task'},details:{zh:'CPU 閾值、連續次數、觸發的規則',en:'CPU threshold, consecutive evaluation periods, and triggered rule'}}
+  ];
+  $('shots').innerHTML=shots.map((s,i)=>'<div class="card"><h3>'+T(s.title.zh,s.title.en)+'</h3><div class="shot" id="shot'+i+'"><div>'+T('尚未放入截圖','No screenshot added yet')+'<br>'+T('請放置檔案：','Place file: ')+'<code>'+s.file+'</code></div><div>'+T(s.details.zh,s.details.en)+'</div></div></div>').join('');
 }
 
 // Navigation, persistence
